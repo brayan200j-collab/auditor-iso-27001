@@ -788,6 +788,10 @@ export interface components {
             rejection_reason: string | null;
             /** Progress */
             progress: components["schemas"]["ProgressStepResponse"][];
+            /** Criteria Done */
+            criteria_done: number | null;
+            /** Criteria Total */
+            criteria_total: number | null;
             /**
              * Updated At
              * Format: date-time

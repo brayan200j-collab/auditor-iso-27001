@@ -31,3 +31,5 @@ class EvaluationDetail:
 class EvaluationStatusView:
     evaluation: Evaluation
     progress: list[ProgressStep]
+    criteria_done: int | None = None
+    criteria_total: int | None = None

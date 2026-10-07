@@ -78,3 +78,9 @@ class NameDirectory(Protocol):
 
 class ReviewerDirectory(Protocol):
     async def is_active_reviewer(self, user_id: UUID) -> bool: ...
+
+
+class AnalysisProgressReader(Protocol):
+    async def progress(self, run: AnalysisRun) -> tuple[int, int] | None:
+        """(criteria with a finding, active criteria of the bound checklist), if known."""
+        ...

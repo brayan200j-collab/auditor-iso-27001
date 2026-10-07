@@ -419,6 +419,7 @@ export const processingCopy = {
     FAILED: "El procesamiento no pudo completarse.",
   },
   updated: (time: string) => `Última actualización: ${time}`,
+  criteria: (done: number, total: number) => `${done} de ${total} criterios analizados.`,
   retry: "Reintentar procesamiento",
   retrying: "Reintentando…",
   retryHint: "El procesamiento continuará desde el último paso completado.",

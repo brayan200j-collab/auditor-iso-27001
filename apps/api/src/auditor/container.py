@@ -14,16 +14,27 @@ import httpx
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
 import auditor.persistence  # noqa: F401 - registers every ORM model (foreign keys across modules)
-from auditor.analysis.application.evaluate_criterion import CriterionEvaluator, EngineLimits
+from auditor.analysis.application.evaluate_criterion import (
+    CriterionEvaluator,
+    CriterionTask,
+    EngineLimits,
+)
 from auditor.analysis.application.mark_processing_failed import MarkProcessingFailed
 from auditor.analysis.application.ports import LLMProvider
 from auditor.analysis.application.retry_processing import RetryProcessing
 from auditor.analysis.application.retrying_provider import RetryingProvider
+from auditor.analysis.application.run_analysis import (
+    AnalysisOrchestrator,
+    CompleteAnalysis,
+    EvaluateAndStore,
+    PlanAnalysis,
+)
 from auditor.analysis.application.run_extraction_step import RunExtractionStep
 from auditor.analysis.application.start_analysis import StartAnalysis
 from auditor.analysis.infrastructure.evidence_search import DocumentEvidenceSearch
 from auditor.analysis.infrastructure.fake_provider import FakeLLMProvider
 from auditor.analysis.infrastructure.groq_provider import GroqProvider
+from auditor.analysis.infrastructure.progress import FindingProgressReader
 from auditor.analysis.infrastructure.prompt_templates import FilePromptTemplates
 from auditor.analysis.infrastructure.repositories import SqlFindingRepository, SqlLlmCallRecorder
 from auditor.audit.application.list_audit_logs import ListAuditLogs
@@ -198,11 +209,28 @@ class AppContainer:
             async with self.scope() as scope:
                 await scope.resolve(RunExtractionStep).execute(job)
 
+        async def plan(job: JobRecord) -> list[CriterionTask] | None:
+            async with self.scope() as scope:
+                return await scope.resolve(PlanAnalysis).execute(job)
+
+        async def evaluate_one(task: CriterionTask) -> None:
+            async with self.scope() as scope:
+                await scope.resolve(EvaluateAndStore).execute(task)
+
+        async def complete(job: JobRecord) -> None:
+            async with self.scope() as scope:
+                await scope.resolve(CompleteAnalysis).execute(job)
+
+        orchestrator = AnalysisOrchestrator(
+            plan, evaluate_one, complete, concurrency=self.settings.llm_max_concurrency
+        )
+
         async def failed(job: JobRecord, reason: str) -> None:
             async with self.scope() as scope:
                 await scope.resolve(MarkProcessingFailed).execute(job, reason)
 
         self.runner.register(JobKind.EXTRACTION, extraction)
+        self.runner.register(JobKind.ANALYSIS, orchestrator.run)
         self.runner.on_failed(failed)
 
     async def start_background(self) -> None:
@@ -332,7 +360,9 @@ def build_factories() -> dict[type[Any], Factory]:
         GetEvaluation: lambda s: GetEvaluation(
             s.evaluation_access, s.runs, s.consents, s.companies, s.users
         ),
-        GetEvaluationStatus: lambda s: GetEvaluationStatus(s.evaluation_access),
+        GetEvaluationStatus: lambda s: GetEvaluationStatus(
+            s.evaluation_access, s.runs, FindingProgressReader(s.session, s.checklists)
+        ),
         GiveConsent: lambda s: GiveConsent(s.evaluation_access, s.consents, s.audit, s.uow),
         AssignReviewer: lambda s: AssignReviewer(
             s.evaluation_access, s.evaluations, s.users, s.audit, s.uow
@@ -409,6 +439,13 @@ def build_factories() -> dict[type[Any], Factory]:
                 max_tokens_per_call=s.settings.max_tokens_per_call,
                 max_calls_per_evaluation=s.settings.max_llm_calls_per_evaluation,
             ),
+        ),
+        PlanAnalysis: lambda s: PlanAnalysis(s.lifecycle, s.checklists, s.findings),
+        EvaluateAndStore: lambda s: EvaluateAndStore(
+            s.resolve(CriterionEvaluator), s.findings, s.uow
+        ),
+        CompleteAnalysis: lambda s: CompleteAnalysis(
+            s.lifecycle, s.checklists, s.findings, s.audit, s.uow
         ),
         ListChecklistVersions: lambda s: ListChecklistVersions(s.checklists),
         GetChecklistVersion: lambda s: GetChecklistVersion(s.checklists),

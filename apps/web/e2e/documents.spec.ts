@@ -51,7 +51,7 @@ test("a scanned PDF is rejected with a clear message", async ({ page }) => {
   );
 });
 
-test("starting the analysis extracts the PDF and the timeline advances by itself", async ({
+test("starting the analysis runs extraction and AI analysis up to human review", async ({
   page,
 }) => {
   await login(page, "SME");
@@ -63,11 +63,12 @@ test("starting the analysis extracts the PDF and the timeline advances by itself
 
   await page.getByRole("button", { name: "Iniciar análisis" }).click();
   const timeline = page.getByRole("list", { name: "Progreso" });
-  await expect(timeline.getByRole("listitem").nth(1)).toContainText("completado", {
-    timeout: 30_000,
+  await expect(timeline.getByRole("listitem").nth(2)).toContainText("completado", {
+    timeout: 60_000,
   });
-  await expect(timeline.getByRole("listitem").nth(2)).toContainText("en curso");
-  await expect(page.getByText("Analizando", { exact: true })).toBeVisible();
+  await expect(timeline.getByRole("listitem").nth(3)).toContainText("en curso");
+  await expect(page.getByText("Pendiente de revisión", { exact: true })).toBeVisible();
+  await expect(page.getByText(/Una persona revisará los resultados/)).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Eliminar politica_seguridad_sintetica.pdf" }),
   ).toHaveCount(0);

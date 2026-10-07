@@ -58,6 +58,9 @@ export function StatusTracker({ evaluationId, initialStatus, initialSteps }: Sta
       <ProgressTimeline steps={data?.progress ?? initialSteps} />
       <p aria-live="polite" className="text-muted-foreground text-sm">
         {live ?? ""}
+        {data?.criteria_total
+          ? ` ${processingCopy.criteria(data.criteria_done ?? 0, data.criteria_total)}`
+          : ""}
         {data ? ` ${processingCopy.updated(formatDateTime(data.updated_at))}` : ""}
       </p>
     </div>

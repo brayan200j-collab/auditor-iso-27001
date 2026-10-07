@@ -121,6 +121,8 @@ class EvaluationStatusResponse(ApiModel):
     failure_reason: FailureReason | None
     rejection_reason: str | None
     progress: list[ProgressStepResponse]
+    criteria_done: int | None
+    criteria_total: int | None
     updated_at: datetime
 
 
@@ -198,6 +200,8 @@ async def get_evaluation_status(
         failure_reason=evaluation.failure_reason,
         rejection_reason=evaluation.rejection_reason,
         progress=[ProgressStepResponse.of(step) for step in view.progress],
+        criteria_done=view.criteria_done,
+        criteria_total=view.criteria_total,
         updated_at=evaluation.updated_at,
     )
 
