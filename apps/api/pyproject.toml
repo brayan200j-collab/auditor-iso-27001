@@ -82,6 +82,7 @@ markers = [
 ]
 filterwarnings = [
     "error::pytest.PytestUnraisableExceptionWarning",
+    "error::DeprecationWarning:auditor",
 ]
 
 [tool.coverage.run]

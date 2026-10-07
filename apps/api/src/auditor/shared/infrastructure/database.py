@@ -1,15 +1,16 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from enum import StrEnum
 
-from sqlalchemy import MetaData, text
+from sqlalchemy import CheckConstraint, DateTime, MetaData, func, text
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
     async_sessionmaker,
     create_async_engine,
 )
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.pool import NullPool
 
 NAMING_CONVENTION = {
@@ -59,3 +60,14 @@ class SessionUnitOfWork:
 class SystemClock:
     def now(self) -> datetime:
         return datetime.now(UTC)
+
+
+def enum_check(column: str, values: type[StrEnum] | tuple[str, ...], name: str) -> CheckConstraint:
+    """CHECK constraint restricting a text column to the given enum values."""
+    allowed = tuple(item.value for item in values) if isinstance(values, type) else values
+    quoted = ", ".join(f"'{value}'" for value in allowed)
+    return CheckConstraint(f"{column} IN ({quoted})", name=name)
+
+
+def utc_now_column() -> Mapped[datetime]:
+    return mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)

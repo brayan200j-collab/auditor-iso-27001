@@ -79,3 +79,15 @@ Format: context · decision · alternatives · reason. Newest last.
 - **Decision:** ignore exactly this GHSA in `pnpm-workspace.yaml` (`auditConfig.ignoreGhsas`); the audit threshold stays at `high`.
 - **Alternatives:** lower the threshold (forbidden); drop `eslint-config-next` (loses Next.js lint rules).
 - **Reason:** the vulnerable code never ships to production and only receives glob patterns written by the team. Remove the exception as soon as a patched release exists (Dependabot weekly).
+
+## D-014 · Development data lives behind explicit seed targets
+- **Context:** the checklist must exist in every environment, while development users must never exist in pilot/production.
+- **Decision:** `python -m auditor.seed checklist` runs anywhere and is idempotent; `python -m auditor.seed users` refuses to run unless `APP_ENV` is local/test. Dev users are created in Supabase Auth with passwords read from `SEED_*` variables (random per machine via `make env`); companies are synthetic ("Empresa de prueba A/B S.A.S.").
+- **Alternatives:** SQL seed file; hardcoded demo accounts (forbidden by section 9).
+- **Reason:** no credentials in code or UI; same code path as real accounts.
+
+## D-015 · Database-level integrity guards
+- **Context:** `ai_findings` must stay immutable, `audit_logs` insert-only, published checklists immutable.
+- **Decision:** triggers reject UPDATE/DELETE on `audit_logs`, `ai_findings`, `human_reviews`, `llm_calls`, and any change to published checklist versions or their items. RLS is enabled on every table with no policies and all grants revoked from `anon`/`authenticated`.
+- **Alternatives:** application-only enforcement.
+- **Reason:** defense in depth; the guarantees hold even for code paths written later or manual SQL.

@@ -1,0 +1,398 @@
+# Checklist propio v1 — Auditor Virtual
+#
+# Redacción propia del equipo. No contiene texto de ISO/IEC 27001, CIS Controls v8.1 ni NIST CSF 2.0:
+# las referencias son solo identificadores, todas en estado "draft" (por confirmar por el equipo).
+# Un campo de referencia vacío significa que no se asignó un identificador con suficiente certeza.
+
+version: 1
+label: "Checklist propio v1"
+items:
+  - code: ISO-01
+    name: Políticas de seguridad de la información
+    description: La organización cuenta con una política de seguridad de la información aprobada por la dirección, comunicada al personal y revisada periódicamente.
+    evaluation_question: ¿El documento presenta evidencia de una política de seguridad de la información aprobada, comunicada y con revisión periódica?
+    expected_evidence: Política firmada o aprobada, fecha de aprobación, responsable, ciclo de revisión y medio de divulgación.
+    iso_reference: "Cl. 5.2; A.5.1"
+    cis_reference: ""
+    nist_reference: "GV.PO"
+    keywords: [política de seguridad, política, aprobación, dirección, revisión, divulgación, seguridad de la información]
+    priority: HIGH
+    risk_level: HIGH
+    effort: LOW
+
+  - code: ISO-02
+    name: Roles y responsabilidades
+    description: Las responsabilidades de seguridad de la información están asignadas a personas o cargos concretos y son conocidas por quienes las ejercen.
+    evaluation_question: ¿El documento identifica responsables de la seguridad de la información y describe sus funciones?
+    expected_evidence: Organigrama o matriz de responsabilidades, designación de un responsable de seguridad, descripción de funciones.
+    iso_reference: "Cl. 5.3; A.5.2"
+    cis_reference: ""
+    nist_reference: "GV.RR"
+    keywords: [responsable, responsabilidades, roles, funciones, oficial de seguridad, organigrama, encargado]
+    priority: HIGH
+    risk_level: MEDIUM
+    effort: LOW
+
+  - code: ISO-03
+    name: Alcance y contexto
+    description: La organización define el alcance de su gestión de seguridad (procesos, sedes, sistemas) y considera su contexto interno y externo y las partes interesadas.
+    evaluation_question: ¿El documento delimita el alcance de la gestión de seguridad y describe el contexto de la organización?
+    expected_evidence: Declaración de alcance, procesos y sedes cubiertos, partes interesadas y sus requisitos, exclusiones justificadas.
+    iso_reference: "Cl. 4.1; Cl. 4.3"
+    cis_reference: ""
+    nist_reference: "GV.OC"
+    keywords: [alcance, contexto, partes interesadas, procesos, sedes, exclusiones, organización]
+    priority: MEDIUM
+    risk_level: MEDIUM
+    effort: LOW
+
+  - code: ISO-04
+    name: Gestión de riesgos
+    description: Existe una metodología para identificar, analizar y valorar los riesgos de seguridad de la información, aplicada de forma periódica.
+    evaluation_question: ¿El documento presenta evidencia de una metodología o registro de valoración de riesgos de seguridad?
+    expected_evidence: Metodología de riesgos, criterios de aceptación, matriz o registro de riesgos, fecha de la última valoración.
+    iso_reference: "Cl. 6.1.2; Cl. 8.2"
+    cis_reference: ""
+    nist_reference: "ID.RA; GV.RM"
+    keywords: [riesgo, riesgos, matriz de riesgos, valoración, probabilidad, impacto, amenaza, análisis de riesgos]
+    priority: CRITICAL
+    risk_level: HIGH
+    effort: MEDIUM
+
+  - code: ISO-05
+    name: Tratamiento de riesgos y plan de acción
+    description: Los riesgos valorados tienen un tratamiento decidido (mitigar, transferir, aceptar o evitar), responsables y plazos.
+    evaluation_question: ¿El documento evidencia un plan de tratamiento de riesgos con acciones, responsables y fechas?
+    expected_evidence: Plan de tratamiento, controles seleccionados, responsables, plazos, aceptación formal de riesgos residuales.
+    iso_reference: "Cl. 6.1.3; Cl. 8.3"
+    cis_reference: ""
+    nist_reference: "ID.RA"
+    keywords: [tratamiento de riesgos, plan de acción, mitigación, riesgo residual, controles, aceptación del riesgo]
+    priority: HIGH
+    risk_level: HIGH
+    effort: MEDIUM
+
+  - code: ISO-06
+    name: Objetivos de seguridad y seguimiento
+    description: La organización define objetivos medibles de seguridad de la información y hace seguimiento de su avance mediante indicadores.
+    evaluation_question: ¿El documento establece objetivos de seguridad medibles y la forma de medir su avance en el tiempo?
+    expected_evidence: Objetivos documentados, indicadores, metas, frecuencia de medición, resultados de seguimiento.
+    iso_reference: "Cl. 6.2; Cl. 9.1"
+    cis_reference: ""
+    nist_reference: "GV.OV"
+    keywords: [objetivos, indicadores, metas, medición, seguimiento, desempeño]
+    priority: MEDIUM
+    risk_level: LOW
+    effort: LOW
+
+  - code: ISO-07
+    name: Gestión de activos
+    description: La organización mantiene un inventario actualizado de sus activos tecnológicos y de información, con un responsable asignado a cada uno.
+    evaluation_question: ¿El documento presenta evidencia de un inventario o procedimiento para gestionar activos tecnológicos?
+    expected_evidence: Inventario, procedimiento, responsables, registros o política.
+    iso_reference: "A.5.9"
+    cis_reference: "1.1; 2.1"
+    nist_reference: "ID.AM"
+    keywords: [inventario, activos, activos tecnológicos, equipos, responsable del activo, hardware, software]
+    priority: HIGH
+    risk_level: HIGH
+    effort: MEDIUM
+
+  - code: ISO-08
+    name: Clasificación y manejo de la información
+    description: La información se clasifica según su sensibilidad y existen reglas de manejo, etiquetado y retención para cada nivel.
+    evaluation_question: ¿El documento define niveles de clasificación de la información y reglas para manejarla?
+    expected_evidence: Esquema de clasificación (pública, interna, confidencial), reglas de etiquetado, manejo y retención.
+    iso_reference: "A.5.12; A.5.13"
+    cis_reference: "3.1; 3.2"
+    nist_reference: "ID.AM; PR.DS"
+    keywords: [clasificación, confidencial, información sensible, etiquetado, uso interno, pública, retención]
+    priority: MEDIUM
+    risk_level: MEDIUM
+    effort: MEDIUM
+
+  - code: ISO-09
+    name: Control de acceso y mínimo privilegio
+    description: El acceso a sistemas e información se concede según la necesidad del cargo, aplicando el principio de mínimo privilegio y restringiendo las cuentas administrativas.
+    evaluation_question: ¿El documento evidencia reglas de control de acceso basadas en el cargo y en el mínimo privilegio?
+    expected_evidence: Política de control de acceso, perfiles por cargo, restricción de privilegios administrativos.
+    iso_reference: "A.5.15; A.8.2"
+    cis_reference: "3.3; 5.4"
+    nist_reference: "PR.AA"
+    keywords: [control de acceso, mínimo privilegio, permisos, privilegios, administrador, perfiles, necesidad de conocer]
+    priority: CRITICAL
+    risk_level: HIGH
+    effort: MEDIUM
+
+  - code: ISO-10
+    name: Autenticación y contraseñas (incluye MFA)
+    description: Existen reglas para la gestión de contraseñas y el uso de autenticación multifactor, especialmente en accesos remotos, administrativos y servicios expuestos a Internet.
+    evaluation_question: ¿El documento define reglas de contraseñas y el uso de autenticación multifactor?
+    expected_evidence: Política de contraseñas (longitud, unicidad, cambio ante compromiso), uso de MFA y gestor de contraseñas.
+    iso_reference: "A.5.17; A.8.5"
+    cis_reference: "5.2; 6.3; 6.5"
+    nist_reference: "PR.AA"
+    keywords: [contraseña, contraseñas, autenticación, doble factor, multifactor, MFA, credenciales]
+    priority: CRITICAL
+    risk_level: HIGH
+    effort: LOW
+
+  - code: ISO-11
+    name: Altas, bajas y revisión de accesos
+    description: Hay un proceso para crear, modificar y retirar accesos cuando una persona ingresa, cambia de cargo o se retira, y los accesos se revisan periódicamente.
+    evaluation_question: ¿El documento describe cómo se otorgan, revocan y revisan los accesos de los usuarios?
+    expected_evidence: Procedimiento de altas y bajas, plazos de revocación, revisiones periódicas de cuentas, desactivación de cuentas inactivas.
+    iso_reference: "A.5.16; A.5.18"
+    cis_reference: "5.1; 5.3; 6.1; 6.2"
+    nist_reference: "PR.AA"
+    keywords: [alta de usuarios, baja de usuarios, revocación, retiro, revisión de accesos, cuentas inactivas, desvinculación]
+    priority: HIGH
+    risk_level: HIGH
+    effort: LOW
+
+  - code: ISO-12
+    name: Seguridad en recursos humanos
+    description: La seguridad se considera antes, durante y al finalizar la relación laboral, incluyendo verificación, acuerdos de confidencialidad y devolución de activos.
+    evaluation_question: ¿El documento evidencia controles de seguridad en la contratación, durante el empleo y al terminar la relación laboral?
+    expected_evidence: Acuerdos de confidencialidad, cláusulas de seguridad en contratos, verificación de antecedentes, devolución de activos.
+    iso_reference: "A.6.1; A.6.2; A.6.5"
+    cis_reference: ""
+    nist_reference: "GV.RR"
+    keywords: [confidencialidad, contrato, empleados, contratación, terminación, acuerdo de confidencialidad, recursos humanos]
+    priority: MEDIUM
+    risk_level: MEDIUM
+    effort: LOW
+
+  - code: ISO-13
+    name: Concienciación y formación
+    description: El personal recibe formación y campañas periódicas de concienciación en seguridad de la información, con registro de participación.
+    evaluation_question: ¿El documento presenta evidencia de un programa de formación o concienciación en seguridad para el personal?
+    expected_evidence: Plan de capacitación, temas (phishing, contraseñas), frecuencia, registros de asistencia.
+    iso_reference: "Cl. 7.3; A.6.3"
+    cis_reference: "14.1"
+    nist_reference: "PR.AT"
+    keywords: [capacitación, formación, concienciación, sensibilización, phishing, entrenamiento, charlas]
+    priority: HIGH
+    risk_level: MEDIUM
+    effort: LOW
+
+  - code: ISO-14
+    name: Seguridad física y de equipos
+    description: Las instalaciones y los equipos están protegidos frente a accesos no autorizados, daños y robo, y los equipos se eliminan de forma segura.
+    evaluation_question: ¿El documento describe controles de acceso físico y protección de equipos?
+    expected_evidence: Control de ingreso, áreas restringidas, protección de equipos, borrado seguro antes de desechar.
+    iso_reference: "A.7.1; A.7.2; A.7.14"
+    cis_reference: ""
+    nist_reference: "PR.AA"
+    keywords: [acceso físico, instalaciones, oficina, cámaras, área restringida, equipos, borrado seguro]
+    priority: MEDIUM
+    risk_level: MEDIUM
+    effort: MEDIUM
+
+  - code: ISO-15
+    name: Dispositivos móviles y teletrabajo
+    description: Existen reglas para el uso seguro de portátiles, teléfonos y del trabajo remoto, incluyendo bloqueo, cifrado y conexiones seguras.
+    evaluation_question: ¿El documento define reglas para el uso de dispositivos móviles y el trabajo remoto?
+    expected_evidence: Política de teletrabajo, uso de VPN, bloqueo automático, cifrado de dispositivos, uso de equipos personales.
+    iso_reference: "A.6.7; A.8.1"
+    cis_reference: "6.4"
+    nist_reference: "PR.AA; PR.PS"
+    keywords: [teletrabajo, trabajo remoto, dispositivos móviles, portátil, celular, VPN, bloqueo de pantalla]
+    priority: MEDIUM
+    risk_level: MEDIUM
+    effort: LOW
+
+  - code: ISO-16
+    name: Copias de respaldo y restauración
+    description: La información crítica se respalda con una frecuencia definida, las copias se protegen y se prueban restauraciones periódicamente.
+    evaluation_question: ¿El documento presenta evidencia de un procedimiento de copias de respaldo y pruebas de restauración?
+    expected_evidence: Política o procedimiento de respaldo, frecuencia, ubicación de las copias, pruebas de restauración registradas.
+    iso_reference: "A.8.13"
+    cis_reference: "11.1; 11.2"
+    nist_reference: "PR.DS"
+    keywords: [copia de seguridad, copias de respaldo, backup, respaldo, restauración, recuperación de datos]
+    priority: CRITICAL
+    risk_level: HIGH
+    effort: MEDIUM
+
+  - code: ISO-17
+    name: Criptografía y protección de datos
+    description: Se usan mecanismos de cifrado para proteger la información sensible en reposo y en tránsito, con una gestión adecuada de las claves.
+    evaluation_question: ¿El documento define el uso de cifrado para proteger la información y la gestión de claves?
+    expected_evidence: Reglas de cifrado de dispositivos y comunicaciones, protocolos seguros, gestión de claves y certificados digitales.
+    iso_reference: "A.8.24"
+    cis_reference: "3.6"
+    nist_reference: "PR.DS"
+    keywords: [cifrado, encriptación, criptografía, claves, certificados, TLS, protección de datos]
+    priority: HIGH
+    risk_level: HIGH
+    effort: MEDIUM
+
+  - code: ISO-18
+    name: Protección contra malware
+    description: Los equipos cuentan con protección contra software malicioso actualizada y existen reglas para prevenir infecciones.
+    evaluation_question: ¿El documento evidencia el uso de protección contra malware y reglas para prevenir infecciones?
+    expected_evidence: Antivirus o EDR instalado y actualizado, análisis periódicos, restricción de software no autorizado.
+    iso_reference: "A.8.7"
+    cis_reference: "10.1"
+    nist_reference: "DE.CM"
+    keywords: [antivirus, malware, software malicioso, virus, ransomware, EDR, protección de equipos]
+    priority: HIGH
+    risk_level: HIGH
+    effort: LOW
+
+  - code: ISO-19
+    name: Gestión de vulnerabilidades y parches
+    description: Las vulnerabilidades técnicas se identifican y los sistemas se actualizan dentro de plazos definidos según su criticidad.
+    evaluation_question: ¿El documento describe cómo se identifican vulnerabilidades y se aplican actualizaciones de seguridad?
+    expected_evidence: Procedimiento de parches, frecuencia, plazos por criticidad, escaneos de vulnerabilidades, registros de actualización.
+    iso_reference: "A.8.8"
+    cis_reference: "7.1; 7.3"
+    nist_reference: "ID.RA; PR.PS"
+    keywords: [vulnerabilidades, parches, actualizaciones, actualización de seguridad, escaneo, sistema operativo]
+    priority: HIGH
+    risk_level: HIGH
+    effort: MEDIUM
+
+  - code: ISO-20
+    name: Configuración segura de sistemas
+    description: Los sistemas se configuran a partir de una línea base segura, eliminando servicios y cuentas innecesarias y cambiando valores por defecto.
+    evaluation_question: ¿El documento presenta evidencia de configuraciones seguras o líneas base para los sistemas?
+    expected_evidence: Guías de configuración, línea base de seguridad, desactivación de cuentas por defecto, control de cambios en configuración.
+    iso_reference: "A.8.9"
+    cis_reference: "4.1; 4.7"
+    nist_reference: "PR.PS"
+    keywords: [configuración segura, línea base, endurecimiento, hardening, configuración por defecto, servicios innecesarios]
+    priority: MEDIUM
+    risk_level: MEDIUM
+    effort: MEDIUM
+
+  - code: ISO-21
+    name: Seguridad de redes
+    description: Las redes se protegen con controles perimetrales, segmentación y servicios de red gestionados de forma segura.
+    evaluation_question: ¿El documento describe controles para proteger la red de la organización?
+    expected_evidence: Firewall, segmentación de redes, red de invitados separada, Wi-Fi protegido, gestión de equipos de red.
+    iso_reference: "A.8.20; A.8.21; A.8.22"
+    cis_reference: "4.4; 4.5; 12.1"
+    nist_reference: "PR.IR"
+    keywords: [red, firewall, cortafuegos, segmentación, wifi, red de invitados, router]
+    priority: HIGH
+    risk_level: HIGH
+    effort: MEDIUM
+
+  - code: ISO-22
+    name: Registro y monitoreo
+    description: Los sistemas relevantes generan registros de eventos que se conservan, protegen y revisan para detectar actividad anómala.
+    evaluation_question: ¿El documento evidencia la generación, conservación y revisión de registros de eventos?
+    expected_evidence: Política de registros, eventos registrados, tiempo de conservación, revisión periódica, alertas.
+    iso_reference: "A.8.15; A.8.16"
+    cis_reference: "8.1; 8.2"
+    nist_reference: "DE.CM"
+    keywords: [registros, logs, bitácora, monitoreo, eventos, auditoría de sistemas, alertas]
+    priority: MEDIUM
+    risk_level: MEDIUM
+    effort: MEDIUM
+
+  - code: ISO-23
+    name: Gestión de incidentes
+    description: Existe un procedimiento para reportar, clasificar, responder y aprender de los incidentes de seguridad, con responsables definidos.
+    evaluation_question: ¿El documento presenta evidencia de un procedimiento de gestión de incidentes de seguridad?
+    expected_evidence: Procedimiento de incidentes, canal de reporte, roles, clasificación, registro de incidentes y lecciones aprendidas.
+    iso_reference: "A.5.24; A.5.26; A.6.8"
+    cis_reference: "17.1; 17.3"
+    nist_reference: "RS.MA"
+    keywords: [incidente, incidentes de seguridad, reporte, respuesta, escalamiento, brecha, evento de seguridad]
+    priority: CRITICAL
+    risk_level: HIGH
+    effort: MEDIUM
+
+  - code: ISO-24
+    name: Continuidad del negocio y recuperación
+    description: La organización planifica cómo mantener o recuperar sus procesos críticos ante interrupciones, con tiempos objetivo y pruebas.
+    evaluation_question: ¿El documento evidencia planes de continuidad o recuperación ante interrupciones?
+    expected_evidence: Plan de continuidad, procesos críticos, tiempos objetivo de recuperación, pruebas del plan.
+    iso_reference: "A.5.29; A.5.30"
+    cis_reference: ""
+    nist_reference: "RC.RP"
+    keywords: [continuidad, plan de continuidad, recuperación, contingencia, interrupción, desastre, RTO]
+    priority: HIGH
+    risk_level: HIGH
+    effort: HIGH
+
+  - code: ISO-25
+    name: Proveedores y terceros
+    description: Los riesgos de seguridad asociados a proveedores se identifican y los acuerdos incluyen requisitos de seguridad y confidencialidad.
+    evaluation_question: ¿El documento describe cómo se gestionan los requisitos de seguridad con proveedores y terceros?
+    expected_evidence: Inventario de proveedores, cláusulas de seguridad y confidencialidad, evaluación de proveedores críticos.
+    iso_reference: "A.5.19; A.5.20"
+    cis_reference: "15.1"
+    nist_reference: "GV.SC"
+    keywords: [proveedores, terceros, contratistas, acuerdos, cláusulas de seguridad, outsourcing, prestadores de servicio]
+    priority: MEDIUM
+    risk_level: MEDIUM
+    effort: MEDIUM
+
+  - code: ISO-26
+    name: Servicios en la nube
+    description: El uso de servicios en la nube se gestiona con criterios de selección, configuración segura, responsabilidades compartidas y salida del servicio.
+    evaluation_question: ¿El documento define reglas para la adopción y el uso seguro de servicios en la nube?
+    expected_evidence: Inventario de servicios en la nube, responsables, configuración segura, respaldo de datos en la nube, condiciones del proveedor.
+    iso_reference: "A.5.23"
+    cis_reference: ""
+    nist_reference: "GV.SC"
+    keywords: [nube, servicios en la nube, cloud, almacenamiento en la nube, correo en la nube, SaaS, proveedor de nube]
+    priority: MEDIUM
+    risk_level: MEDIUM
+    effort: LOW
+
+  - code: ISO-27
+    name: Desarrollo seguro y gestión de cambios
+    description: Los cambios en sistemas y el desarrollo de software siguen un proceso controlado que incluye requisitos de seguridad, pruebas y aprobación.
+    evaluation_question: ¿El documento evidencia un proceso de gestión de cambios o de desarrollo seguro?
+    expected_evidence: Procedimiento de cambios, aprobaciones, ambientes separados, pruebas de seguridad, control de versiones.
+    iso_reference: "A.8.25; A.8.32"
+    cis_reference: ""
+    nist_reference: "PR.PS"
+    keywords: [gestión de cambios, cambios, desarrollo seguro, pruebas, ambiente de pruebas, control de versiones, aprobación de cambios]
+    priority: MEDIUM
+    risk_level: MEDIUM
+    effort: MEDIUM
+
+  - code: ISO-28
+    name: Requisitos legales, contractuales y datos personales
+    description: La organización identifica sus obligaciones legales y contractuales de seguridad, incluida la protección de datos personales.
+    evaluation_question: ¿El documento identifica requisitos legales y contractuales aplicables, incluida la protección de datos personales?
+    expected_evidence: Matriz de requisitos legales, política de tratamiento de datos personales, autorizaciones, avisos de privacidad.
+    iso_reference: "A.5.31; A.5.34"
+    cis_reference: ""
+    nist_reference: "GV.OC"
+    keywords: [datos personales, protección de datos, ley 1581, habeas data, requisitos legales, privacidad, tratamiento de datos]
+    priority: HIGH
+    risk_level: HIGH
+    effort: MEDIUM
+
+  - code: ISO-29
+    name: Auditoría interna y revisión por la dirección
+    description: La gestión de seguridad se evalúa mediante auditorías internas planificadas y la dirección revisa periódicamente sus resultados.
+    evaluation_question: ¿El documento presenta evidencia de auditorías internas o revisiones de la dirección sobre la seguridad?
+    expected_evidence: Programa de auditoría interna, informes, actas de revisión por la dirección, decisiones tomadas.
+    iso_reference: "Cl. 9.2; Cl. 9.3"
+    cis_reference: ""
+    nist_reference: "GV.OV"
+    keywords: [auditoría interna, revisión por la dirección, informe de auditoría, acta, evaluación interna, comité]
+    priority: MEDIUM
+    risk_level: MEDIUM
+    effort: MEDIUM
+
+  - code: ISO-30
+    name: Mejora continua y acciones correctivas
+    description: Las no conformidades y oportunidades de mejora se registran, se analizan sus causas y se da seguimiento a las acciones correctivas.
+    evaluation_question: ¿El documento evidencia el registro de no conformidades y el seguimiento de acciones correctivas o de mejora?
+    expected_evidence: Registro de no conformidades, análisis de causa, acciones correctivas con responsables y fechas, verificación de eficacia.
+    iso_reference: "Cl. 10.1; Cl. 10.2"
+    cis_reference: ""
+    nist_reference: "ID.IM"
+    keywords: [mejora continua, acciones correctivas, no conformidad, lecciones aprendidas, causa raíz, plan de mejora]
+    priority: MEDIUM
+    risk_level: LOW
+    effort: LOW

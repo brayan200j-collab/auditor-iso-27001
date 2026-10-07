@@ -134,3 +134,20 @@ class Settings(BaseSettings):
 
 def load_settings() -> Settings:
     return Settings()  # pyright: ignore[reportCallIssue] - values come from the environment
+
+
+class SeedSettings(BaseSettings):
+    """Development users for `python -m auditor.seed users` (local/test only)."""
+
+    model_config = SettingsConfigDict(extra="ignore", case_sensitive=False)
+
+    seed_admin_email: str = ""
+    seed_admin_password: SecretStr = SecretStr("")
+    seed_reviewer_email: str = ""
+    seed_reviewer_password: SecretStr = SecretStr("")
+    seed_sme_email: str = ""
+    seed_sme_password: SecretStr = SecretStr("")
+    seed_sme_b_email: str = ""
+    seed_sme_b_password: SecretStr = SecretStr("")
+    seed_mentor_email: str = ""
+    seed_mentor_password: SecretStr = SecretStr("")
