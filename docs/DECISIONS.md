@@ -109,3 +109,33 @@ Format: context · decision · alternatives · reason. Newest last.
 - **Decision:** sign-in, sign-out, recovery and password update are Server Actions/route handlers; the Supabase client is created only on the server with `cookieOptions.httpOnly = true`. `proxy.ts` refreshes the session and redirects anonymous visitors from `/app`. Unknown or inactive profiles are signed out immediately after login.
 - **Alternatives:** browser Supabase client (requires JS-readable cookies).
 - **Reason:** the access token is never exposed to browser JavaScript.
+
+## D-019 · Schemathesis configuration
+- **Context:** gate 4 runs Schemathesis against the OpenAPI document (`tests/integration/test_contract.py`, all operations, admin token).
+- **Decision:** all default checks run except `ignored_auth` (it re-sends our explicit Authorization header and reports a false positive; anonymous access is covered by `test_authentication_required.py`, which walks every operation) and `positive_data_acceptance` (business rules such as "an SME needs a company" legitimately reject schema-valid input with 422).
+- **Alternatives:** encode business rules in JSON Schema (not expressible); drop Schemathesis (forbidden).
+- **Reason:** keeps every meaningful contract check. Findings already fixed thanks to it: complete `Allow` header on 405, documented 400, non-nullable optional query parameters, NIT pattern in the schema, rejection of undeclared query parameters.
+
+## D-020 · Email links verified with token_hash
+- **Context:** Supabase invitation links use the implicit flow (token in the URL fragment, invisible to the server) and PKCE recovery links only work in the browser that requested them.
+- **Decision:** custom Supabase email templates (`supabase/templates/*.html`) point to `/auth/confirm?token_hash=…&type=invite|recovery`; the web server calls `verifyOtp`, opens an HttpOnly session and continues to `/restablecer`. The same templates must be configured in Supabase cloud (docs/DEPLOY.md).
+- **Alternatives:** client-side fragment handling (needs JS-readable tokens).
+- **Reason:** works across browsers and keeps tokens server-side.
+
+## D-021 · Undeclared query parameters are rejected
+- **Context:** allowlist input validation (OWASP ASVS V5).
+- **Decision:** a global dependency compares the query string with the parameters declared for the operation in the OpenAPI document and answers 422 `VALIDATION_ERROR` for anything else. List filters are declared as individual query parameters (dependency functions) instead of Pydantic query models, which this FastAPI version publishes as a single object parameter.
+- **Alternatives:** ignore unknown parameters.
+- **Reason:** predictable contract; the generated TypeScript client serializes filters correctly.
+
+## D-022 · Email syntax validation without email-validator
+- **Context:** `pydantic.EmailStr` (email-validator) rejects reserved domains such as `.test` and `.local`, used by synthetic development accounts.
+- **Decision:** a pragmatic syntax pattern on input; deliverability is proven by the Supabase invitation email itself.
+- **Alternatives:** add `pydantic[email]` and special-case test domains.
+- **Reason:** one less dependency; real addresses are still validated by delivery.
+
+## D-023 · Reviewer assignment ships with evaluations (S04)
+- **Context:** section 23 lists "asignación de revisor" in S03, but there are no evaluations to assign until S04.
+- **Decision:** S03 delivers companies and users; the assignment endpoint and UI are delivered and tested in S04.
+- **Alternatives:** an assignment table without evaluations.
+- **Reason:** vertical slices must be testable end to end.

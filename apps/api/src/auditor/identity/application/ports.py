@@ -32,6 +32,8 @@ class AuthAdmin(Protocol):
 
     async def set_banned(self, user_id: UUID, banned: bool) -> None: ...
 
+    async def delete_user(self, user_id: UUID) -> None: ...
+
 
 @dataclass(frozen=True, slots=True)
 class NewUser:

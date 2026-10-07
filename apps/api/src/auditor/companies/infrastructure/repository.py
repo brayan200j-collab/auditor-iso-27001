@@ -11,6 +11,7 @@ from auditor.companies.domain.company import Company
 from auditor.companies.infrastructure.models import CompanyModel
 from auditor.shared.domain.errors import ResourceNotFoundError
 from auditor.shared.domain.pagination import Page, PageRequest
+from auditor.shared.infrastructure.database import contains_pattern
 
 
 def _to_company(model: CompanyModel) -> Company:
@@ -53,9 +54,12 @@ class SqlCompanyRepository:
     async def list(self, search: str | None, page: PageRequest) -> Page[Company]:
         query = select(CompanyModel)
         if search:
-            pattern = f"%{search.strip().lower()}%"
+            pattern = contains_pattern(search)
             query = query.where(
-                or_(func.lower(CompanyModel.name).like(pattern), CompanyModel.tax_id.like(pattern))
+                or_(
+                    func.lower(CompanyModel.name).like(pattern, escape="\\"),
+                    CompanyModel.tax_id.like(pattern, escape="\\"),
+                )
             )
         total = await self._session.scalar(select(func.count()).select_from(query.subquery()))
         models = await self._session.scalars(

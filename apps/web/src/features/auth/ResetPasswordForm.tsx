@@ -11,7 +11,9 @@ import { describedBy, Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { auth } from "@/content/es";
 
-import { resetPasswordAction, type ActionResult } from "./actions";
+import type { ActionResult } from "@/lib/actions";
+
+import { resetPasswordAction } from "./actions";
 import { resetSchema, type ResetInput } from "./schemas";
 
 export function ResetPasswordForm() {

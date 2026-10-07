@@ -5,11 +5,14 @@ Unexpected exceptions are turned into a 500 body by `RequestIdMiddleware`.
 
 from __future__ import annotations
 
+import re
+
 import structlog
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.status import HTTP_405_METHOD_NOT_ALLOWED
 
 from auditor.shared.api.middleware import current_request_id
 from auditor.shared.api.schemas import ErrorResponse
@@ -47,6 +50,7 @@ _STATUS_BY_ERROR: dict[type[DomainError], int] = {
 }
 
 _HTTP_MESSAGES: dict[int, tuple[str, str]] = {
+    400: ("BAD_REQUEST", "La solicitud no tiene un formato válido."),
     401: ("UNAUTHORIZED", "Debes iniciar sesión para continuar."),
     403: ("FORBIDDEN", "No tienes permiso para realizar esta acción."),
     404: ("NOT_FOUND", "El recurso solicitado no existe o no está disponible."),
@@ -88,16 +92,34 @@ async def _handle_validation_error(_request: Request, exc: Exception) -> JSONRes
     )
 
 
-async def _handle_http_error(_request: Request, exc: Exception) -> JSONResponse:
+def _allowed_methods(request: Request) -> str | None:
+    """Methods documented for the requested path (Starlette reports only the first route's)."""
+    path = request.url.path
+    methods: set[str] = set()
+    for template, operations in request.app.openapi().get("paths", {}).items():
+        pattern = "^" + re.sub(r"\{[^/]+\}", "[^/]+", template) + "$"
+        if re.match(pattern, path):
+            methods.update(method.upper() for method in operations)
+    return ", ".join(sorted(methods)) if methods else None
+
+
+async def _handle_http_error(request: Request, exc: Exception) -> JSONResponse:
     if not isinstance(exc, StarletteHTTPException):
         raise exc
     code, message = _HTTP_MESSAGES.get(
         exc.status_code, ("HTTP_ERROR", "No fue posible completar la solicitud.")
     )
+    headers = {
+        key: value
+        for key, value in (getattr(exc, "headers", None) or {}).items()
+        if key.lower() != "allow"
+    }
+    if exc.status_code == HTTP_405_METHOD_NOT_ALLOWED:
+        allowed = _allowed_methods(request)
+        if allowed:
+            headers["allow"] = allowed
     return JSONResponse(
-        status_code=exc.status_code,
-        content=error_body(code, message),
-        headers=getattr(exc, "headers", None),
+        status_code=exc.status_code, content=error_body(code, message), headers=headers or None
     )
 
 

@@ -8,17 +8,27 @@ from dataclasses import dataclass, field
 from functools import cached_property
 from typing import Any, cast
 
+import httpx
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
 from auditor.audit.application.list_audit_logs import ListAuditLogs
 from auditor.audit.infrastructure.audit_log_reader import SqlAuditLogReader
 from auditor.audit.infrastructure.sql_audit_logger import SqlAuditLogger
+from auditor.companies.application.create_company import CreateCompany
+from auditor.companies.application.get_company import GetCompany
+from auditor.companies.application.list_companies import ListCompanies
+from auditor.companies.application.update_company import UpdateCompany
 from auditor.companies.infrastructure.repository import SqlCompanyRepository
 from auditor.config import Settings
+from auditor.identity.application.create_user import CreateUser
 from auditor.identity.application.get_profile import GetProfile
-from auditor.identity.application.ports import TokenVerifier
+from auditor.identity.application.get_user import GetUser
+from auditor.identity.application.list_users import ListUsers
+from auditor.identity.application.ports import AuthAdmin, TokenVerifier
 from auditor.identity.application.record_session_event import RecordSessionEvent
 from auditor.identity.application.resolve_actor import ResolveActor
+from auditor.identity.application.update_user import UpdateUser
+from auditor.identity.infrastructure.supabase_admin import SupabaseAuthAdmin
 from auditor.identity.infrastructure.token_verifiers import SupabaseJwtVerifier, TestJwtVerifier
 from auditor.identity.infrastructure.user_repository import SqlUserRepository
 from auditor.shared.domain.actor import Actor
@@ -53,6 +63,8 @@ class AppContainer:
     engine: AsyncEngine
     session_factory: async_sessionmaker[AsyncSession]
     token_verifier: TokenVerifier
+    http: httpx.AsyncClient
+    auth_admin: AuthAdmin
     clock: SystemClock = field(default_factory=SystemClock)
     factories: dict[type[Any], Factory] = field(default_factory=dict)
 
@@ -63,11 +75,16 @@ class AppContainer:
             pool_size=settings.database_pool_size,
             use_null_pool=settings.app_env == "test",
         )
+        http = httpx.AsyncClient(timeout=httpx.Timeout(30.0, connect=5.0))
         return cls(
             settings=settings,
             engine=engine,
             session_factory=create_session_factory(engine),
             token_verifier=build_token_verifier(settings),
+            http=http,
+            auth_admin=SupabaseAuthAdmin(
+                settings.supabase_url, settings.supabase_service_role_key.get_secret_value(), http
+            ),
             factories=build_factories(),
         )
 
@@ -75,6 +92,7 @@ class AppContainer:
         return await ping(self.engine)
 
     async def aclose(self) -> None:
+        await self.http.aclose()
         await self.engine.dispose()
 
     @asynccontextmanager
@@ -129,4 +147,16 @@ def build_factories() -> dict[type[Any], Factory]:
         GetProfile: lambda s: GetProfile(s.users, s.companies),
         RecordSessionEvent: lambda s: RecordSessionEvent(s.audit),
         ListAuditLogs: lambda s: ListAuditLogs(SqlAuditLogReader(s.session)),
+        CreateCompany: lambda s: CreateCompany(s.companies, s.audit, s.uow),
+        UpdateCompany: lambda s: UpdateCompany(s.companies, s.audit, s.uow),
+        ListCompanies: lambda s: ListCompanies(s.companies),
+        GetCompany: lambda s: GetCompany(s.companies),
+        CreateUser: lambda s: CreateUser(
+            s.users, s.container.auth_admin, s.companies, s.audit, s.uow
+        ),
+        UpdateUser: lambda s: UpdateUser(
+            s.users, s.container.auth_admin, s.companies, s.audit, s.uow
+        ),
+        ListUsers: lambda s: ListUsers(s.users),
+        GetUser: lambda s: GetUser(s.users),
     }

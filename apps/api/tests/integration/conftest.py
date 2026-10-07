@@ -12,6 +12,7 @@ from auditor.config import Settings
 from auditor.main import create_app
 from auditor.shared.infrastructure.database import create_engine, create_session_factory
 from tests.support.database import ensure_database, migrate, reset_schema, truncate_all
+from tests.support.fakes import FakeAuthAdmin
 from tests.support.settings import make_settings, test_database_url
 
 
@@ -55,8 +56,15 @@ def settings(database_url: str, tmp_path: Path) -> Settings:
 
 
 @pytest.fixture
-def app(settings: Settings) -> FastAPI:
-    return create_app(settings)
+def auth_admin() -> FakeAuthAdmin:
+    return FakeAuthAdmin()
+
+
+@pytest.fixture
+def app(settings: Settings, auth_admin: FakeAuthAdmin) -> FastAPI:
+    application = create_app(settings)
+    application.state.container.auth_admin = auth_admin
+    return application
 
 
 @pytest.fixture

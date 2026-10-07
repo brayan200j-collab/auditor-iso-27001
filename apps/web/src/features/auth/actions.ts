@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 
 import { auth } from "@/content/es";
+import type { ActionResult } from "@/lib/actions";
 import { serverApi } from "@/lib/api/server";
 import {
   getAccessToken,
@@ -16,8 +17,6 @@ import { consume } from "@/lib/rate-limit";
 import { clientIp } from "@/lib/request";
 
 import { loginSchema, recoverySchema, resetSchema } from "./schemas";
-
-export type ActionResult = { ok: true; message?: string } | { ok: false; message: string };
 
 const MINUTE = 60_000;
 
@@ -60,7 +59,7 @@ export async function signOutAction(): Promise<void> {
 export async function requestRecoveryAction(input: unknown): Promise<ActionResult> {
   const parsed = recoverySchema.safeParse(input);
   if (parsed.success && (await allowed("recovery", parsed.data.email))) {
-    const redirectTo = `${env().NEXT_PUBLIC_SITE_URL}/auth/callback?next=/restablecer`;
+    const redirectTo = `${env().NEXT_PUBLIC_SITE_URL}/restablecer`;
     await requestPasswordReset(parsed.data.email, redirectTo);
   }
   // Same answer in every case: never reveal whether an account exists.

@@ -127,3 +127,41 @@ async def test_cors_only_allows_configured_origins(client: httpx.AsyncClient) ->
         headers={"origin": "https://evil.example", "access-control-request-method": "GET"},
     )
     assert "access-control-allow-origin" not in denied.headers
+
+
+async def test_method_not_allowed_lists_every_allowed_method() -> None:
+    settings = make_settings()
+    app = create_app(settings, AppContainer.build(settings))
+    transport = httpx.ASGITransport(app=app)
+    async with httpx.AsyncClient(transport=transport, base_url="http://test") as http:
+        response = await http.request("OPTIONS", "/api/v1/companies")
+        malformed = await http.patch(
+            "/api/v1/companies/e3e70682-c209-1cac-a29f-6fbed82c07cd",
+            content=b"{not json",
+            headers={"content-type": "application/json", "authorization": "Bearer x"},
+        )
+    assert response.status_code == 405
+    assert response.headers["allow"] == "GET, POST"
+    assert malformed.status_code in {400, 401, 422}
+
+
+def test_optional_query_parameters_are_not_nullable() -> None:
+    document = create_app(make_settings()).openapi()
+    parameters = document["paths"]["/api/v1/users"]["get"]["parameters"]
+    names = {parameter["name"] for parameter in parameters}
+    assert {"role", "company_id", "search", "page", "page_size"} <= names
+    role = next(parameter for parameter in parameters if parameter["name"] == "role")
+    assert "anyOf" not in role["schema"]
+    assert role["schema"]["$ref"].endswith("/Role")
+
+
+async def test_undeclared_query_parameters_are_rejected() -> None:
+    settings = make_settings()
+    app = create_app(settings, AppContainer.build(settings))
+    transport = httpx.ASGITransport(app=app)
+    async with httpx.AsyncClient(transport=transport, base_url="http://test") as http:
+        extra = await http.get("/healthz", params={"debug": "1"})
+        empty_name = await http.get("/api/v1/companies?page=1&=x")
+    assert extra.status_code == 422
+    assert extra.json()["code"] == "VALIDATION_ERROR"
+    assert empty_name.status_code == 422

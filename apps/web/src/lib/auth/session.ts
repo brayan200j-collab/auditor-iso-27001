@@ -32,9 +32,12 @@ export async function requestPasswordReset(email: string, redirectTo: string): P
   await supabase.auth.resetPasswordForEmail(email, { redirectTo });
 }
 
-export async function exchangeRecoveryCode(code: string): Promise<boolean> {
+export type EmailLinkType = "recovery" | "invite";
+
+/** Verifies an invitation or recovery link (token_hash) and opens a server-side session. */
+export async function verifyEmailLink(tokenHash: string, type: EmailLinkType): Promise<boolean> {
   const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
   return !error;
 }
 

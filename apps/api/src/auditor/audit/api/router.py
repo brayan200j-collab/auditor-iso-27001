@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, Query
 from auditor.audit.application.list_audit_logs import AuditLogFilters, ListAuditLogs
 from auditor.shared.api.dependencies import CurrentActor, use_case
 from auditor.shared.api.pagination import PageParams
-from auditor.shared.api.schemas import ERROR_RESPONSES, ApiModel, PageMeta, QueryModel
+from auditor.shared.api.schemas import ERROR_RESPONSES, ApiModel, PageMeta
 from auditor.shared.domain.audit import AuditAction, AuditOutcome
 
 router = APIRouter(prefix="/api/v1", tags=["audit"], responses=ERROR_RESPONSES)
@@ -34,32 +34,26 @@ class AuditLogPage(ApiModel):
     meta: PageMeta
 
 
-class AuditLogQuery(QueryModel):
-    action: AuditAction | None = None
-    outcome: AuditOutcome | None = None
-    company_id: UUID | None = None
-    since: datetime | None = None
-    until: datetime | None = None
+def audit_filters(
+    action: Annotated[AuditAction | None, Query()] = None,
+    outcome: Annotated[AuditOutcome | None, Query()] = None,
+    company_id: Annotated[UUID | None, Query()] = None,
+    since: Annotated[datetime | None, Query()] = None,
+    until: Annotated[datetime | None, Query()] = None,
+) -> AuditLogFilters:
+    return AuditLogFilters(
+        action=action, outcome=outcome, company_id=company_id, since=since, until=until
+    )
 
 
 @router.get("/audit-logs", response_model=AuditLogPage, summary="Registro de auditoría")
 async def list_audit_logs(
     actor: CurrentActor,
     page: PageParams,
-    query: Annotated[AuditLogQuery, Query()],
+    filters: Annotated[AuditLogFilters, Depends(audit_filters)],
     list_logs: Annotated[ListAuditLogs, Depends(use_case(ListAuditLogs))],
 ) -> AuditLogPage:
-    result = await list_logs.execute(
-        actor,
-        AuditLogFilters(
-            action=query.action,
-            outcome=query.outcome,
-            company_id=query.company_id,
-            since=query.since,
-            until=query.until,
-        ),
-        page,
-    )
+    result = await list_logs.execute(actor, filters, page)
     return AuditLogPage(
         items=[
             AuditLogResponse(

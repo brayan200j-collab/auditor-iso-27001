@@ -12,6 +12,7 @@ from auditor.identity.infrastructure.models import CompanyUserModel, UserModel
 from auditor.shared.domain.actor import Role
 from auditor.shared.domain.errors import ResourceNotFoundError
 from auditor.shared.domain.pagination import Page, PageRequest
+from auditor.shared.infrastructure.database import contains_pattern
 
 
 def _base() -> Select[UserModel, UUID]:
@@ -53,11 +54,11 @@ class SqlUserRepository:
         if filters.company_id:
             query = query.where(CompanyUserModel.company_id == filters.company_id)
         if filters.search:
-            pattern = f"%{filters.search.strip().lower()}%"
+            pattern = contains_pattern(filters.search)
             query = query.where(
                 or_(
-                    func.lower(UserModel.email).like(pattern),
-                    func.lower(UserModel.full_name).like(pattern),
+                    func.lower(UserModel.email).like(pattern, escape="\\"),
+                    func.lower(UserModel.full_name).like(pattern, escape="\\"),
                 )
             )
         total = await self._session.scalar(select(func.count()).select_from(query.subquery()))

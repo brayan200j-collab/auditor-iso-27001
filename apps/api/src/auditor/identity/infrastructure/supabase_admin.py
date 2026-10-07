@@ -75,6 +75,11 @@ class SupabaseAuthAdmin:
         )
         _raise_for_status(response)
 
+    async def delete_user(self, user_id: UUID) -> None:
+        response = await self._request("DELETE", f"/admin/users/{user_id}")
+        if response.status_code != httpx.codes.NOT_FOUND:
+            _raise_for_status(response)
+
 
 def _raise_for_status(response: httpx.Response) -> None:
     if response.is_success:

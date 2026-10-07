@@ -5,17 +5,21 @@ from __future__ import annotations
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from auditor.audit.api.router import router as audit_router
+from auditor.companies.api.router import router as companies_router
 from auditor.config import Settings, load_settings
 from auditor.container import AppContainer
 from auditor.identity.api.router import router as identity_router
+from auditor.identity.api.users_router import router as users_router
 from auditor.shared.api.dependencies import get_resolver
 from auditor.shared.api.errors import register_error_handlers
 from auditor.shared.api.health import build_health_router
 from auditor.shared.api.middleware import RequestIdMiddleware, SecurityHeadersMiddleware
+from auditor.shared.api.openapi import install_openapi
+from auditor.shared.api.strict_query import reject_unknown_query_parameters
 from auditor.shared.infrastructure.logging import configure_logging, get_logger
 
 API_PREFIX = "/api/v1"
@@ -43,14 +47,16 @@ def create_app(settings: Settings | None = None, container: AppContainer | None 
         docs_url="/docs" if show_docs else None,
         redoc_url=None,
         openapi_url="/openapi.json" if show_docs else None,
+        dependencies=[Depends(reject_unknown_query_parameters)],
     )
     app.state.container = container
     app.dependency_overrides[get_resolver] = container.request_resolver
 
     register_error_handlers(app)
     app.include_router(build_health_router(container.is_ready))
-    for router in (identity_router, audit_router):
+    for router in (identity_router, users_router, companies_router, audit_router):
         app.include_router(router)
+    install_openapi(app)
 
     app.add_middleware(
         CORSMiddleware,

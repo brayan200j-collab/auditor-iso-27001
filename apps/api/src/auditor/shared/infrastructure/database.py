@@ -71,3 +71,14 @@ def enum_check(column: str, values: type[StrEnum] | tuple[str, ...], name: str) 
 
 def utc_now_column() -> Mapped[datetime]:
     return mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+def contains_pattern(text: str) -> str:
+    r"""Case-insensitive LIKE pattern that treats the user's ``%`` and ``_`` literally.
+
+    Use with ``.like(pattern, escape="\\")``.
+    """
+    escaped = text.strip().lower()
+    for special in ("\\", "%", "_"):
+        escaped = escaped.replace(special, "\\" + special)
+    return f"%{escaped}%"
