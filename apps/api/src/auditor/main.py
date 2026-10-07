@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from auditor.analysis.api.router import router as analysis_router
 from auditor.audit.api.router import router as audit_router
+from auditor.checklist.api.router import router as checklist_router
 from auditor.companies.api.router import router as companies_router
 from auditor.config import Settings, load_settings
 from auditor.container import AppContainer
@@ -68,6 +69,7 @@ def create_app(settings: Settings | None = None, container: AppContainer | None 
         evaluations_router,
         documents_router,
         analysis_router,
+        checklist_router,
         audit_router,
     ):
         app.include_router(router)

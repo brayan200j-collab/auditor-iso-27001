@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Protocol
 from uuid import UUID
 
-from auditor.checklist.application.definitions import ChecklistDefinition
+from auditor.checklist.application.definitions import ChecklistDefinition, ChecklistItemDefinition
 from auditor.checklist.domain.entities import ChecklistVersion
 
 
@@ -27,3 +27,11 @@ class ChecklistRepository(Protocol):
     ) -> ChecklistVersion: ...
 
     async def publish(self, version_id: UUID) -> ChecklistVersion: ...
+
+    async def draft(self) -> ChecklistVersion | None:
+        """The single draft version, if any."""
+        ...
+
+    async def update_item(
+        self, version_id: UUID, definition: ChecklistItemDefinition
+    ) -> ChecklistVersion: ...

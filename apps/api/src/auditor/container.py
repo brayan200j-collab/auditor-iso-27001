@@ -20,6 +20,11 @@ from auditor.analysis.application.start_analysis import StartAnalysis
 from auditor.audit.application.list_audit_logs import ListAuditLogs
 from auditor.audit.infrastructure.audit_log_reader import SqlAuditLogReader
 from auditor.audit.infrastructure.sql_audit_logger import SqlAuditLogger
+from auditor.checklist.application.create_draft import CreateChecklistDraft
+from auditor.checklist.application.get_version import GetChecklistVersion
+from auditor.checklist.application.list_versions import ListChecklistVersions
+from auditor.checklist.application.publish_version import PublishChecklistVersion
+from auditor.checklist.application.update_item import UpdateChecklistItem
 from auditor.checklist.infrastructure.repository import SqlChecklistRepository
 from auditor.companies.application.create_company import CreateCompany
 from auditor.companies.application.get_company import GetCompany
@@ -350,4 +355,9 @@ def build_factories() -> dict[type[Any], Factory]:
             s.settings.job_max_attempts,
         ),
         MarkProcessingFailed: lambda s: MarkProcessingFailed(s.lifecycle, s.uow),
+        ListChecklistVersions: lambda s: ListChecklistVersions(s.checklists),
+        GetChecklistVersion: lambda s: GetChecklistVersion(s.checklists),
+        CreateChecklistDraft: lambda s: CreateChecklistDraft(s.checklists, s.audit, s.uow),
+        UpdateChecklistItem: lambda s: UpdateChecklistItem(s.checklists, s.uow),
+        PublishChecklistVersion: lambda s: PublishChecklistVersion(s.checklists, s.audit, s.uow),
     }

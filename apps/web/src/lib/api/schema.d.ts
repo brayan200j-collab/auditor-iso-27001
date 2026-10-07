@@ -333,6 +333,75 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/checklists": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Versiones del checklist */
+        get: operations["list_versions_api_v1_checklists_get"];
+        put?: never;
+        /** Crear un borrador a partir de la versión publicada */
+        post: operations["create_draft_api_v1_checklists_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/checklists/{version_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Criterios de una versión */
+        get: operations["get_version_api_v1_checklists__version_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/checklists/{version_id}/items/{code}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Editar un criterio del borrador */
+        put: operations["update_item_api_v1_checklists__version_id__items__code__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/checklists/{version_id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Publicar el borrador */
+        post: operations["publish_api_v1_checklists__version_id__publish_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/audit-logs": {
         parameters: {
             query?: never;
@@ -408,6 +477,118 @@ export interface components {
              * @description Documento PDF
              */
             file: string;
+        };
+        /** ChecklistItemResponse */
+        ChecklistItemResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Code */
+            code: string;
+            /** Position */
+            position: number;
+            /** Name */
+            name: string;
+            /** Description */
+            description: string;
+            /** Evaluation Question */
+            evaluation_question: string;
+            /** Expected Evidence */
+            expected_evidence: string;
+            /** Iso Reference */
+            iso_reference: string | null;
+            /** Cis Reference */
+            cis_reference: string | null;
+            /** Nist Reference */
+            nist_reference: string | null;
+            reference_status: components["schemas"]["ReferenceStatus"];
+            /** Keywords */
+            keywords: string[];
+            priority: components["schemas"]["Priority"];
+            risk_level: components["schemas"]["Level"];
+            effort: components["schemas"]["Level"];
+            /** Active */
+            active: boolean;
+        };
+        /** ChecklistItemUpdateRequest */
+        ChecklistItemUpdateRequest: {
+            /** Name */
+            name: string;
+            /** Description */
+            description: string;
+            /** Evaluation Question */
+            evaluation_question: string;
+            /** Expected Evidence */
+            expected_evidence: string;
+            /**
+             * Iso Reference
+             * @default
+             */
+            iso_reference: string;
+            /**
+             * Cis Reference
+             * @default
+             */
+            cis_reference: string;
+            /**
+             * Nist Reference
+             * @default
+             */
+            nist_reference: string;
+            /** @default draft */
+            reference_status: components["schemas"]["ReferenceStatus"];
+            /** Keywords */
+            keywords: string[];
+            priority: components["schemas"]["Priority"];
+            risk_level: components["schemas"]["Level"];
+            effort: components["schemas"]["Level"];
+            /**
+             * Active
+             * @default true
+             */
+            active: boolean;
+        };
+        /** ChecklistVersionResponse */
+        ChecklistVersionResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Version */
+            version: number;
+            /** Label */
+            label: string;
+            status: components["schemas"]["VersionStatus"];
+            /** Published At */
+            published_at: string | null;
+            /** Item Count */
+            item_count: number;
+            /** Active Item Count */
+            active_item_count: number;
+            /** Items */
+            items: components["schemas"]["ChecklistItemResponse"][];
+        };
+        /** ChecklistVersionSummary */
+        ChecklistVersionSummary: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Version */
+            version: number;
+            /** Label */
+            label: string;
+            status: components["schemas"]["VersionStatus"];
+            /** Published At */
+            published_at: string | null;
+            /** Item Count */
+            item_count: number;
+            /** Active Item Count */
+            active_item_count: number;
         };
         /** CompanyPage */
         CompanyPage: {
@@ -624,6 +805,12 @@ export interface components {
             /** Status */
             status: string;
         };
+        /**
+         * Level
+         * @description Used for risk level and estimated effort.
+         * @enum {string}
+         */
+        Level: "LOW" | "MEDIUM" | "HIGH";
         /** PageMeta */
         PageMeta: {
             /** Total */
@@ -633,6 +820,11 @@ export interface components {
             /** Page Size */
             page_size: number;
         };
+        /**
+         * Priority
+         * @enum {string}
+         */
+        Priority: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
         /** ProcessingResponse */
         ProcessingResponse: {
             /**
@@ -664,6 +856,11 @@ export interface components {
             step: components["schemas"]["EvaluationStatus"];
             state: components["schemas"]["StepState"];
         };
+        /**
+         * ReferenceStatus
+         * @enum {string}
+         */
+        ReferenceStatus: "draft" | "confirmed";
         /** ReviewerAssignmentRequest */
         ReviewerAssignmentRequest: {
             /**
@@ -734,6 +931,11 @@ export interface components {
             /** Company Id */
             company_id?: string | null;
         };
+        /**
+         * VersionStatus
+         * @enum {string}
+         */
+        VersionStatus: "DRAFT" | "PUBLISHED";
     };
     responses: never;
     parameters: never;
@@ -2730,6 +2932,432 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProcessingResponse"];
+                };
+            };
+            /** @description Solicitud con formato no válido */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No autenticado */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Sin permiso */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflicto con el estado actual */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Datos no válidos */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Límite de uso alcanzado */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    list_versions_api_v1_checklists_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChecklistVersionSummary"][];
+                };
+            };
+            /** @description Solicitud con formato no válido */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No autenticado */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Sin permiso */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflicto con el estado actual */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Datos no válidos */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Límite de uso alcanzado */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    create_draft_api_v1_checklists_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChecklistVersionResponse"];
+                };
+            };
+            /** @description Solicitud con formato no válido */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No autenticado */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Sin permiso */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflicto con el estado actual */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Datos no válidos */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Límite de uso alcanzado */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_version_api_v1_checklists__version_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                version_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChecklistVersionResponse"];
+                };
+            };
+            /** @description Solicitud con formato no válido */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No autenticado */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Sin permiso */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflicto con el estado actual */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Datos no válidos */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Límite de uso alcanzado */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    update_item_api_v1_checklists__version_id__items__code__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                version_id: string;
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChecklistItemUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChecklistVersionResponse"];
+                };
+            };
+            /** @description Solicitud con formato no válido */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No autenticado */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Sin permiso */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflicto con el estado actual */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Datos no válidos */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Límite de uso alcanzado */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    publish_api_v1_checklists__version_id__publish_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                version_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChecklistVersionResponse"];
                 };
             };
             /** @description Solicitud con formato no válido */

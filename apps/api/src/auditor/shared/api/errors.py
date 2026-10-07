@@ -11,6 +11,7 @@ import structlog
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from pydantic import ValidationError as PydanticValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.status import HTTP_405_METHOD_NOT_ALLOWED
 
@@ -123,7 +124,20 @@ async def _handle_http_error(request: Request, exc: Exception) -> JSONResponse:
     )
 
 
+async def _handle_model_validation_error(_request: Request, exc: Exception) -> JSONResponse:
+    """Validation of domain definitions built inside an endpoint (not the request body)."""
+    if not isinstance(exc, PydanticValidationError):
+        raise exc
+    fields = sorted({".".join(str(part) for part in err.get("loc", ())) for err in exc.errors()})
+    logger.info("model_validation_failed", fields=fields)
+    return JSONResponse(
+        status_code=422,
+        content=error_body("VALIDATION_ERROR", "Los datos enviados no son válidos."),
+    )
+
+
 def register_error_handlers(app: FastAPI) -> None:
     app.add_exception_handler(DomainError, _handle_domain_error)
     app.add_exception_handler(RequestValidationError, _handle_validation_error)
+    app.add_exception_handler(PydanticValidationError, _handle_model_validation_error)
     app.add_exception_handler(StarletteHTTPException, _handle_http_error)

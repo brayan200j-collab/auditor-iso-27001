@@ -6,7 +6,7 @@ from uuid import UUID
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from auditor.checklist.application.definitions import ChecklistDefinition
+from auditor.checklist.application.definitions import ChecklistDefinition, ChecklistItemDefinition
 from auditor.checklist.domain.entities import (
     ChecklistItem,
     ChecklistVersion,
@@ -137,6 +137,44 @@ class SqlChecklistRepository:
         if model is None:  # pragma: no cover - just updated
             raise ResourceNotFoundError()
         return await self._load(model)
+
+    async def draft(self) -> ChecklistVersion | None:
+        model = await self._session.scalar(
+            select(ChecklistVersionModel).where(ChecklistVersionModel.status == VersionStatus.DRAFT)
+        )
+        return await self._load(model) if model else None
+
+    async def update_item(
+        self, version_id: UUID, definition: ChecklistItemDefinition
+    ) -> ChecklistVersion:
+        version = await self._session.get(ChecklistVersionModel, version_id)
+        if version is None:
+            raise ResourceNotFoundError()
+        if version.status != VersionStatus.DRAFT:
+            raise ConflictError("Una versión publicada no se puede modificar.")
+        item = await self._session.scalar(
+            select(ChecklistItemModel).where(
+                ChecklistItemModel.version_id == version_id,
+                ChecklistItemModel.code == definition.code,
+            )
+        )
+        if item is None:
+            raise ResourceNotFoundError()
+        item.name = definition.name
+        item.description = definition.description
+        item.evaluation_question = definition.evaluation_question
+        item.expected_evidence = definition.expected_evidence
+        item.iso_reference = definition.iso_reference or None
+        item.cis_reference = definition.cis_reference or None
+        item.nist_reference = definition.nist_reference or None
+        item.reference_status = definition.reference_status
+        item.keywords = list(definition.keywords)
+        item.priority = definition.priority
+        item.risk_level = definition.risk_level
+        item.effort = definition.effort
+        item.active = definition.active
+        await self._session.flush()
+        return await self._load(version)
 
     def _add_items(self, version_id: UUID, definition: ChecklistDefinition) -> None:
         for position, item in enumerate(definition.items, start=1):
