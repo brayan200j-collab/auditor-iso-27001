@@ -151,3 +151,15 @@ Format: context · decision · alternatives · reason. Newest last.
 - **Decision:** up to `MAX_DOCUMENTS_PER_EVALUATION` (5) PDFs per run. Extra transitions: RECEIVED→RECEIVED (another upload), RECEIVED→DRAFT (last document deleted), REJECTED→RECEIVED (new PDF opens run N+1), FAILED→EXTRACTING/ANALYZING (retry from the last successful step). `failed_stage` records where a run failed so the timeline can show it.
 - **Alternatives:** single document per evaluation.
 - **Reason:** SMEs usually keep policies in several short files; the report lists "documentos analizados".
+
+## D-026 · Upload pipeline
+- **Context:** section 10 requires streaming reception with a hard 20 MB cap, server-side validation and safe handling of active content.
+- **Decision:** multipart upload through the BFF; `BodySizeLimitMiddleware` counts bytes as they arrive and answers 413 beyond 20 MB (+64 KB envelope) before anything is buffered; Starlette spools the file to a temporary file that is closed and deleted after the request. Validation order: sanitized name (no paths, control characters or double extensions) → declared MIME → size → `%PDF-` signature → PyMuPDF inspection in a worker thread with a timeout (encryption, 0 or >30 pages counted before extraction, JavaScript/Launch/embedded files, selectable text) → `FileScanner` hook (no-op) → private storage at `companies/{company}/evaluations/{evaluation}/{document}.pdf`. Rejections are audited; a failed database commit deletes the stored object.
+- **Alternatives:** raw-body upload; parsing in a subprocess for strict memory limits.
+- **Reason:** standard multipart contract documented in OpenAPI; memory is bounded by the size and page caps. A subprocess sandbox is listed in the backlog.
+
+## D-027 · Configurable sign-in rate limits
+- **Context:** the E2E suite signs in dozens of times and hit the per-email limit (which proves the limiter works).
+- **Decision:** `AUTH_RATE_LIMIT_PER_IP` and `AUTH_RATE_LIMIT_PER_EMAIL` (server-only) default to 10/min and 5/15 min; only the generated local `.env.local` relaxes them.
+- **Alternatives:** disabling the limiter in development.
+- **Reason:** production keeps strict defaults without special code paths.

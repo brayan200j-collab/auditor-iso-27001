@@ -137,7 +137,7 @@ async def test_admin_invites_an_sme_user(
         ("REVIEWER", True, "Solo los usuarios PYME se asocian a una empresa."),
     ],
 )
-async def test_role_and_company_must_be_consistent(  # noqa: PLR0917 - pytest fixtures
+async def test_role_and_company_must_be_consistent(
     client: httpx.AsyncClient,
     session: AsyncSession,
     admin_headers: dict[str, str],

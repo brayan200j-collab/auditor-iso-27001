@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import secrets
 from collections.abc import AsyncIterator, Callable
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
@@ -21,6 +22,12 @@ from auditor.companies.application.list_companies import ListCompanies
 from auditor.companies.application.update_company import UpdateCompany
 from auditor.companies.infrastructure.repository import SqlCompanyRepository
 from auditor.config import Settings
+from auditor.documents.application.delete_document import DeleteDocument
+from auditor.documents.application.list_documents import ListDocuments
+from auditor.documents.application.ports import FileScanner, NoopFileScanner
+from auditor.documents.application.upload_document import UploadDocument, UploadLimits
+from auditor.documents.infrastructure.pdf_inspector import PyMuPdfInspector
+from auditor.documents.infrastructure.repository import SqlDocumentRepository
 from auditor.evaluations.application.access import EvaluationAccess
 from auditor.evaluations.application.assign_reviewer import AssignReviewer
 from auditor.evaluations.application.create_evaluation import CreateEvaluation
@@ -45,6 +52,7 @@ from auditor.identity.application.update_user import UpdateUser
 from auditor.identity.infrastructure.supabase_admin import SupabaseAuthAdmin
 from auditor.identity.infrastructure.token_verifiers import SupabaseJwtVerifier, TestJwtVerifier
 from auditor.identity.infrastructure.user_repository import SqlUserRepository
+from auditor.shared.application.ports import ObjectStorage
 from auditor.shared.domain.actor import Actor
 from auditor.shared.infrastructure.database import (
     SessionUnitOfWork,
@@ -53,6 +61,7 @@ from auditor.shared.infrastructure.database import (
     create_session_factory,
     ping,
 )
+from auditor.shared.infrastructure.storage import LocalDiskStorage, SupabaseStorage
 
 Factory = Callable[["RequestScope"], Any]
 
@@ -71,6 +80,19 @@ def build_token_verifier(settings: Settings) -> TokenVerifier:
     )
 
 
+def build_storage(settings: Settings, http: httpx.AsyncClient) -> ObjectStorage:
+    if settings.storage_provider == "local":
+        return LocalDiskStorage(
+            settings.local_storage_dir, secrets.token_bytes(32), "http://testserver"
+        )
+    return SupabaseStorage(
+        settings.supabase_url,
+        settings.supabase_public_url,
+        settings.supabase_service_role_key.get_secret_value(),
+        http,
+    )
+
+
 @dataclass
 class AppContainer:
     settings: Settings
@@ -79,6 +101,9 @@ class AppContainer:
     token_verifier: TokenVerifier
     http: httpx.AsyncClient
     auth_admin: AuthAdmin
+    storage: ObjectStorage
+    inspector: PyMuPdfInspector
+    scanner: FileScanner
     clock: SystemClock = field(default_factory=SystemClock)
     factories: dict[type[Any], Factory] = field(default_factory=dict)
 
@@ -99,6 +124,9 @@ class AppContainer:
             auth_admin=SupabaseAuthAdmin(
                 settings.supabase_url, settings.supabase_service_role_key.get_secret_value(), http
             ),
+            storage=build_storage(settings, http),
+            inspector=PyMuPdfInspector(settings.max_pdf_pages, settings.extraction_timeout_seconds),
+            scanner=NoopFileScanner(),
             factories=build_factories(),
         )
 
@@ -159,6 +187,10 @@ class RequestScope:
         return SqlConsentRepository(self.session)
 
     @cached_property
+    def documents(self) -> SqlDocumentRepository:
+        return SqlDocumentRepository(self.session)
+
+    @cached_property
     def evaluation_access(self) -> EvaluationAccess:
         return EvaluationAccess(self.evaluations, self.audit)
 
@@ -205,4 +237,31 @@ def build_factories() -> dict[type[Any], Factory]:
         AssignReviewer: lambda s: AssignReviewer(
             s.evaluation_access, s.evaluations, s.users, s.audit, s.uow
         ),
+        UploadDocument: lambda s: UploadDocument(
+            s.evaluation_access,
+            s.lifecycle,
+            s.consents,
+            s.documents,
+            s.container.storage,
+            s.container.inspector,
+            s.container.scanner,
+            s.audit,
+            s.uow,
+            UploadLimits(
+                max_bytes=s.settings.max_upload_bytes,
+                max_pages=s.settings.max_pdf_pages,
+                max_documents=s.settings.max_documents_per_evaluation,
+                bucket=s.settings.documents_bucket,
+            ),
+        ),
+        DeleteDocument: lambda s: DeleteDocument(
+            s.evaluation_access,
+            s.lifecycle,
+            s.documents,
+            s.container.storage,
+            s.audit,
+            s.uow,
+            s.settings.documents_bucket,
+        ),
+        ListDocuments: lambda s: ListDocuments(s.evaluation_access, s.lifecycle, s.documents),
     }

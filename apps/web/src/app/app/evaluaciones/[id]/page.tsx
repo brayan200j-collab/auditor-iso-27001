@@ -4,7 +4,8 @@ import { EvaluationStatusBadge } from "@/components/shared/EvaluationStatusBadge
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ProgressTimeline } from "@/components/shared/ProgressTimeline";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
-import { consentCopy, evaluations } from "@/content/es";
+import { consentCopy, documentsCopy, evaluations } from "@/content/es";
+import { DocumentList, listDocuments, UploadZone } from "@/features/documents";
 import {
   ConsentForm,
   EvaluationNotices,
@@ -16,6 +17,7 @@ import { requireRole } from "@/lib/guards";
 export const metadata: Metadata = { title: evaluations.listTitle };
 
 const OPEN_FOR_DOCUMENTS = new Set(["DRAFT", "RECEIVED", "REJECTED"]);
+const DELETABLE = new Set(["DRAFT", "RECEIVED"]);
 
 export default async function EvaluationPage({ params }: PageProps<"/app/evaluaciones/[id]">) {
   await requireRole("SME");
@@ -23,7 +25,11 @@ export default async function EvaluationPage({ params }: PageProps<"/app/evaluac
   const detail = await getEvaluation(id);
   const { evaluation } = detail;
   const needsConsent = !detail.consent_given && OPEN_FOR_DOCUMENTS.has(evaluation.status);
-  const consent = needsConsent ? await getConsentText() : null;
+  const [consent, documents] = await Promise.all([
+    needsConsent ? getConsentText() : Promise.resolve(null),
+    listDocuments(evaluation.id),
+  ]);
+  const canUpload = detail.consent_given && OPEN_FOR_DOCUMENTS.has(evaluation.status);
 
   return (
     <>
@@ -45,6 +51,18 @@ export default async function EvaluationPage({ params }: PageProps<"/app/evaluac
           <ConsentForm evaluationId={evaluation.id} version={consent.version} text={consent.text} />
         </Card>
       ) : null}
+      <Card className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1">
+          <CardTitle>{documentsCopy.title}</CardTitle>
+          <CardDescription>{documentsCopy.description}</CardDescription>
+        </div>
+        {canUpload ? <UploadZone evaluationId={evaluation.id} /> : null}
+        <DocumentList
+          evaluationId={evaluation.id}
+          documents={documents}
+          canDelete={DELETABLE.has(evaluation.status)}
+        />
+      </Card>
     </>
   );
 }

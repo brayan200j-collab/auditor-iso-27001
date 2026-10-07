@@ -1,4 +1,5 @@
 import { AppShell } from "@/components/shared/AppShell";
+import { QueryProvider } from "@/components/shared/QueryProvider";
 import { LogoutButton } from "@/features/auth";
 import { navigationFor } from "@/lib/navigation";
 import { requireProfile } from "@/lib/profile";
@@ -13,7 +14,7 @@ export default async function PrivateLayout({ children }: LayoutProps<"/app">) {
       items={navigationFor(profile.role)}
       actions={<LogoutButton />}
     >
-      {children}
+      <QueryProvider>{children}</QueryProvider>
     </AppShell>
   );
 }

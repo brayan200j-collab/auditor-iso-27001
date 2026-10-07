@@ -107,6 +107,9 @@ def main() -> None:
         "NEXT_PUBLIC_SUPABASE_URL": api_url,
         "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY": status["PUBLISHABLE_KEY"],
         "NEXT_PUBLIC_SITE_URL": "http://localhost:3000",
+        # Local only: the E2E suite signs in many times. Production keeps the strict defaults.
+        "AUTH_RATE_LIMIT_PER_IP": "500",
+        "AUTH_RATE_LIMIT_PER_EMAIL": "200",
     }
     write_env(ROOT / "apps" / "web" / ".env.local", "Local web environment", web)
     print("Wrote .env and apps/web/.env.local")

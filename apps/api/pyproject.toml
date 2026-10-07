@@ -53,11 +53,12 @@ src = ["src", "tests"]
 select = ["E", "F", "W", "I", "N", "UP", "B", "S", "A", "C4", "SIM", "RET", "PTH", "ASYNC", "RUF", "PL", "TRY"]
 ignore = [
     "PLR0913", # use cases receive explicit collaborators by constructor
+    "PLR0917", # same reason, positional form
     "TRY003",  # domain errors carry a Spanish user message by design
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["S101", "PLR2004", "S105", "S106", "PLR0915", "S311", "PLC0415"]
+"tests/**" = ["S101", "PLR2004", "S105", "S106", "PLR0915", "S311", "PLC0415", "ASYNC240"]
 "alembic/**" = ["E501"]
 
 [tool.mypy]
@@ -70,6 +71,14 @@ plugins = ["pydantic.mypy"]
 [[tool.mypy.overrides]]
 module = ["fitz", "fitz.*", "pymupdf", "pymupdf.*", "weasyprint", "weasyprint.*", "slowapi", "slowapi.*"]
 ignore_missing_imports = true
+
+# PyMuPDF ships partial annotations; only the adapter modules that call it may make untyped calls.
+[[tool.mypy.overrides]]
+module = [
+    "auditor.documents.infrastructure.pdf_inspector",
+    "auditor.documents.infrastructure.pdf_extractor",
+]
+disallow_untyped_calls = false
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -379,3 +379,29 @@ export const consentCopy = {
   accepted: "Consentimiento registrado.",
   version: (version: string) => `Versión del texto: ${version}`,
 } as const;
+
+export const documentsCopy = {
+  title: "Documentos",
+  description:
+    "Carga tus políticas y procedimientos en PDF con texto seleccionable (máximo 20 MB y 30 páginas por archivo).",
+  dropTitle: "Arrastra aquí tu PDF o selecciónalo",
+  dropHint:
+    "Solo archivos PDF con texto seleccionable. Los documentos escaneados no son compatibles.",
+  choose: "Seleccionar PDF",
+  uploading: "Cargando y validando…",
+  validPdf: "PDF válido",
+  pages: (count: number) => `${count} ${count === 1 ? "página" : "páginas"}`,
+  textDetected: "Texto detectado",
+  empty: "Aún no has cargado documentos.",
+  remove: "Eliminar",
+  removeLabel: (name: string) => `Eliminar ${name}`,
+  removed: "Documento eliminado.",
+  size: (bytes: number) => `${(bytes / (1024 * 1024)).toFixed(1)} MB`,
+  clientErrors: {
+    type: "El archivo debe ser un PDF.",
+    size: "El archivo supera el tamaño máximo de 20 MB.",
+    empty: "El archivo está vacío.",
+  },
+  locked: "Los documentos ya no se pueden modificar en este estado de la evaluación.",
+  consentFirst: "Acepta el consentimiento para poder cargar documentos.",
+} as const;

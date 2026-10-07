@@ -12,9 +12,12 @@ from auditor.audit.api.router import router as audit_router
 from auditor.companies.api.router import router as companies_router
 from auditor.config import Settings, load_settings
 from auditor.container import AppContainer
+from auditor.documents.api.router import UPLOAD_PATH_PATTERN
+from auditor.documents.api.router import router as documents_router
 from auditor.evaluations.api.router import router as evaluations_router
 from auditor.identity.api.router import router as identity_router
 from auditor.identity.api.users_router import router as users_router
+from auditor.shared.api.body_limit import BodySizeLimitMiddleware
 from auditor.shared.api.dependencies import get_resolver
 from auditor.shared.api.errors import register_error_handlers
 from auditor.shared.api.health import build_health_router
@@ -24,6 +27,7 @@ from auditor.shared.api.strict_query import reject_unknown_query_parameters
 from auditor.shared.infrastructure.logging import configure_logging, get_logger
 
 API_PREFIX = "/api/v1"
+JSON_BODY_LIMIT = 256 * 1024
 
 logger = get_logger(__name__)
 
@@ -60,6 +64,7 @@ def create_app(settings: Settings | None = None, container: AppContainer | None 
         users_router,
         companies_router,
         evaluations_router,
+        documents_router,
         audit_router,
     ):
         app.include_router(router)
@@ -76,6 +81,12 @@ def create_app(settings: Settings | None = None, container: AppContainer | None 
     )
     app.add_middleware(
         SecurityHeadersMiddleware, enable_hsts=not settings.app_env.allows_dev_adapters
+    )
+    app.add_middleware(
+        BodySizeLimitMiddleware,
+        default_limit=JSON_BODY_LIMIT,
+        upload_limit=settings.max_upload_bytes,
+        upload_path=UPLOAD_PATH_PATTERN,
     )
     app.add_middleware(RequestIdMiddleware)
     return app

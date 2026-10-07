@@ -24,7 +24,8 @@ test("an SME creates an evaluation and gives consent; an admin assigns a reviewe
   await expect(page.getByText("Debes aceptar las condiciones para continuar.")).toBeVisible();
   await page.getByLabel("He leído y acepto las condiciones anteriores.").check();
   await page.getByRole("button", { name: "Aceptar y continuar" }).click();
-  await expect(page.getByText("Consentimiento registrado.")).toBeVisible();
+  // Once consent is stored the page re-renders without the consent card and offers the upload.
+  await expect(page.getByRole("button", { name: "Seleccionar PDF" })).toBeVisible();
   await page.reload();
   await expect(page.getByRole("button", { name: "Aceptar y continuar" })).toHaveCount(0);
   await logout(page);

@@ -20,10 +20,19 @@ import { loginSchema, recoverySchema, resetSchema } from "./schemas";
 
 const MINUTE = 60_000;
 
+function limit(name: string, fallback: number): number {
+  const value = Number(process.env[name]);
+  return Number.isInteger(value) && value > 0 ? value : fallback;
+}
+
 async function allowed(scope: string, email: string): Promise<boolean> {
   const ip = await clientIp();
-  const byIp = consume(`${scope}:ip:${ip}`, 10, MINUTE);
-  const byEmail = consume(`${scope}:email:${email.toLowerCase()}`, 5, 15 * MINUTE);
+  const byIp = consume(`${scope}:ip:${ip}`, limit("AUTH_RATE_LIMIT_PER_IP", 10), MINUTE);
+  const byEmail = consume(
+    `${scope}:email:${email.toLowerCase()}`,
+    limit("AUTH_RATE_LIMIT_PER_EMAIL", 5),
+    15 * MINUTE,
+  );
   return byIp && byEmail;
 }
 

@@ -8,3 +8,4 @@ Ideas recorded here are **not** implemented in the MVP (CLAUDE.md section 3).
 - Full Annex A coverage and all 56 CIS IG1 safeguards.
 - Antivirus scanning behind the `FileScanner` extension point.
 - Multi-language UI.
+- Run PDF inspection/extraction in a separate process with OS memory limits (stronger sandbox than thread + timeout).
