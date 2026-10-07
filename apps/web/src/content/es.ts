@@ -316,3 +316,66 @@ export const table = {
   next: "Siguiente",
   pagination: "Paginación",
 } as const;
+
+export const evaluations = {
+  listTitle: "Mis evaluaciones",
+  listDescription: "Autoevaluaciones iniciales de tu empresa.",
+  adminTitle: "Evaluaciones",
+  adminDescription: "Todas las evaluaciones del piloto y su revisor asignado.",
+  reviewerTitle: "Evaluaciones asignadas",
+  reviewerDescription: "Evaluaciones que te asignaron para revisión humana.",
+  newTitle: "Nueva evaluación",
+  newDescription:
+    "Ponle un nombre que te ayude a reconocerla, por ejemplo «Autoevaluación inicial 2026».",
+  titleLabel: "Nombre de la evaluación",
+  create: "Crear evaluación",
+  creating: "Creando…",
+  titleError: "El nombre debe tener entre 3 y 200 caracteres.",
+  empty: "Aún no tienes evaluaciones. Crea la primera para cargar tus documentos.",
+  emptyReviewer: "No tienes evaluaciones asignadas por ahora.",
+  emptyAdmin: "Aún no hay evaluaciones en el piloto.",
+  columns: {
+    title: "Evaluación",
+    company: "Empresa",
+    status: "Estado",
+    reviewer: "Revisor",
+    created: "Creada",
+    open: "Abrir",
+  },
+  statusFilter: "Filtrar por estado",
+  filter: "Filtrar",
+  unassigned: "Sin asignar",
+  assign: "Asignar",
+  assignLabel: (title: string) => `Revisor para ${title}`,
+  assigned: "Revisor asignado.",
+  progressTitle: "Progreso",
+  stepStates: {
+    DONE: "completado",
+    CURRENT: "en curso",
+    FAILED: "con error",
+    PENDING: "pendiente",
+  },
+  rejectionTitle: "La evaluación fue rechazada por el revisor",
+  rejectionHelp: "Revisa el motivo, carga un PDF actualizado y vuelve a iniciar el análisis.",
+  failureTitle: "No pudimos completar el procesamiento",
+  failureReasons: {
+    EXTRACTION_ERROR:
+      "No pudimos leer el contenido del documento. El equipo revisará el caso y podrá reintentar el procesamiento.",
+    ANALYSIS_ERROR:
+      "El análisis no pudo completarse. El equipo revisará el caso y podrá reintentarlo.",
+    INTERRUPTED: "El procesamiento se interrumpió. El equipo podrá reintentarlo.",
+    QUOTA_EXCEEDED:
+      "Se alcanzó el límite de uso del servicio de análisis. El equipo revisará el caso.",
+  },
+} as const;
+
+export const consentCopy = {
+  title: "Consentimiento",
+  description: "Antes de cargar documentos, lee y acepta las condiciones de tratamiento.",
+  checkbox: "He leído y acepto las condiciones anteriores.",
+  submit: "Aceptar y continuar",
+  submitting: "Guardando…",
+  required: "Debes aceptar las condiciones para continuar.",
+  accepted: "Consentimiento registrado.",
+  version: (version: string) => `Versión del texto: ${version}`,
+} as const;

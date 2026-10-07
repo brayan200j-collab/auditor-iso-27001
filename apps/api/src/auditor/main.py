@@ -12,6 +12,7 @@ from auditor.audit.api.router import router as audit_router
 from auditor.companies.api.router import router as companies_router
 from auditor.config import Settings, load_settings
 from auditor.container import AppContainer
+from auditor.evaluations.api.router import router as evaluations_router
 from auditor.identity.api.router import router as identity_router
 from auditor.identity.api.users_router import router as users_router
 from auditor.shared.api.dependencies import get_resolver
@@ -54,7 +55,13 @@ def create_app(settings: Settings | None = None, container: AppContainer | None 
 
     register_error_handlers(app)
     app.include_router(build_health_router(container.is_ready))
-    for router in (identity_router, users_router, companies_router, audit_router):
+    for router in (
+        identity_router,
+        users_router,
+        companies_router,
+        evaluations_router,
+        audit_router,
+    ):
         app.include_router(router)
     install_openapi(app)
 

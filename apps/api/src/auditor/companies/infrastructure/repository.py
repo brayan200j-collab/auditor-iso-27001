@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
 from datetime import UTC, datetime
 from uuid import UUID
 
@@ -50,6 +51,15 @@ class SqlCompanyRepository:
 
     async def exists(self, company_id: UUID) -> bool:
         return await self.name_of(company_id) is not None
+
+    async def names_of(self, ids: Iterable[UUID]) -> dict[UUID, str]:
+        wanted = set(ids)
+        if not wanted:
+            return {}
+        rows = await self._session.execute(
+            select(CompanyModel.id, CompanyModel.name).where(CompanyModel.id.in_(wanted))
+        )
+        return dict(rows.all())
 
     async def list(self, search: str | None, page: PageRequest) -> Page[Company]:
         query = select(CompanyModel)

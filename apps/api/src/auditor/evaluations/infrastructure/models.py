@@ -27,6 +27,7 @@ class EvaluationModel(Base):
     current_run_number: Mapped[int] = mapped_column(Integer, server_default="1")
     rejection_reason: Mapped[str | None] = mapped_column(Text)
     failure_reason: Mapped[str | None] = mapped_column(String(60))
+    failed_stage: Mapped[str | None] = mapped_column(String(20))
     submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     approved_by: Mapped[UUID | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))

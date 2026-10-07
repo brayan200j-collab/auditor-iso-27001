@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
 from datetime import UTC, datetime
 from uuid import UUID
 
@@ -67,6 +68,21 @@ class SqlUserRepository:
         )
         items = [_to_user(model, company_id) for model, company_id in rows.all()]
         return Page(items=items, total=total or 0, page=page.page, page_size=page.page_size)
+
+    async def names_of(self, ids: Iterable[UUID]) -> dict[UUID, str]:
+        wanted = set(ids)
+        if not wanted:
+            return {}
+        rows = await self._session.execute(
+            select(UserModel.id, UserModel.full_name).where(UserModel.id.in_(wanted))
+        )
+        return dict(rows.all())
+
+    async def is_active_reviewer(self, user_id: UUID) -> bool:
+        role = await self._session.scalar(
+            select(UserModel.role).where(UserModel.id == user_id, UserModel.active.is_(True))
+        )
+        return role == Role.REVIEWER
 
     async def add(self, user: NewUser) -> User:
         self._session.add(

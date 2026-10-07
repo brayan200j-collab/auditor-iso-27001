@@ -139,3 +139,15 @@ Format: context · decision · alternatives · reason. Newest last.
 - **Decision:** S03 delivers companies and users; the assignment endpoint and UI are delivered and tested in S04.
 - **Alternatives:** an assignment table without evaluations.
 - **Reason:** vertical slices must be testable end to end.
+
+## D-024 · Evaluation data scope and the public access service
+- **Context:** section 8 requires company-scoped repositories and a generic 404 (with an audit entry) for cross-company access.
+- **Decision:** evaluation queries require a `DataScope` (all for admins, own company for SMEs, assigned for reviewers) derived from the permission matrix. Other modules load evaluations only through `EvaluationAccess.require` (`auditor.evaluations.public`), which audits `ACCESS_DENIED` when the evaluation exists outside the scope and always answers 404. Lifecycle changes go through `EvaluationLifecycle`, which persists with compare-and-set on the status (concurrent transitions get 409).
+- **Alternatives:** per-module ownership checks; database RLS policies for the backend role (the backend bypasses RLS).
+- **Reason:** one authorization path that tests can exercise exhaustively.
+
+## D-025 · Multiple PDFs per evaluation and the state machine extensions
+- **Context:** section 11 lists the main states; uploading and deleting documents also move an evaluation between DRAFT and RECEIVED, and a rejected evaluation reopens with a new analysis run.
+- **Decision:** up to `MAX_DOCUMENTS_PER_EVALUATION` (5) PDFs per run. Extra transitions: RECEIVED→RECEIVED (another upload), RECEIVED→DRAFT (last document deleted), REJECTED→RECEIVED (new PDF opens run N+1), FAILED→EXTRACTING/ANALYZING (retry from the last successful step). `failed_stage` records where a run failed so the timeline can show it.
+- **Alternatives:** single document per evaluation.
+- **Reason:** SMEs usually keep policies in several short files; the report lists "documentos analizados".

@@ -49,3 +49,28 @@ async def create_user(
         user = await repository.update(user.id, active=False)
     await session.commit()
     return user
+
+
+async def create_evaluation(
+    session: AsyncSession,
+    company_id: UUID,
+    created_by: UUID,
+    *,
+    status: str = "DRAFT",
+    reviewer_id: UUID | None = None,
+    title: str = "Evaluación sintética",
+) -> UUID:
+    from auditor.evaluations.infrastructure.models import AnalysisRunModel, EvaluationModel
+
+    evaluation = EvaluationModel(
+        company_id=company_id,
+        created_by=created_by,
+        reviewer_id=reviewer_id,
+        title=title,
+        status=status,
+    )
+    session.add(evaluation)
+    await session.flush()
+    session.add(AnalysisRunModel(evaluation_id=evaluation.id, run_number=1))
+    await session.commit()
+    return evaluation.id

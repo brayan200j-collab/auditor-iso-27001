@@ -11,6 +11,7 @@ from typing import Any, cast
 import httpx
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
+import auditor.persistence  # noqa: F401 - registers every ORM model (foreign keys across modules)
 from auditor.audit.application.list_audit_logs import ListAuditLogs
 from auditor.audit.infrastructure.audit_log_reader import SqlAuditLogReader
 from auditor.audit.infrastructure.sql_audit_logger import SqlAuditLogger
@@ -20,6 +21,19 @@ from auditor.companies.application.list_companies import ListCompanies
 from auditor.companies.application.update_company import UpdateCompany
 from auditor.companies.infrastructure.repository import SqlCompanyRepository
 from auditor.config import Settings
+from auditor.evaluations.application.access import EvaluationAccess
+from auditor.evaluations.application.assign_reviewer import AssignReviewer
+from auditor.evaluations.application.create_evaluation import CreateEvaluation
+from auditor.evaluations.application.get_evaluation import GetEvaluation
+from auditor.evaluations.application.get_status import GetEvaluationStatus
+from auditor.evaluations.application.give_consent import GiveConsent
+from auditor.evaluations.application.lifecycle import EvaluationLifecycle
+from auditor.evaluations.application.list_evaluations import ListEvaluations
+from auditor.evaluations.infrastructure.repositories import (
+    SqlAnalysisRunRepository,
+    SqlConsentRepository,
+    SqlEvaluationRepository,
+)
 from auditor.identity.application.create_user import CreateUser
 from auditor.identity.application.get_profile import GetProfile
 from auditor.identity.application.get_user import GetUser
@@ -132,6 +146,26 @@ class RequestScope:
     def companies(self) -> SqlCompanyRepository:
         return SqlCompanyRepository(self.session)
 
+    @cached_property
+    def evaluations(self) -> SqlEvaluationRepository:
+        return SqlEvaluationRepository(self.session)
+
+    @cached_property
+    def runs(self) -> SqlAnalysisRunRepository:
+        return SqlAnalysisRunRepository(self.session)
+
+    @cached_property
+    def consents(self) -> SqlConsentRepository:
+        return SqlConsentRepository(self.session)
+
+    @cached_property
+    def evaluation_access(self) -> EvaluationAccess:
+        return EvaluationAccess(self.evaluations, self.audit)
+
+    @cached_property
+    def lifecycle(self) -> EvaluationLifecycle:
+        return EvaluationLifecycle(self.evaluations, self.runs, self.audit, self.container.clock)
+
     def resolve[T](self, use_case: type[T]) -> T:
         factory = self.container.factories.get(use_case)
         if factory is None:
@@ -159,4 +193,16 @@ def build_factories() -> dict[type[Any], Factory]:
         ),
         ListUsers: lambda s: ListUsers(s.users),
         GetUser: lambda s: GetUser(s.users),
+        CreateEvaluation: lambda s: CreateEvaluation(
+            s.evaluations, s.runs, s.audit, s.uow, s.settings.max_evaluations_per_company
+        ),
+        ListEvaluations: lambda s: ListEvaluations(s.evaluations, s.companies, s.users),
+        GetEvaluation: lambda s: GetEvaluation(
+            s.evaluation_access, s.runs, s.consents, s.companies, s.users
+        ),
+        GetEvaluationStatus: lambda s: GetEvaluationStatus(s.evaluation_access),
+        GiveConsent: lambda s: GiveConsent(s.evaluation_access, s.consents, s.audit, s.uow),
+        AssignReviewer: lambda s: AssignReviewer(
+            s.evaluation_access, s.evaluations, s.users, s.audit, s.uow
+        ),
     }
