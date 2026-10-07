@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import secrets
 from collections.abc import AsyncIterator, Callable
 from contextlib import asynccontextmanager
@@ -13,10 +14,18 @@ import httpx
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
 import auditor.persistence  # noqa: F401 - registers every ORM model (foreign keys across modules)
+from auditor.analysis.application.evaluate_criterion import CriterionEvaluator, EngineLimits
 from auditor.analysis.application.mark_processing_failed import MarkProcessingFailed
+from auditor.analysis.application.ports import LLMProvider
 from auditor.analysis.application.retry_processing import RetryProcessing
+from auditor.analysis.application.retrying_provider import RetryingProvider
 from auditor.analysis.application.run_extraction_step import RunExtractionStep
 from auditor.analysis.application.start_analysis import StartAnalysis
+from auditor.analysis.infrastructure.evidence_search import DocumentEvidenceSearch
+from auditor.analysis.infrastructure.fake_provider import FakeLLMProvider
+from auditor.analysis.infrastructure.groq_provider import GroqProvider
+from auditor.analysis.infrastructure.prompt_templates import FilePromptTemplates
+from auditor.analysis.infrastructure.repositories import SqlFindingRepository, SqlLlmCallRecorder
 from auditor.audit.application.list_audit_logs import ListAuditLogs
 from auditor.audit.infrastructure.audit_log_reader import SqlAuditLogReader
 from auditor.audit.infrastructure.sql_audit_logger import SqlAuditLogger
@@ -37,6 +46,7 @@ from auditor.documents.application.extract_documents import ExtractRunDocuments
 from auditor.documents.application.list_documents import ListDocuments
 from auditor.documents.application.ports import FileScanner, NoopFileScanner
 from auditor.documents.application.upload_document import UploadDocument, UploadLimits
+from auditor.documents.infrastructure.chunk_search import FtsChunkSearch
 from auditor.documents.infrastructure.pdf_extractor import PyMuPdfExtractor
 from auditor.documents.infrastructure.pdf_inspector import PyMuPdfInspector
 from auditor.documents.infrastructure.repository import SqlChunkRepository, SqlDocumentRepository
@@ -108,6 +118,20 @@ def build_storage(settings: Settings, http: httpx.AsyncClient) -> ObjectStorage:
     )
 
 
+def build_llm(settings: Settings, http: httpx.AsyncClient) -> LLMProvider:
+    if settings.llm_provider == "groq" and settings.llm_api_key is not None:
+        return GroqProvider(
+            settings.llm_api_key.get_secret_value(),
+            settings.llm_model,
+            http,
+            timeout_seconds=settings.llm_timeout_seconds,
+            reasoning_effort=settings.llm_reasoning_effort or None,
+        )
+    if settings.llm_provider == "fake":
+        return FakeLLMProvider()
+    raise RuntimeError(f"LLM provider '{settings.llm_provider}' is not available")
+
+
 @dataclass
 class AppContainer:
     settings: Settings
@@ -121,6 +145,9 @@ class AppContainer:
     extractor: PyMuPdfExtractor
     scanner: FileScanner
     runner: AsyncioJobRunner
+    llm_backend: LLMProvider
+    llm: RetryingProvider
+    prompts: FilePromptTemplates
     clock: SystemClock = field(default_factory=SystemClock)
     factories: dict[type[Any], Factory] = field(default_factory=dict)
 
@@ -137,6 +164,7 @@ class AppContainer:
         runner = AsyncioJobRunner(
             session_factory, clock, stale_after_seconds=settings.job_running_timeout_seconds
         )
+        llm_backend = build_llm(settings, http)
         container = cls(
             settings=settings,
             engine=engine,
@@ -151,6 +179,14 @@ class AppContainer:
             extractor=PyMuPdfExtractor(settings.max_pdf_pages, settings.extraction_timeout_seconds),
             scanner=NoopFileScanner(),
             runner=runner,
+            llm_backend=llm_backend,
+            llm=RetryingProvider(
+                llm_backend,
+                max_retries=settings.llm_max_retries,
+                max_backoff_seconds=settings.llm_backoff_max_seconds,
+                semaphore=asyncio.Semaphore(settings.llm_max_concurrency),
+            ),
+            prompts=FilePromptTemplates(settings.prompts_dir),
             clock=clock,
             factories=build_factories(),
         )
@@ -241,6 +277,14 @@ class RequestScope:
     @cached_property
     def jobs(self) -> SqlJobRepository:
         return SqlJobRepository(self.session)
+
+    @cached_property
+    def findings(self) -> SqlFindingRepository:
+        return SqlFindingRepository(self.session)
+
+    @cached_property
+    def llm_calls(self) -> SqlLlmCallRecorder:
+        return SqlLlmCallRecorder(self.session, self.container.session_factory)
 
     @cached_property
     def checklists(self) -> SqlChecklistRepository:
@@ -355,6 +399,17 @@ def build_factories() -> dict[type[Any], Factory]:
             s.settings.job_max_attempts,
         ),
         MarkProcessingFailed: lambda s: MarkProcessingFailed(s.lifecycle, s.uow),
+        CriterionEvaluator: lambda s: CriterionEvaluator(
+            DocumentEvidenceSearch(FtsChunkSearch(s.session)),
+            s.container.llm,
+            s.container.prompts,
+            s.llm_calls,
+            EngineLimits(
+                top_k=s.settings.evidence_top_k,
+                max_tokens_per_call=s.settings.max_tokens_per_call,
+                max_calls_per_evaluation=s.settings.max_llm_calls_per_evaluation,
+            ),
+        ),
         ListChecklistVersions: lambda s: ListChecklistVersions(s.checklists),
         GetChecklistVersion: lambda s: GetChecklistVersion(s.checklists),
         CreateChecklistDraft: lambda s: CreateChecklistDraft(s.checklists, s.audit, s.uow),

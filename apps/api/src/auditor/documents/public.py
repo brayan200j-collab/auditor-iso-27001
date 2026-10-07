@@ -6,9 +6,11 @@ from auditor.documents.application.extract_documents import (
     ExtractRunDocuments,
 )
 from auditor.documents.application.ports import DocumentRepository
+from auditor.documents.domain.search import ChunkHit
 
 __all__ = [
     "EXTRACTION_ERROR",
+    "ChunkHit",
     "DocumentRepository",
     "ExtractRunDocuments",
     "ExtractionSummary",

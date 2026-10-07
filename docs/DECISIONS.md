@@ -175,3 +175,21 @@ Format: context · decision · alternatives · reason. Newest last.
 - **Decision:** chunks never cross pages; numbered headings are detected per line and start a new chunk (their text becomes the chunk's `section`); sentences are packed up to ~900 characters (hard cap 1200) with ~150 characters of overlap. PostgreSQL computes the `spanish` tsvector in a generated column.
 - **Alternatives:** fixed-size windows; embeddings (out of scope).
 - **Reason:** predictable, testable (property test), and good enough for keyword FTS.
+
+## D-030 · Groq adapter verified against the official documentation (2026-10-07)
+- **Context:** section 4 asks to confirm the model name, structured output support and limits before implementing.
+- **Decision:** `openai/gpt-oss-120b` supports `response_format.json_schema` with `strict: true` (constrained decoding; every property required and `additionalProperties: false`, so the Pydantic schema is inlined and closed by `strict_json_schema()`). Free tier: 30 RPM, 1,000 RPD, 8,000 TPM, 200,000 TPD; 429 responses carry `retry-after`. Pydantic validation still runs on every answer, with one retry that includes the validation error. Defaults: `LLM_MAX_CONCURRENCY=2`, `MAX_TOKENS_PER_CALL=2000`, `reasoning_effort=low` (configurable through `LLM_REASONING_EFFORT`).
+- **Alternatives:** JSON mode without schema (fallback not needed).
+- **Reason:** guaranteed schema conformance. With ~1,500 tokens per criterion, a 30-criterion evaluation takes several minutes on the free tier (about 4 evaluations per day); enough for a 2–3 SME pilot. Not verified with a real key in this environment.
+
+## D-031 · Data minimization and citation design
+- **Context:** section 9.1: send the minimum, never show invented citations.
+- **Decision:** the model receives at most `EVIDENCE_TOP_K` delimited fragments, documents are named "Documento N" (never the file name), and no company or user data. The model cites by fragment id; document and page are taken from the real fragment and the quote is verified against its text (case, whitespace and typographic quotes normalized, 15–300 characters). Unknown fragment ids are discarded and flagged; unverified quotes are kept but flagged. Document text that tries to open or close the delimiters is neutralized. `llm_calls.structured_result` stores status, confidence and fragment ids, never quotes.
+- **Alternatives:** let the model report document and page.
+- **Reason:** traceability cannot depend on the model's honesty.
+
+## D-032 · Findings without a model call and the deterministic test double
+- **Context:** criteria without relevant fragments are classified without the AI; tests and CI never call a real provider.
+- **Decision:** without fragments the finding is NO_DOCUMENTARY_EVIDENCE with `confidence = NULL` (no model estimated it) and checklist defaults for priority/risk/effort. `FakeLLMProvider` applies transparent keyword rules on the most relevant fragment (hedges such as "en elaboración" ⇒ PARTIAL) and quotes real sentences; a golden set over the synthetic policy pins its behavior.
+- **Alternatives:** random or canned fake answers.
+- **Reason:** deterministic, explainable local runs and E2E tests.

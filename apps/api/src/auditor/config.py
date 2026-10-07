@@ -64,6 +64,7 @@ class Settings(BaseSettings):
     )
     llm_max_concurrency: int = Field(default=2, ge=1, le=16)
     llm_timeout_seconds: float = Field(default=60.0, gt=0)
+    llm_reasoning_effort: str = "low"
     llm_max_retries: int = Field(default=4, ge=0, le=8)
     llm_backoff_max_seconds: float = Field(default=30.0, gt=0)
     max_tokens_per_call: int = Field(default=2000, ge=256, le=16000)
