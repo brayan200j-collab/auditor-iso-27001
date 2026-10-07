@@ -1,0 +1,14 @@
+{
+  "name": "auditor-virtual",
+  "private": true,
+  "packageManager": "pnpm@12.10.1",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "supabase": "supabase"
+  },
+  "devDependencies": {
+    "supabase": "2.120.0"
+  }
+}

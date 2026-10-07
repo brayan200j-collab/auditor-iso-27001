@@ -1,0 +1,761 @@
+[importlinter]
+root_package = auditor
+include_external_packages = True
+
+[importlinter:contract:layers]
+name = Each module follows api|infrastructure -> application -> domain
+type = layers
+layers =
+    api | infrastructure
+    application
+    domain
+containers =
+    auditor.shared
+    auditor.identity
+    auditor.companies
+    auditor.evaluations
+    auditor.documents
+    auditor.checklist
+    auditor.analysis
+    auditor.review
+    auditor.reports
+    auditor.feedback
+    auditor.audit
+    auditor.metrics
+    auditor.retention
+
+[importlinter:contract:domain-pure]
+name = Domain layers import no frameworks or infrastructure
+type = forbidden
+source_modules =
+    auditor.shared.domain
+    auditor.identity.domain
+    auditor.companies.domain
+    auditor.evaluations.domain
+    auditor.documents.domain
+    auditor.checklist.domain
+    auditor.analysis.domain
+    auditor.review.domain
+    auditor.reports.domain
+    auditor.feedback.domain
+    auditor.audit.domain
+    auditor.metrics.domain
+    auditor.retention.domain
+forbidden_modules =
+    fastapi
+    starlette
+    sqlalchemy
+    pydantic
+    pydantic_settings
+    httpx
+    fitz
+    pymupdf
+    weasyprint
+    jinja2
+    psycopg
+    alembic
+    structlog
+    jwt
+    slowapi
+    yaml
+    auditor.config
+    auditor.container
+    auditor.main
+
+[importlinter:contract:application-framework-free]
+name = Application layers never import SQLAlchemy, FastAPI or adapters
+type = forbidden
+source_modules =
+    auditor.shared.application
+    auditor.identity.application
+    auditor.companies.application
+    auditor.evaluations.application
+    auditor.documents.application
+    auditor.checklist.application
+    auditor.analysis.application
+    auditor.review.application
+    auditor.reports.application
+    auditor.feedback.application
+    auditor.audit.application
+    auditor.metrics.application
+    auditor.retention.application
+forbidden_modules =
+    fastapi
+    starlette
+    sqlalchemy
+    httpx
+    fitz
+    pymupdf
+    weasyprint
+    jinja2
+    psycopg
+    alembic
+    jwt
+    slowapi
+    auditor.container
+    auditor.main
+
+[importlinter:contract:api-no-sql]
+name = API layers contain no SQL and do not reach infrastructure
+type = forbidden
+source_modules =
+    auditor.shared.api
+    auditor.identity.api
+    auditor.companies.api
+    auditor.evaluations.api
+    auditor.documents.api
+    auditor.checklist.api
+    auditor.analysis.api
+    auditor.review.api
+    auditor.reports.api
+    auditor.feedback.api
+    auditor.audit.api
+    auditor.metrics.api
+    auditor.retention.api
+forbidden_modules =
+    sqlalchemy
+    psycopg
+    auditor.container
+
+[importlinter:contract:shared-independent]
+name = Shared kernel does not depend on feature modules
+type = forbidden
+source_modules =
+    auditor.shared
+forbidden_modules =
+    auditor.identity
+    auditor.companies
+    auditor.evaluations
+    auditor.documents
+    auditor.checklist
+    auditor.analysis
+    auditor.review
+    auditor.reports
+    auditor.feedback
+    auditor.audit
+    auditor.metrics
+    auditor.retention
+
+[importlinter:contract:public-only-identity]
+name = identity uses other modules only through their public interface
+type = forbidden
+source_modules =
+    auditor.identity
+forbidden_modules =
+    auditor.companies.domain
+    auditor.companies.application
+    auditor.companies.infrastructure
+    auditor.companies.api
+    auditor.evaluations.domain
+    auditor.evaluations.application
+    auditor.evaluations.infrastructure
+    auditor.evaluations.api
+    auditor.documents.domain
+    auditor.documents.application
+    auditor.documents.infrastructure
+    auditor.documents.api
+    auditor.checklist.domain
+    auditor.checklist.application
+    auditor.checklist.infrastructure
+    auditor.checklist.api
+    auditor.analysis.domain
+    auditor.analysis.application
+    auditor.analysis.infrastructure
+    auditor.analysis.api
+    auditor.review.domain
+    auditor.review.application
+    auditor.review.infrastructure
+    auditor.review.api
+    auditor.reports.domain
+    auditor.reports.application
+    auditor.reports.infrastructure
+    auditor.reports.api
+    auditor.feedback.domain
+    auditor.feedback.application
+    auditor.feedback.infrastructure
+    auditor.feedback.api
+    auditor.audit.domain
+    auditor.audit.application
+    auditor.audit.infrastructure
+    auditor.audit.api
+    auditor.metrics.domain
+    auditor.metrics.application
+    auditor.metrics.infrastructure
+    auditor.metrics.api
+    auditor.retention.domain
+    auditor.retention.application
+    auditor.retention.infrastructure
+    auditor.retention.api
+allow_indirect_imports = True
+
+[importlinter:contract:public-only-companies]
+name = companies uses other modules only through their public interface
+type = forbidden
+source_modules =
+    auditor.companies
+forbidden_modules =
+    auditor.identity.domain
+    auditor.identity.application
+    auditor.identity.infrastructure
+    auditor.identity.api
+    auditor.evaluations.domain
+    auditor.evaluations.application
+    auditor.evaluations.infrastructure
+    auditor.evaluations.api
+    auditor.documents.domain
+    auditor.documents.application
+    auditor.documents.infrastructure
+    auditor.documents.api
+    auditor.checklist.domain
+    auditor.checklist.application
+    auditor.checklist.infrastructure
+    auditor.checklist.api
+    auditor.analysis.domain
+    auditor.analysis.application
+    auditor.analysis.infrastructure
+    auditor.analysis.api
+    auditor.review.domain
+    auditor.review.application
+    auditor.review.infrastructure
+    auditor.review.api
+    auditor.reports.domain
+    auditor.reports.application
+    auditor.reports.infrastructure
+    auditor.reports.api
+    auditor.feedback.domain
+    auditor.feedback.application
+    auditor.feedback.infrastructure
+    auditor.feedback.api
+    auditor.audit.domain
+    auditor.audit.application
+    auditor.audit.infrastructure
+    auditor.audit.api
+    auditor.metrics.domain
+    auditor.metrics.application
+    auditor.metrics.infrastructure
+    auditor.metrics.api
+    auditor.retention.domain
+    auditor.retention.application
+    auditor.retention.infrastructure
+    auditor.retention.api
+allow_indirect_imports = True
+
+[importlinter:contract:public-only-evaluations]
+name = evaluations uses other modules only through their public interface
+type = forbidden
+source_modules =
+    auditor.evaluations
+forbidden_modules =
+    auditor.identity.domain
+    auditor.identity.application
+    auditor.identity.infrastructure
+    auditor.identity.api
+    auditor.companies.domain
+    auditor.companies.application
+    auditor.companies.infrastructure
+    auditor.companies.api
+    auditor.documents.domain
+    auditor.documents.application
+    auditor.documents.infrastructure
+    auditor.documents.api
+    auditor.checklist.domain
+    auditor.checklist.application
+    auditor.checklist.infrastructure
+    auditor.checklist.api
+    auditor.analysis.domain
+    auditor.analysis.application
+    auditor.analysis.infrastructure
+    auditor.analysis.api
+    auditor.review.domain
+    auditor.review.application
+    auditor.review.infrastructure
+    auditor.review.api
+    auditor.reports.domain
+    auditor.reports.application
+    auditor.reports.infrastructure
+    auditor.reports.api
+    auditor.feedback.domain
+    auditor.feedback.application
+    auditor.feedback.infrastructure
+    auditor.feedback.api
+    auditor.audit.domain
+    auditor.audit.application
+    auditor.audit.infrastructure
+    auditor.audit.api
+    auditor.metrics.domain
+    auditor.metrics.application
+    auditor.metrics.infrastructure
+    auditor.metrics.api
+    auditor.retention.domain
+    auditor.retention.application
+    auditor.retention.infrastructure
+    auditor.retention.api
+allow_indirect_imports = True
+
+[importlinter:contract:public-only-documents]
+name = documents uses other modules only through their public interface
+type = forbidden
+source_modules =
+    auditor.documents
+forbidden_modules =
+    auditor.identity.domain
+    auditor.identity.application
+    auditor.identity.infrastructure
+    auditor.identity.api
+    auditor.companies.domain
+    auditor.companies.application
+    auditor.companies.infrastructure
+    auditor.companies.api
+    auditor.evaluations.domain
+    auditor.evaluations.application
+    auditor.evaluations.infrastructure
+    auditor.evaluations.api
+    auditor.checklist.domain
+    auditor.checklist.application
+    auditor.checklist.infrastructure
+    auditor.checklist.api
+    auditor.analysis.domain
+    auditor.analysis.application
+    auditor.analysis.infrastructure
+    auditor.analysis.api
+    auditor.review.domain
+    auditor.review.application
+    auditor.review.infrastructure
+    auditor.review.api
+    auditor.reports.domain
+    auditor.reports.application
+    auditor.reports.infrastructure
+    auditor.reports.api
+    auditor.feedback.domain
+    auditor.feedback.application
+    auditor.feedback.infrastructure
+    auditor.feedback.api
+    auditor.audit.domain
+    auditor.audit.application
+    auditor.audit.infrastructure
+    auditor.audit.api
+    auditor.metrics.domain
+    auditor.metrics.application
+    auditor.metrics.infrastructure
+    auditor.metrics.api
+    auditor.retention.domain
+    auditor.retention.application
+    auditor.retention.infrastructure
+    auditor.retention.api
+allow_indirect_imports = True
+
+[importlinter:contract:public-only-checklist]
+name = checklist uses other modules only through their public interface
+type = forbidden
+source_modules =
+    auditor.checklist
+forbidden_modules =
+    auditor.identity.domain
+    auditor.identity.application
+    auditor.identity.infrastructure
+    auditor.identity.api
+    auditor.companies.domain
+    auditor.companies.application
+    auditor.companies.infrastructure
+    auditor.companies.api
+    auditor.evaluations.domain
+    auditor.evaluations.application
+    auditor.evaluations.infrastructure
+    auditor.evaluations.api
+    auditor.documents.domain
+    auditor.documents.application
+    auditor.documents.infrastructure
+    auditor.documents.api
+    auditor.analysis.domain
+    auditor.analysis.application
+    auditor.analysis.infrastructure
+    auditor.analysis.api
+    auditor.review.domain
+    auditor.review.application
+    auditor.review.infrastructure
+    auditor.review.api
+    auditor.reports.domain
+    auditor.reports.application
+    auditor.reports.infrastructure
+    auditor.reports.api
+    auditor.feedback.domain
+    auditor.feedback.application
+    auditor.feedback.infrastructure
+    auditor.feedback.api
+    auditor.audit.domain
+    auditor.audit.application
+    auditor.audit.infrastructure
+    auditor.audit.api
+    auditor.metrics.domain
+    auditor.metrics.application
+    auditor.metrics.infrastructure
+    auditor.metrics.api
+    auditor.retention.domain
+    auditor.retention.application
+    auditor.retention.infrastructure
+    auditor.retention.api
+allow_indirect_imports = True
+
+[importlinter:contract:public-only-analysis]
+name = analysis uses other modules only through their public interface
+type = forbidden
+source_modules =
+    auditor.analysis
+forbidden_modules =
+    auditor.identity.domain
+    auditor.identity.application
+    auditor.identity.infrastructure
+    auditor.identity.api
+    auditor.companies.domain
+    auditor.companies.application
+    auditor.companies.infrastructure
+    auditor.companies.api
+    auditor.evaluations.domain
+    auditor.evaluations.application
+    auditor.evaluations.infrastructure
+    auditor.evaluations.api
+    auditor.documents.domain
+    auditor.documents.application
+    auditor.documents.infrastructure
+    auditor.documents.api
+    auditor.checklist.domain
+    auditor.checklist.application
+    auditor.checklist.infrastructure
+    auditor.checklist.api
+    auditor.review.domain
+    auditor.review.application
+    auditor.review.infrastructure
+    auditor.review.api
+    auditor.reports.domain
+    auditor.reports.application
+    auditor.reports.infrastructure
+    auditor.reports.api
+    auditor.feedback.domain
+    auditor.feedback.application
+    auditor.feedback.infrastructure
+    auditor.feedback.api
+    auditor.audit.domain
+    auditor.audit.application
+    auditor.audit.infrastructure
+    auditor.audit.api
+    auditor.metrics.domain
+    auditor.metrics.application
+    auditor.metrics.infrastructure
+    auditor.metrics.api
+    auditor.retention.domain
+    auditor.retention.application
+    auditor.retention.infrastructure
+    auditor.retention.api
+allow_indirect_imports = True
+
+[importlinter:contract:public-only-review]
+name = review uses other modules only through their public interface
+type = forbidden
+source_modules =
+    auditor.review
+forbidden_modules =
+    auditor.identity.domain
+    auditor.identity.application
+    auditor.identity.infrastructure
+    auditor.identity.api
+    auditor.companies.domain
+    auditor.companies.application
+    auditor.companies.infrastructure
+    auditor.companies.api
+    auditor.evaluations.domain
+    auditor.evaluations.application
+    auditor.evaluations.infrastructure
+    auditor.evaluations.api
+    auditor.documents.domain
+    auditor.documents.application
+    auditor.documents.infrastructure
+    auditor.documents.api
+    auditor.checklist.domain
+    auditor.checklist.application
+    auditor.checklist.infrastructure
+    auditor.checklist.api
+    auditor.analysis.domain
+    auditor.analysis.application
+    auditor.analysis.infrastructure
+    auditor.analysis.api
+    auditor.reports.domain
+    auditor.reports.application
+    auditor.reports.infrastructure
+    auditor.reports.api
+    auditor.feedback.domain
+    auditor.feedback.application
+    auditor.feedback.infrastructure
+    auditor.feedback.api
+    auditor.audit.domain
+    auditor.audit.application
+    auditor.audit.infrastructure
+    auditor.audit.api
+    auditor.metrics.domain
+    auditor.metrics.application
+    auditor.metrics.infrastructure
+    auditor.metrics.api
+    auditor.retention.domain
+    auditor.retention.application
+    auditor.retention.infrastructure
+    auditor.retention.api
+allow_indirect_imports = True
+
+[importlinter:contract:public-only-reports]
+name = reports uses other modules only through their public interface
+type = forbidden
+source_modules =
+    auditor.reports
+forbidden_modules =
+    auditor.identity.domain
+    auditor.identity.application
+    auditor.identity.infrastructure
+    auditor.identity.api
+    auditor.companies.domain
+    auditor.companies.application
+    auditor.companies.infrastructure
+    auditor.companies.api
+    auditor.evaluations.domain
+    auditor.evaluations.application
+    auditor.evaluations.infrastructure
+    auditor.evaluations.api
+    auditor.documents.domain
+    auditor.documents.application
+    auditor.documents.infrastructure
+    auditor.documents.api
+    auditor.checklist.domain
+    auditor.checklist.application
+    auditor.checklist.infrastructure
+    auditor.checklist.api
+    auditor.analysis.domain
+    auditor.analysis.application
+    auditor.analysis.infrastructure
+    auditor.analysis.api
+    auditor.review.domain
+    auditor.review.application
+    auditor.review.infrastructure
+    auditor.review.api
+    auditor.feedback.domain
+    auditor.feedback.application
+    auditor.feedback.infrastructure
+    auditor.feedback.api
+    auditor.audit.domain
+    auditor.audit.application
+    auditor.audit.infrastructure
+    auditor.audit.api
+    auditor.metrics.domain
+    auditor.metrics.application
+    auditor.metrics.infrastructure
+    auditor.metrics.api
+    auditor.retention.domain
+    auditor.retention.application
+    auditor.retention.infrastructure
+    auditor.retention.api
+allow_indirect_imports = True
+
+[importlinter:contract:public-only-feedback]
+name = feedback uses other modules only through their public interface
+type = forbidden
+source_modules =
+    auditor.feedback
+forbidden_modules =
+    auditor.identity.domain
+    auditor.identity.application
+    auditor.identity.infrastructure
+    auditor.identity.api
+    auditor.companies.domain
+    auditor.companies.application
+    auditor.companies.infrastructure
+    auditor.companies.api
+    auditor.evaluations.domain
+    auditor.evaluations.application
+    auditor.evaluations.infrastructure
+    auditor.evaluations.api
+    auditor.documents.domain
+    auditor.documents.application
+    auditor.documents.infrastructure
+    auditor.documents.api
+    auditor.checklist.domain
+    auditor.checklist.application
+    auditor.checklist.infrastructure
+    auditor.checklist.api
+    auditor.analysis.domain
+    auditor.analysis.application
+    auditor.analysis.infrastructure
+    auditor.analysis.api
+    auditor.review.domain
+    auditor.review.application
+    auditor.review.infrastructure
+    auditor.review.api
+    auditor.reports.domain
+    auditor.reports.application
+    auditor.reports.infrastructure
+    auditor.reports.api
+    auditor.audit.domain
+    auditor.audit.application
+    auditor.audit.infrastructure
+    auditor.audit.api
+    auditor.metrics.domain
+    auditor.metrics.application
+    auditor.metrics.infrastructure
+    auditor.metrics.api
+    auditor.retention.domain
+    auditor.retention.application
+    auditor.retention.infrastructure
+    auditor.retention.api
+allow_indirect_imports = True
+
+[importlinter:contract:public-only-audit]
+name = audit uses other modules only through their public interface
+type = forbidden
+source_modules =
+    auditor.audit
+forbidden_modules =
+    auditor.identity.domain
+    auditor.identity.application
+    auditor.identity.infrastructure
+    auditor.identity.api
+    auditor.companies.domain
+    auditor.companies.application
+    auditor.companies.infrastructure
+    auditor.companies.api
+    auditor.evaluations.domain
+    auditor.evaluations.application
+    auditor.evaluations.infrastructure
+    auditor.evaluations.api
+    auditor.documents.domain
+    auditor.documents.application
+    auditor.documents.infrastructure
+    auditor.documents.api
+    auditor.checklist.domain
+    auditor.checklist.application
+    auditor.checklist.infrastructure
+    auditor.checklist.api
+    auditor.analysis.domain
+    auditor.analysis.application
+    auditor.analysis.infrastructure
+    auditor.analysis.api
+    auditor.review.domain
+    auditor.review.application
+    auditor.review.infrastructure
+    auditor.review.api
+    auditor.reports.domain
+    auditor.reports.application
+    auditor.reports.infrastructure
+    auditor.reports.api
+    auditor.feedback.domain
+    auditor.feedback.application
+    auditor.feedback.infrastructure
+    auditor.feedback.api
+    auditor.metrics.domain
+    auditor.metrics.application
+    auditor.metrics.infrastructure
+    auditor.metrics.api
+    auditor.retention.domain
+    auditor.retention.application
+    auditor.retention.infrastructure
+    auditor.retention.api
+allow_indirect_imports = True
+
+[importlinter:contract:public-only-metrics]
+name = metrics uses other modules only through their public interface
+type = forbidden
+source_modules =
+    auditor.metrics
+forbidden_modules =
+    auditor.identity.domain
+    auditor.identity.application
+    auditor.identity.infrastructure
+    auditor.identity.api
+    auditor.companies.domain
+    auditor.companies.application
+    auditor.companies.infrastructure
+    auditor.companies.api
+    auditor.evaluations.domain
+    auditor.evaluations.application
+    auditor.evaluations.infrastructure
+    auditor.evaluations.api
+    auditor.documents.domain
+    auditor.documents.application
+    auditor.documents.infrastructure
+    auditor.documents.api
+    auditor.checklist.domain
+    auditor.checklist.application
+    auditor.checklist.infrastructure
+    auditor.checklist.api
+    auditor.analysis.domain
+    auditor.analysis.application
+    auditor.analysis.infrastructure
+    auditor.analysis.api
+    auditor.review.domain
+    auditor.review.application
+    auditor.review.infrastructure
+    auditor.review.api
+    auditor.reports.domain
+    auditor.reports.application
+    auditor.reports.infrastructure
+    auditor.reports.api
+    auditor.feedback.domain
+    auditor.feedback.application
+    auditor.feedback.infrastructure
+    auditor.feedback.api
+    auditor.audit.domain
+    auditor.audit.application
+    auditor.audit.infrastructure
+    auditor.audit.api
+    auditor.retention.domain
+    auditor.retention.application
+    auditor.retention.infrastructure
+    auditor.retention.api
+allow_indirect_imports = True
+
+[importlinter:contract:public-only-retention]
+name = retention uses other modules only through their public interface
+type = forbidden
+source_modules =
+    auditor.retention
+forbidden_modules =
+    auditor.identity.domain
+    auditor.identity.application
+    auditor.identity.infrastructure
+    auditor.identity.api
+    auditor.companies.domain
+    auditor.companies.application
+    auditor.companies.infrastructure
+    auditor.companies.api
+    auditor.evaluations.domain
+    auditor.evaluations.application
+    auditor.evaluations.infrastructure
+    auditor.evaluations.api
+    auditor.documents.domain
+    auditor.documents.application
+    auditor.documents.infrastructure
+    auditor.documents.api
+    auditor.checklist.domain
+    auditor.checklist.application
+    auditor.checklist.infrastructure
+    auditor.checklist.api
+    auditor.analysis.domain
+    auditor.analysis.application
+    auditor.analysis.infrastructure
+    auditor.analysis.api
+    auditor.review.domain
+    auditor.review.application
+    auditor.review.infrastructure
+    auditor.review.api
+    auditor.reports.domain
+    auditor.reports.application
+    auditor.reports.infrastructure
+    auditor.reports.api
+    auditor.feedback.domain
+    auditor.feedback.application
+    auditor.feedback.infrastructure
+    auditor.feedback.api
+    auditor.audit.domain
+    auditor.audit.application
+    auditor.audit.infrastructure
+    auditor.audit.api
+    auditor.metrics.domain
+    auditor.metrics.application
+    auditor.metrics.infrastructure
+    auditor.metrics.api
+allow_indirect_imports = True
