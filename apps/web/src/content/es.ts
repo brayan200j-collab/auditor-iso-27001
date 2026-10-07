@@ -475,6 +475,35 @@ export const checklistCopy = {
   invalid: "Revisa los campos: hay datos incompletos o no válidos.",
 } as const;
 
+export const resultsCopy = {
+  title: "Resultados aprobados",
+  open: "Ver resultados aprobados",
+  readyTitle: "Tus resultados están listos",
+  readyDescription: "Una persona revisó y aprobó los hallazgos de esta evaluación.",
+  approvedOn: (date: string) => `Revisión aprobada el ${date}`,
+  coverageTitle: "Cobertura documental preliminar",
+  coverageFound: (n: number, total: number) =>
+    `${n} de ${total} criterios con evidencia documental`,
+  coveragePartial: (n: number, total: number) => `${n} de ${total} con evidencia parcial`,
+  coverageNone: (n: number, total: number) => `${n} de ${total} sin evidencia documental`,
+  coverageDiscarded: (n: number, total: number) =>
+    `${n} de ${total} no incluidos tras la revisión humana`,
+  planTitle: "Plan inicial de mejora",
+  planDescription:
+    "Brechas ordenadas por prioridad, luego por nivel de riesgo y luego por esfuerzo estimado.",
+  phases: { 1: "Abordar primero", 2: "A continuación", 3: "Más adelante" } as Record<
+    number,
+    string
+  >,
+  noGaps: "No se identificaron brechas en los criterios revisados.",
+  findingsTitle: "Hallazgos por criterio",
+  detail: "Ver detalle",
+  detailLabel: (code: string) => `Ver detalle de ${code}`,
+  backToResults: "Volver a los resultados",
+  reviewerNotes: "Observaciones del revisor",
+  notAvailable: "Los resultados estarán disponibles cuando termine la revisión humana.",
+} as const;
+
 export const reviewCopy = {
   summaryTitle: "Resultado del análisis",
   evaluated: (total: number) => `${total} criterios evaluados`,

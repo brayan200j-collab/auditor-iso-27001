@@ -88,6 +88,7 @@ from auditor.identity.infrastructure.user_repository import SqlUserRepository
 from auditor.review.application.approve_evaluation import ApproveEvaluation
 from auditor.review.application.get_finding import GetFinding
 from auditor.review.application.get_finding_history import GetFindingHistory
+from auditor.review.application.get_results import GetApprovedResults
 from auditor.review.application.get_review import GetReview
 from auditor.review.application.list_review_queue import ListReviewQueue
 from auditor.review.application.reject_evaluation import RejectEvaluation
@@ -474,6 +475,9 @@ def build_factories() -> dict[type[Any], Factory]:
         ),
         GetFindingHistory: lambda s: GetFindingHistory(
             s.evaluation_access, s.findings, s.human_reviews
+        ),
+        GetApprovedResults: lambda s: GetApprovedResults(
+            s.evaluation_access, s.lifecycle, s.finals, s.checklists, s.documents
         ),
         GetFinding: lambda s: GetFinding(
             s.findings, s.resolve(GetReview), s.resolve(GetFindingHistory)

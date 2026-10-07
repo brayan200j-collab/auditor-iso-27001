@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { EvaluationStatusBadge } from "@/components/shared/EvaluationStatusBadge";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
-import { evaluations, reviewCopy } from "@/content/es";
+import { evaluations, resultsCopy, reviewCopy } from "@/content/es";
 import { EvaluationNotices, getEvaluation } from "@/features/evaluations";
 import { ProcessingAction, StatusTracker } from "@/features/processing";
 import { DecisionPanel, getReview, ReviewQueueTable, ReviewSummaryCard } from "@/features/review";
@@ -53,6 +54,14 @@ export default async function ReviewEvaluationPage({ params }: PageProps<"/app/r
           </section>
           {evaluation.status === "PENDING_REVIEW" ? (
             <DecisionPanel evaluationId={evaluation.id} pending={review.summary.pending} />
+          ) : null}
+          {evaluation.status === "APPROVED" ? (
+            <Link
+              href={`/app/evaluaciones/${evaluation.id}/resultados`}
+              className="text-primary text-sm hover:underline"
+            >
+              {resultsCopy.open}
+            </Link>
           ) : null}
         </>
       ) : null}

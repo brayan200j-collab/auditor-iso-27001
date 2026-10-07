@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { EvaluationStatusBadge } from "@/components/shared/EvaluationStatusBadge";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
-import { consentCopy, documentsCopy, evaluations } from "@/content/es";
+import { consentCopy, documentsCopy, evaluations, resultsCopy } from "@/content/es";
 import { DocumentList, listDocuments, UploadZone } from "@/features/documents";
 import {
   ConsentForm,
@@ -38,6 +40,22 @@ export default async function EvaluationPage({ params }: PageProps<"/app/evaluac
         actions={<EvaluationStatusBadge status={evaluation.status} />}
       />
       <EvaluationNotices evaluation={evaluation} />
+      {evaluation.status === "APPROVED" ? (
+        <Card className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1">
+            <CardTitle>{resultsCopy.readyTitle}</CardTitle>
+            <CardDescription>{resultsCopy.readyDescription}</CardDescription>
+          </div>
+          <div>
+            <Link
+              href={`/app/evaluaciones/${evaluation.id}/resultados`}
+              className={buttonVariants()}
+            >
+              {resultsCopy.open}
+            </Link>
+          </div>
+        </Card>
+      ) : null}
       <Card className="flex flex-col gap-4">
         <CardTitle>{evaluations.progressTitle}</CardTitle>
         <StatusTracker

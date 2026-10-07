@@ -86,4 +86,22 @@ test("a reviewer edits a finding, approves the rest and approves the evaluation"
   await page.reload();
   await expect(page.getByText("Aprobado", { exact: true }).first()).toBeVisible();
   await expect(page.getByRole("button", { name: "Aprobar evaluación" })).toHaveCount(0);
+  await logout(page);
+
+  // Only now does the company see the reviewed results.
+  await login(page, "SME");
+  await page.goto("/app/evaluaciones");
+  await page.getByRole("row").filter({ hasText: title }).getByRole("link").click();
+  await page.getByRole("link", { name: "Ver resultados aprobados" }).click();
+  await expect(page.getByText("Cobertura documental preliminar")).toBeVisible();
+  await expect(page.getByText(/de 30 criterios con evidencia documental/)).toBeVisible();
+  await expect(page.getByText("Plan inicial de mejora")).toBeVisible();
+  await expect(page.locator("main")).not.toContainText("%");
+  await expect(page.locator("main")).not.toContainText("Nivel de confianza");
+  await page
+    .getByRole("link", { name: /^Ver detalle de ISO-/ })
+    .first()
+    .click();
+  await expect(page.getByRole("link", { name: "Volver a los resultados" })).toBeVisible();
+  await expect(page.getByText(/no constituye una certificación/)).toBeVisible();
 });

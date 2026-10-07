@@ -7,9 +7,11 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from pydantic import Field
 
+from auditor.checklist.public import ChecklistItem
 from auditor.evaluations.public import Evaluation, EvaluationStatus
 from auditor.review.application.approve_evaluation import ApproveEvaluation
 from auditor.review.application.get_finding import GetFinding
+from auditor.review.application.get_results import GetApprovedResults, ResultItem
 from auditor.review.application.get_review import GetReview, ReviewItem, ReviewSummary
 from auditor.review.application.list_review_queue import ListReviewQueue
 from auditor.review.application.reject_evaluation import RejectEvaluation
@@ -90,16 +92,7 @@ class ReviewItemResponse(ApiModel):
         ai, criterion, final = item.ai, item.criterion, item.final
         return cls(
             finding_id=ai.id,
-            criterion=CriterionResponse(
-                code=criterion.code,
-                name=criterion.name,
-                evaluation_question=criterion.evaluation_question,
-                expected_evidence=criterion.expected_evidence,
-                iso_reference=criterion.iso_reference,
-                cis_reference=criterion.cis_reference,
-                nist_reference=criterion.nist_reference,
-                reference_status=criterion.reference_status.value,
-            ),
+            criterion=_criterion(criterion),
             ai=AIFindingResponse(
                 status=ai.status,
                 confidence=float(ai.confidence) if ai.confidence is not None else None,
@@ -133,6 +126,19 @@ class ReviewItemResponse(ApiModel):
                 reviewed_at=final.reviewed_at if final else None,
             ),
         )
+
+
+def _criterion(criterion: ChecklistItem) -> CriterionResponse:
+    return CriterionResponse(
+        code=criterion.code,
+        name=criterion.name,
+        evaluation_question=criterion.evaluation_question,
+        expected_evidence=criterion.expected_evidence,
+        iso_reference=criterion.iso_reference,
+        cis_reference=criterion.cis_reference,
+        nist_reference=criterion.nist_reference,
+        reference_status=criterion.reference_status.value,
+    )
 
 
 def _values(values: FinalValues) -> FinalValuesResponse:
@@ -227,6 +233,75 @@ class FinalFindingResponse(ApiModel):
             review_status=final.review_status,
             final=_values(final.values),
         )
+
+
+class CoverageResponse(ApiModel):
+    """Counts only: coverage is never expressed as a percentage."""
+
+    total: int
+    found: int
+    partial: int
+    no_evidence: int
+    discarded: int
+
+
+class ResultEvidenceResponse(ApiModel):
+    document_name: str | None
+    page: int
+    quote: str
+
+
+class ResultFindingResponse(ApiModel):
+    finding_id: UUID
+    criterion: CriterionResponse
+    review_status: ReviewStatus
+    status: FindingStatus
+    gap: str
+    recommendation: str
+    priority: Priority
+    effort: Level
+    risk_level: Level
+    evidence: list[ResultEvidenceResponse]
+    reviewer_comment: str | None
+
+    @classmethod
+    def of(cls, item: ResultItem, names: dict[UUID, str]) -> ResultFindingResponse:
+        final, values = item.final, item.final.values
+        if not (values.status and values.priority and values.effort and values.risk_level):
+            raise ValueError("only classified (non-discarded) findings are published")
+        return cls(
+            finding_id=final.ai_finding_id,
+            criterion=_criterion(item.criterion),
+            review_status=final.review_status,
+            status=values.status,
+            gap=values.gap,
+            recommendation=values.recommendation,
+            priority=values.priority,
+            effort=values.effort,
+            risk_level=values.risk_level,
+            evidence=[
+                ResultEvidenceResponse(
+                    document_name=names.get(e.document_id), page=e.page, quote=e.quote
+                )
+                for e in final.evidence
+            ],
+            reviewer_comment=final.reviewer_comment,
+        )
+
+
+class PlanPhaseResponse(ApiModel):
+    phase: int = Field(description="1 = abordar primero, 2 = a continuación, 3 = más adelante")
+    finding_ids: list[UUID]
+
+
+class ResultsResponse(ApiModel):
+    evaluation_id: UUID
+    title: str
+    approved_at: datetime
+    coverage: CoverageResponse
+    findings: list[ResultFindingResponse]
+    gap_ids: list[UUID] = Field(description="Brechas ordenadas por prioridad, riesgo y esfuerzo")
+    plan: list[PlanPhaseResponse]
 
 
 # ------------------------------------------------------------------ requests
@@ -405,3 +480,34 @@ async def reject_evaluation(
     reject: Annotated[RejectEvaluation, Depends(use_case(RejectEvaluation))],
 ) -> DecisionResponse:
     return DecisionResponse.of(await reject.execute(actor, evaluation_id, body.reason))
+
+
+@router.get(
+    "/evaluations/{evaluation_id}/findings",
+    response_model=ResultsResponse,
+    summary="Resultados aprobados de la evaluación",
+)
+async def approved_results(
+    actor: CurrentActor,
+    evaluation_id: UUID,
+    results: Annotated[GetApprovedResults, Depends(use_case(GetApprovedResults))],
+) -> ResultsResponse:
+    view = await results.execute(actor, evaluation_id)
+    return ResultsResponse(
+        evaluation_id=view.evaluation.id,
+        title=view.evaluation.title,
+        approved_at=view.evaluation.updated_at,
+        coverage=CoverageResponse(
+            total=view.coverage.total,
+            found=view.coverage.found,
+            partial=view.coverage.partial,
+            no_evidence=view.coverage.no_evidence,
+            discarded=view.coverage.discarded,
+        ),
+        findings=[ResultFindingResponse.of(item, view.document_names) for item in view.items],
+        gap_ids=[item.final.ai_finding_id for item in view.gaps],
+        plan=[
+            PlanPhaseResponse(phase=int(phase), finding_ids=[i.final.ai_finding_id for i in group])
+            for phase, group in view.plan.items()
+        ],
+    )

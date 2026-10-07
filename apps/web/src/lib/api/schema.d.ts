@@ -522,6 +522,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/evaluations/{evaluation_id}/findings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Resultados aprobados de la evaluación */
+        get: operations["approved_results_api_v1_evaluations__evaluation_id__findings_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/audit-logs": {
         parameters: {
             query?: never;
@@ -821,6 +838,22 @@ export interface components {
             /** Text */
             text: string;
         };
+        /**
+         * CoverageResponse
+         * @description Counts only: coverage is never expressed as a percentage.
+         */
+        CoverageResponse: {
+            /** Total */
+            total: number;
+            /** Found */
+            found: number;
+            /** Partial */
+            partial: number;
+            /** No Evidence */
+            no_evidence: number;
+            /** Discarded */
+            discarded: number;
+        };
         /** CriterionResponse */
         CriterionResponse: {
             /** Code */
@@ -1097,6 +1130,16 @@ export interface components {
             /** Page Size */
             page_size: number;
         };
+        /** PlanPhaseResponse */
+        PlanPhaseResponse: {
+            /**
+             * Phase
+             * @description 1 = abordar primero, 2 = a continuación, 3 = más adelante
+             */
+            phase: number;
+            /** Finding Ids */
+            finding_ids: string[];
+        };
         /**
          * Priority
          * @enum {string}
@@ -1169,6 +1212,62 @@ export interface components {
         RejectRequest: {
             /** Reason */
             reason: string;
+        };
+        /** ResultEvidenceResponse */
+        ResultEvidenceResponse: {
+            /** Document Name */
+            document_name: string | null;
+            /** Page */
+            page: number;
+            /** Quote */
+            quote: string;
+        };
+        /** ResultFindingResponse */
+        ResultFindingResponse: {
+            /**
+             * Finding Id
+             * Format: uuid
+             */
+            finding_id: string;
+            criterion: components["schemas"]["CriterionResponse"];
+            review_status: components["schemas"]["ReviewStatus"];
+            status: components["schemas"]["FindingStatus"];
+            /** Gap */
+            gap: string;
+            /** Recommendation */
+            recommendation: string;
+            priority: components["schemas"]["Priority"];
+            effort: components["schemas"]["Level"];
+            risk_level: components["schemas"]["Level"];
+            /** Evidence */
+            evidence: components["schemas"]["ResultEvidenceResponse"][];
+            /** Reviewer Comment */
+            reviewer_comment: string | null;
+        };
+        /** ResultsResponse */
+        ResultsResponse: {
+            /**
+             * Evaluation Id
+             * Format: uuid
+             */
+            evaluation_id: string;
+            /** Title */
+            title: string;
+            /**
+             * Approved At
+             * Format: date-time
+             */
+            approved_at: string;
+            coverage: components["schemas"]["CoverageResponse"];
+            /** Findings */
+            findings: components["schemas"]["ResultFindingResponse"][];
+            /**
+             * Gap Ids
+             * @description Brechas ordenadas por prioridad, riesgo y esfuerzo
+             */
+            gap_ids: string[];
+            /** Plan */
+            plan: components["schemas"]["PlanPhaseResponse"][];
         };
         /**
          * ReviewAction
@@ -4429,6 +4528,91 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DecisionResponse"];
+                };
+            };
+            /** @description Solicitud con formato no válido */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No autenticado */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Sin permiso */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflicto con el estado actual */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Datos no válidos */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Límite de uso alcanzado */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    approved_results_api_v1_evaluations__evaluation_id__findings_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                evaluation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResultsResponse"];
                 };
             };
             /** @description Solicitud con formato no válido */
