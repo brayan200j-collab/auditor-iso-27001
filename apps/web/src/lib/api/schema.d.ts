@@ -402,6 +402,126 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/reviews": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Evaluaciones pendientes de revisión */
+        get: operations["review_queue_api_v1_reviews_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/reviews/{evaluation_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Hallazgos para revisión */
+        get: operations["get_review_api_v1_reviews__evaluation_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/findings/{finding_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Detalle del hallazgo */
+        get: operations["get_finding_api_v1_findings__finding_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Editar y aprobar */
+        patch: operations["edit_finding_api_v1_findings__finding_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/findings/{finding_id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Aprobar el hallazgo tal como lo propuso la IA */
+        post: operations["approve_finding_api_v1_findings__finding_id__approve_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/findings/{finding_id}/discard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Descartar el hallazgo (con motivo) */
+        post: operations["discard_finding_api_v1_findings__finding_id__discard_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/evaluations/{evaluation_id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Aprobar la evaluación (todos los hallazgos revisados) */
+        post: operations["approve_evaluation_api_v1_evaluations__evaluation_id__approve_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/evaluations/{evaluation_id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Rechazar la evaluación con un motivo */
+        post: operations["reject_evaluation_api_v1_evaluations__evaluation_id__reject_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/audit-logs": {
         parameters: {
             query?: never;
@@ -423,6 +543,38 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AIFindingResponse */
+        AIFindingResponse: {
+            status: components["schemas"]["FindingStatus"] | null;
+            /** Confidence */
+            confidence: number | null;
+            /** Evidence */
+            evidence: components["schemas"]["EvidenceResponse"][];
+            /** Gap */
+            gap: string;
+            /** Recommendation */
+            recommendation: string;
+            preliminary_priority: components["schemas"]["Priority"] | null;
+            estimated_effort: components["schemas"]["Level"] | null;
+            risk_level: components["schemas"]["Level"] | null;
+            /** Llm Called */
+            llm_called: boolean;
+            /** Error Summary */
+            error_summary: string | null;
+            /** Needs Attention */
+            needs_attention: boolean;
+            /** Provider */
+            provider: string;
+            /** Model */
+            model: string;
+            /** Prompt Version */
+            prompt_version: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
         /**
          * AuditAction
          * @enum {string}
@@ -590,6 +742,11 @@ export interface components {
             /** Active Item Count */
             active_item_count: number;
         };
+        /** CommentRequest */
+        CommentRequest: {
+            /** Comment */
+            comment?: string | null;
+        };
         /** CompanyPage */
         CompanyPage: {
             /** Items */
@@ -664,6 +821,39 @@ export interface components {
             /** Text */
             text: string;
         };
+        /** CriterionResponse */
+        CriterionResponse: {
+            /** Code */
+            code: string;
+            /** Name */
+            name: string;
+            /** Evaluation Question */
+            evaluation_question: string;
+            /** Expected Evidence */
+            expected_evidence: string;
+            /** Iso Reference */
+            iso_reference: string | null;
+            /** Cis Reference */
+            cis_reference: string | null;
+            /** Nist Reference */
+            nist_reference: string | null;
+            /** Reference Status */
+            reference_status: string;
+        };
+        /** DecisionResponse */
+        DecisionResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            status: components["schemas"]["EvaluationStatus"];
+        };
+        /** DiscardRequest */
+        DiscardRequest: {
+            /** Comment */
+            comment: string;
+        };
         /**
          * DocumentResponse
          * @description Metadata only: storage paths never leave the backend.
@@ -694,6 +884,19 @@ export interface components {
          * @enum {string}
          */
         DocumentStatus: "STORED" | "EXTRACTED" | "PURGED";
+        /** EditRequest */
+        EditRequest: {
+            status: components["schemas"]["FindingStatus"];
+            /** Gap */
+            gap: string;
+            /** Recommendation */
+            recommendation: string;
+            priority: components["schemas"]["Priority"];
+            effort: components["schemas"]["Level"];
+            risk_level: components["schemas"]["Level"];
+            /** Comment */
+            comment?: string | null;
+        };
         /** ErrorResponse */
         ErrorResponse: {
             /** Code */
@@ -798,16 +1001,86 @@ export interface components {
              */
             updated_at: string;
         };
+        /** EvidenceResponse */
+        EvidenceResponse: {
+            /**
+             * Document Id
+             * Format: uuid
+             */
+            document_id: string;
+            /** Document Name */
+            document_name: string | null;
+            /** Page */
+            page: number;
+            /** Quote */
+            quote: string;
+            /** Citation Verified */
+            citation_verified: boolean;
+        };
         /**
          * FailureReason
          * @description User-facing causes of a failed run (the technical detail stays in logs and jobs).
          * @enum {string}
          */
         FailureReason: "EXTRACTION_ERROR" | "ANALYSIS_ERROR" | "INTERRUPTED" | "QUOTA_EXCEEDED";
+        /** FinalFindingResponse */
+        FinalFindingResponse: {
+            /**
+             * Finding Id
+             * Format: uuid
+             */
+            finding_id: string;
+            review_status: components["schemas"]["ReviewStatus"];
+            final: components["schemas"]["FinalValuesResponse"];
+        };
+        /** FinalValuesResponse */
+        FinalValuesResponse: {
+            status: components["schemas"]["FindingStatus"] | null;
+            /** Gap */
+            gap: string;
+            /** Recommendation */
+            recommendation: string;
+            priority: components["schemas"]["Priority"] | null;
+            effort: components["schemas"]["Level"] | null;
+            risk_level: components["schemas"]["Level"] | null;
+        };
+        /** FindingDetailResponse */
+        FindingDetailResponse: {
+            /**
+             * Evaluation Id
+             * Format: uuid
+             */
+            evaluation_id: string;
+            evaluation_status: components["schemas"]["EvaluationStatus"];
+            item: components["schemas"]["ReviewItemResponse"];
+            /** History */
+            history: components["schemas"]["HistoryEntryResponse"][];
+        };
+        /**
+         * FindingStatus
+         * @enum {string}
+         */
+        FindingStatus: "FOUND" | "PARTIAL" | "NO_DOCUMENTARY_EVIDENCE";
         /** HealthResponse */
         HealthResponse: {
             /** Status */
             status: string;
+        };
+        /** HistoryEntryResponse */
+        HistoryEntryResponse: {
+            action: components["schemas"]["ReviewAction"];
+            /** Comment */
+            comment: string | null;
+            /**
+             * Reviewer Id
+             * Format: uuid
+             */
+            reviewer_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
         };
         /**
          * Level
@@ -860,11 +1133,106 @@ export interface components {
             step: components["schemas"]["EvaluationStatus"];
             state: components["schemas"]["StepState"];
         };
+        /** QueueItemResponse */
+        QueueItemResponse: {
+            /**
+             * Evaluation Id
+             * Format: uuid
+             */
+            evaluation_id: string;
+            /** Title */
+            title: string;
+            /** Company Name */
+            company_name: string | null;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Findings */
+            findings: number;
+            /** Reviewed */
+            reviewed: number;
+        };
+        /** QueuePage */
+        QueuePage: {
+            /** Items */
+            items: components["schemas"]["QueueItemResponse"][];
+            meta: components["schemas"]["PageMeta"];
+        };
         /**
          * ReferenceStatus
          * @enum {string}
          */
         ReferenceStatus: "draft" | "confirmed";
+        /** RejectRequest */
+        RejectRequest: {
+            /** Reason */
+            reason: string;
+        };
+        /**
+         * ReviewAction
+         * @enum {string}
+         */
+        ReviewAction: "APPROVE" | "EDIT" | "DISCARD";
+        /** ReviewItemResponse */
+        ReviewItemResponse: {
+            /**
+             * Finding Id
+             * Format: uuid
+             */
+            finding_id: string;
+            criterion: components["schemas"]["CriterionResponse"];
+            ai: components["schemas"]["AIFindingResponse"];
+            review: components["schemas"]["ReviewStateResponse"];
+        };
+        /** ReviewResponse */
+        ReviewResponse: {
+            /**
+             * Evaluation Id
+             * Format: uuid
+             */
+            evaluation_id: string;
+            /** Title */
+            title: string;
+            status: components["schemas"]["EvaluationStatus"];
+            summary: components["schemas"]["ReviewSummaryResponse"];
+            /** Items */
+            items: components["schemas"]["ReviewItemResponse"][];
+        };
+        /** ReviewStateResponse */
+        ReviewStateResponse: {
+            review_status: components["schemas"]["ReviewStatus"];
+            final: components["schemas"]["FinalValuesResponse"] | null;
+            /** Comment */
+            comment: string | null;
+            /** Reviewed At */
+            reviewed_at: string | null;
+        };
+        /**
+         * ReviewStatus
+         * @enum {string}
+         */
+        ReviewStatus: "PENDING_REVIEW" | "APPROVED" | "EDITED_APPROVED" | "DISCARDED";
+        /** ReviewSummaryResponse */
+        ReviewSummaryResponse: {
+            /** Total */
+            total: number;
+            /** Found */
+            found: number;
+            /** Partial */
+            partial: number;
+            /** No Evidence */
+            no_evidence: number;
+            /** Errors */
+            errors: number;
+            /** Reviewed */
+            reviewed: number;
+            /** Pending */
+            pending: number;
+            /** Needs Attention */
+            needs_attention: number;
+        };
         /** ReviewerAssignmentRequest */
         ReviewerAssignmentRequest: {
             /**
@@ -3362,6 +3730,705 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ChecklistVersionResponse"];
+                };
+            };
+            /** @description Solicitud con formato no válido */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No autenticado */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Sin permiso */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflicto con el estado actual */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Datos no válidos */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Límite de uso alcanzado */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    review_queue_api_v1_reviews_get: {
+        parameters: {
+            query?: {
+                /** @description Página (desde 1) */
+                page?: number;
+                /** @description Elementos por página */
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QueuePage"];
+                };
+            };
+            /** @description Solicitud con formato no válido */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No autenticado */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Sin permiso */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflicto con el estado actual */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Datos no válidos */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Límite de uso alcanzado */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_review_api_v1_reviews__evaluation_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                evaluation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewResponse"];
+                };
+            };
+            /** @description Solicitud con formato no válido */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No autenticado */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Sin permiso */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflicto con el estado actual */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Datos no válidos */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Límite de uso alcanzado */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_finding_api_v1_findings__finding_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                finding_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FindingDetailResponse"];
+                };
+            };
+            /** @description Solicitud con formato no válido */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No autenticado */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Sin permiso */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflicto con el estado actual */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Datos no válidos */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Límite de uso alcanzado */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    edit_finding_api_v1_findings__finding_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                finding_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FinalFindingResponse"];
+                };
+            };
+            /** @description Solicitud con formato no válido */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No autenticado */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Sin permiso */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflicto con el estado actual */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Datos no válidos */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Límite de uso alcanzado */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    approve_finding_api_v1_findings__finding_id__approve_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                finding_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CommentRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FinalFindingResponse"];
+                };
+            };
+            /** @description Solicitud con formato no válido */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No autenticado */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Sin permiso */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflicto con el estado actual */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Datos no válidos */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Límite de uso alcanzado */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    discard_finding_api_v1_findings__finding_id__discard_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                finding_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DiscardRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FinalFindingResponse"];
+                };
+            };
+            /** @description Solicitud con formato no válido */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No autenticado */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Sin permiso */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflicto con el estado actual */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Datos no válidos */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Límite de uso alcanzado */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    approve_evaluation_api_v1_evaluations__evaluation_id__approve_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                evaluation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DecisionResponse"];
+                };
+            };
+            /** @description Solicitud con formato no válido */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No autenticado */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Sin permiso */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflicto con el estado actual */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Datos no válidos */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Límite de uso alcanzado */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    reject_evaluation_api_v1_evaluations__evaluation_id__reject_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                evaluation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RejectRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DecisionResponse"];
                 };
             };
             /** @description Solicitud con formato no válido */

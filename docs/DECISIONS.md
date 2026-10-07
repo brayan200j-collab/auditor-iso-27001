@@ -193,3 +193,9 @@ Format: context · decision · alternatives · reason. Newest last.
 - **Decision:** without fragments the finding is NO_DOCUMENTARY_EVIDENCE with `confidence = NULL` (no model estimated it) and checklist defaults for priority/risk/effort. `FakeLLMProvider` applies transparent keyword rules on the most relevant fragment (hedges such as "en elaboración" ⇒ PARTIAL) and quotes real sentences; a golden set over the synthetic policy pins its behavior.
 - **Alternatives:** random or canned fake answers.
 - **Reason:** deterministic, explainable local runs and E2E tests.
+
+## D-033 · Human review rules and the three-layer model
+- **Context:** section 14: the AI result is never overwritten and the company only sees reviewed results.
+- **Decision:** `ai_findings` stay immutable; every reviewer action appends a `human_reviews` row (previous and new values) and upserts one `final_findings` row per finding. Approve copies the AI values and only verified citations; edit may change status, gap, recommendation, priority, risk and effort (editing to NO_DOCUMENTARY_EVIDENCE drops evidence); discard needs a comment of at least 10 characters and leaves classification fields NULL (migration 0003, check constraint `ck_final_findings_classified_unless_discarded`). Findings without a classification (model error) can only be edited. The evaluation is approved only when no finding is pending; rejection needs a reason of at least 10 characters. Approval exposes an `after_approval` hook used by the report step (S12). The queue orders pending findings needing attention first, then lowest confidence.
+- **Alternatives:** editing `ai_findings` in place; a single findings table with a status column.
+- **Reason:** full traceability of who changed what, and the SME can never receive an unreviewed AI result.

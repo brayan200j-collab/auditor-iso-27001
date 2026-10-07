@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import DateTime, ForeignKey, String, Text, func
+from sqlalchemy import CheckConstraint, DateTime, ForeignKey, String, Text, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -45,6 +45,11 @@ class FinalFindingModel(Base):
         enum_check("priority", Priority, "priority_valid"),
         enum_check("effort", Level, "effort_valid"),
         enum_check("risk_level", Level, "risk_level_valid"),
+        CheckConstraint(
+            "review_status = 'DISCARDED' OR (status IS NOT NULL AND priority IS NOT NULL "
+            "AND effort IS NOT NULL AND risk_level IS NOT NULL)",
+            name="classified_unless_discarded",
+        ),
     )
 
     id: Mapped[UUID] = mapped_column(primary_key=True, server_default=func.gen_random_uuid())
@@ -62,12 +67,12 @@ class FinalFindingModel(Base):
     )
     criterion_code: Mapped[str] = mapped_column(String(10))
     review_status: Mapped[str] = mapped_column(String(20))
-    status: Mapped[str] = mapped_column(String(30))
+    status: Mapped[str | None] = mapped_column(String(30))
     gap: Mapped[str] = mapped_column(Text)
     recommendation: Mapped[str] = mapped_column(Text)
-    priority: Mapped[str] = mapped_column(String(10))
-    effort: Mapped[str] = mapped_column(String(10))
-    risk_level: Mapped[str] = mapped_column(String(10))
+    priority: Mapped[str | None] = mapped_column(String(10))
+    effort: Mapped[str | None] = mapped_column(String(10))
+    risk_level: Mapped[str | None] = mapped_column(String(10))
     evidence: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, server_default="[]")
     reviewer_comment: Mapped[str | None] = mapped_column(Text)
     reviewed_by: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"))

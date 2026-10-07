@@ -91,6 +91,8 @@ class FindingRepository(Protocol):
 
     async def list_for_run(self, analysis_run_id: UUID) -> list[AIFindingRecord]: ...
 
+    async def get(self, finding_id: UUID) -> AIFindingRecord | None: ...
+
 
 class PromptTemplates(Protocol):
     version: str

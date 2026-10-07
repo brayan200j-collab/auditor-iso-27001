@@ -85,6 +85,17 @@ from auditor.identity.application.update_user import UpdateUser
 from auditor.identity.infrastructure.supabase_admin import SupabaseAuthAdmin
 from auditor.identity.infrastructure.token_verifiers import SupabaseJwtVerifier, TestJwtVerifier
 from auditor.identity.infrastructure.user_repository import SqlUserRepository
+from auditor.review.application.approve_evaluation import ApproveEvaluation
+from auditor.review.application.get_finding import GetFinding
+from auditor.review.application.get_finding_history import GetFindingHistory
+from auditor.review.application.get_review import GetReview
+from auditor.review.application.list_review_queue import ListReviewQueue
+from auditor.review.application.reject_evaluation import RejectEvaluation
+from auditor.review.application.review_finding import ReviewFinding
+from auditor.review.infrastructure.repositories import (
+    SqlFinalFindingRepository,
+    SqlHumanReviewRepository,
+)
 from auditor.shared.application.jobs import JobRecord
 from auditor.shared.application.ports import ObjectStorage
 from auditor.shared.domain.actor import Actor
@@ -311,6 +322,14 @@ class RequestScope:
         return SqlFindingRepository(self.session)
 
     @cached_property
+    def finals(self) -> SqlFinalFindingRepository:
+        return SqlFinalFindingRepository(self.session)
+
+    @cached_property
+    def human_reviews(self) -> SqlHumanReviewRepository:
+        return SqlHumanReviewRepository(self.session)
+
+    @cached_property
     def llm_calls(self) -> SqlLlmCallRecorder:
         return SqlLlmCallRecorder(self.session, self.container.session_factory)
 
@@ -447,6 +466,32 @@ def build_factories() -> dict[type[Any], Factory]:
         CompleteAnalysis: lambda s: CompleteAnalysis(
             s.lifecycle, s.checklists, s.findings, s.audit, s.uow
         ),
+        ListReviewQueue: lambda s: ListReviewQueue(
+            s.resolve(ListEvaluations), s.lifecycle, s.findings, s.finals
+        ),
+        GetReview: lambda s: GetReview(
+            s.evaluation_access, s.lifecycle, s.findings, s.finals, s.checklists, s.documents
+        ),
+        GetFindingHistory: lambda s: GetFindingHistory(
+            s.evaluation_access, s.findings, s.human_reviews
+        ),
+        GetFinding: lambda s: GetFinding(
+            s.findings, s.resolve(GetReview), s.resolve(GetFindingHistory)
+        ),
+        ReviewFinding: lambda s: ReviewFinding(
+            s.evaluation_access,
+            s.lifecycle,
+            s.findings,
+            s.finals,
+            s.human_reviews,
+            s.audit,
+            s.uow,
+            s.container.clock,
+        ),
+        ApproveEvaluation: lambda s: ApproveEvaluation(
+            s.evaluation_access, s.lifecycle, s.findings, s.finals, s.uow
+        ),
+        RejectEvaluation: lambda s: RejectEvaluation(s.evaluation_access, s.lifecycle, s.uow),
         ListChecklistVersions: lambda s: ListChecklistVersions(s.checklists),
         GetChecklistVersion: lambda s: GetChecklistVersion(s.checklists),
         CreateChecklistDraft: lambda s: CreateChecklistDraft(s.checklists, s.audit, s.uow),

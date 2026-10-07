@@ -85,6 +85,7 @@ export const roleLabels = {
 export const filterLabels = { ALL: "Todos" } as const;
 
 export const confidence = {
+  whatIs: "¿Qué significa?",
   label: "Nivel de confianza estimado por el modelo para la clasificación del hallazgo",
   help: "Este valor no mide el nivel de seguridad de la empresa. Lo estima el modelo de IA y sirve para ordenar la revisión humana: los hallazgos con menor confianza se revisan primero.",
 } as const;
@@ -472,4 +473,75 @@ export const checklistCopy = {
   yes: "Sí",
   no: "No",
   invalid: "Revisa los campos: hay datos incompletos o no válidos.",
+} as const;
+
+export const reviewCopy = {
+  summaryTitle: "Resultado del análisis",
+  evaluated: (total: number) => `${total} criterios evaluados`,
+  found: (count: number) => `Encontrados: ${count}`,
+  partial: (count: number) => `Parciales: ${count}`,
+  noEvidence: (count: number) => `Sin evidencia: ${count}`,
+  errors: (count: number) => `Sin clasificar: ${count}`,
+  progress: (reviewed: number, total: number) => `Revisados ${reviewed} de ${total}`,
+  queueTitle: "Cola de revisión",
+  columns: { criterion: "Criterio", confidence: "Confianza", review: "Revisión" },
+  queueHint:
+    "Primero aparecen los hallazgos pendientes que requieren atención y los de menor confianza.",
+  needsAttention: "Requiere atención",
+  aiStatus: "Estado propuesto por la IA",
+  unclassified: "Sin clasificar",
+  review: "Revisar",
+  reviewLabel: (code: string) => `Revisar ${code}`,
+  noModelCall: "Sin llamada a la IA",
+  noModelCallHelp:
+    "No se encontraron fragmentos relevantes, así que el sistema clasificó el criterio sin consultar a la IA.",
+  evidenceTitle: "Evidencia",
+  noCitations: "Sin citas de evidencia.",
+  page: (page: number) => `Página ${page}`,
+  unverified: "Cita no verificada: no se encontró en el documento",
+  unverifiedHelp: "Esta cita no se mostrará a la empresa.",
+  gap: "Brecha",
+  recommendation: "Recomendación",
+  priority: "Prioridad",
+  risk: "Nivel de riesgo",
+  effort: "Esfuerzo estimado",
+  modelInfo: (provider: string, model: string, version: string, date: string) =>
+    `Generado por ${provider} · ${model} · prompts ${version} · ${date}`,
+  modelError: "La IA no pudo clasificar este criterio. Edítalo o descártalo.",
+  criterionQuestion: "Pregunta de evaluación",
+  expectedEvidence: "Evidencia esperada",
+  references: "Referencias",
+  actions: {
+    choose: "Acción de revisión",
+    approve: "Aprobar",
+    approveHint: "Aprueba el hallazgo tal como lo propuso la IA.",
+    edit: "Editar y aprobar",
+    discard: "Descartar",
+    discardHint: "Indica el motivo del descarte (mínimo 10 caracteres).",
+    comment: "Comentario para el registro (opcional)",
+    reason: "Motivo",
+    status: "Estado",
+    saved: "Revisión guardada.",
+  },
+  history: "Historial de revisión",
+  historyActions: {
+    APPROVE: "Aprobado",
+    EDIT: "Editado y aprobado",
+    DISCARD: "Descartado",
+  },
+  decision: {
+    title: "Decisión sobre la evaluación",
+    approve: "Aprobar evaluación",
+    approveHint:
+      "Al aprobar, la empresa verá los resultados revisados y se generará el informe. Esta acción no se puede deshacer.",
+    pending: (count: number) =>
+      `Faltan ${count} hallazgo(s) por revisar antes de aprobar la evaluación.`,
+    reject: "Rechazar evaluación",
+    rejectHint: "La empresa verá el motivo y podrá cargar un documento actualizado.",
+    reason: "Motivo del rechazo",
+    approved: "Evaluación aprobada.",
+    rejected: "Evaluación rechazada.",
+  },
+  backToQueue: "Volver a la cola de revisión",
+  locked: "La evaluación ya no está en revisión; los hallazgos no se pueden modificar.",
 } as const;

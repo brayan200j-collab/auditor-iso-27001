@@ -2,19 +2,23 @@ import type { Metadata } from "next";
 
 import { EvaluationStatusBadge } from "@/components/shared/EvaluationStatusBadge";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { Card, CardTitle } from "@/components/ui/card";
-import { evaluations } from "@/content/es";
+import { Card, CardDescription, CardTitle } from "@/components/ui/card";
+import { evaluations, reviewCopy } from "@/content/es";
 import { EvaluationNotices, getEvaluation } from "@/features/evaluations";
 import { ProcessingAction, StatusTracker } from "@/features/processing";
+import { DecisionPanel, getReview, ReviewQueueTable, ReviewSummaryCard } from "@/features/review";
 import { requireRole } from "@/lib/guards";
 
 export const metadata: Metadata = { title: evaluations.reviewerTitle };
+
+const WITH_FINDINGS = new Set(["PENDING_REVIEW", "APPROVED", "REJECTED"]);
 
 export default async function ReviewEvaluationPage({ params }: PageProps<"/app/revision/[id]">) {
   await requireRole("REVIEWER", "ADMIN");
   const { id } = await params;
   const detail = await getEvaluation(id);
   const { evaluation } = detail;
+  const review = WITH_FINDINGS.has(evaluation.status) ? await getReview(evaluation.id) : null;
 
   return (
     <>
@@ -34,6 +38,23 @@ export default async function ReviewEvaluationPage({ params }: PageProps<"/app/r
       </Card>
       {evaluation.status === "FAILED" ? (
         <ProcessingAction evaluationId={evaluation.id} kind="retry" />
+      ) : null}
+      {review ? (
+        <>
+          <ReviewSummaryCard summary={review.summary} />
+          <section aria-labelledby="cola" className="flex flex-col gap-3">
+            <div className="flex flex-col gap-1">
+              <h2 id="cola" className="text-foreground text-lg font-semibold">
+                {reviewCopy.queueTitle}
+              </h2>
+              <CardDescription>{reviewCopy.queueHint}</CardDescription>
+            </div>
+            <ReviewQueueTable evaluationId={evaluation.id} items={review.items} />
+          </section>
+          {evaluation.status === "PENDING_REVIEW" ? (
+            <DecisionPanel evaluationId={evaluation.id} pending={review.summary.pending} />
+          ) : null}
+        </>
       ) : null}
     </>
   );

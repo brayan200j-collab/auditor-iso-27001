@@ -3,11 +3,14 @@ feedback. Other modules never load evaluations directly."""
 
 from auditor.evaluations.application.access import EvaluationAccess
 from auditor.evaluations.application.lifecycle import EvaluationLifecycle
+from auditor.evaluations.application.list_evaluations import ListEvaluations
 from auditor.evaluations.application.ports import (
     AnalysisProgressReader,
     AnalysisRunRepository,
     ConsentRepository,
+    EvaluationFilters,
 )
+from auditor.evaluations.application.views import EvaluationSummary
 from auditor.evaluations.domain.consent import CURRENT_CONSENT
 from auditor.evaluations.domain.evaluation import AnalysisRun, Evaluation, FailureReason
 from auditor.evaluations.domain.state_machine import Party, Trigger
@@ -22,9 +25,12 @@ __all__ = [
     "ConsentRepository",
     "Evaluation",
     "EvaluationAccess",
+    "EvaluationFilters",
     "EvaluationLifecycle",
     "EvaluationStatus",
+    "EvaluationSummary",
     "FailureReason",
+    "ListEvaluations",
     "Party",
     "Trigger",
 ]

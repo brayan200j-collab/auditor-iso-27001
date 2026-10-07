@@ -112,6 +112,10 @@ class SqlFindingRepository:
         )
         return [to_record(model) for model in models]
 
+    async def get(self, finding_id: UUID) -> AIFindingRecord | None:
+        model = await self._session.get(AIFindingModel, finding_id)
+        return to_record(model) if model else None
+
 
 class SqlLlmCallRecorder:
     """Usage is recorded in its own transaction so it survives a failed analysis."""
