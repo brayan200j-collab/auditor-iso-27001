@@ -7,6 +7,12 @@ class ApiModel(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
 
+class QueryModel(BaseModel):
+    """Base for query-string filter models (other query parameters such as paging coexist)."""
+
+    model_config = ConfigDict(extra="ignore", frozen=True)
+
+
 class ErrorResponse(ApiModel):
     code: str
     message: str

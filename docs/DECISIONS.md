@@ -91,3 +91,21 @@ Format: context · decision · alternatives · reason. Newest last.
 - **Decision:** triggers reject UPDATE/DELETE on `audit_logs`, `ai_findings`, `human_reviews`, `llm_calls`, and any change to published checklist versions or their items. RLS is enabled on every table with no policies and all grants revoked from `anon`/`authenticated`.
 - **Alternatives:** application-only enforcement.
 - **Reason:** defense in depth; the guarantees hold even for code paths written later or manual SQL.
+
+## D-016 · Login and recovery rate limiting in the web server
+- **Context:** sign-in happens in a Server Action, so Supabase Auth sees the Next.js server IP for every user and its per-IP limit would be shared by everyone.
+- **Decision:** the web server applies its own fixed-window limiter before calling Supabase: 10 attempts/minute per client IP and 5 per 15 minutes per email, for login and recovery (`src/lib/rate-limit.ts`). Recovery answers identically whether or not the account exists.
+- **Alternatives:** route sign-in through FastAPI; shared Redis limiter (out of scope).
+- **Reason:** keeps HttpOnly cookies and server-side auth. Limitation: the store is per instance; a multi-instance deployment needs a shared store (documented in SECURITY.md).
+
+## D-017 · Reviewer scope for approved results is "assigned"
+- **Context:** section 7 grants reviewers "ver resultados aprobados y descargar informe" without specifying scope, while they only see their assigned evaluations.
+- **Decision:** reviewers can view approved results and download reports only for evaluations assigned to them; administrators see all.
+- **Alternatives:** all approved results for any reviewer.
+- **Reason:** least privilege, consistent with "Ver evaluaciones: solo asignadas".
+
+## D-018 · Session cookies are HttpOnly; Supabase runs only on the server
+- **Context:** section 6 asks for Supabase Auth with `@supabase/ssr` cookie sessions and section 9 for HttpOnly cookies.
+- **Decision:** sign-in, sign-out, recovery and password update are Server Actions/route handlers; the Supabase client is created only on the server with `cookieOptions.httpOnly = true`. `proxy.ts` refreshes the session and redirects anonymous visitors from `/app`. Unknown or inactive profiles are signed out immediately after login.
+- **Alternatives:** browser Supabase client (requires JS-readable cookies).
+- **Reason:** the access token is never exposed to browser JavaScript.

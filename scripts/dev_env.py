@@ -106,6 +106,7 @@ def main() -> None:
         "NEXT_PUBLIC_API_URL": "http://localhost:8000",
         "NEXT_PUBLIC_SUPABASE_URL": api_url,
         "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY": status["PUBLISHABLE_KEY"],
+        "NEXT_PUBLIC_SITE_URL": "http://localhost:3000",
     }
     write_env(ROOT / "apps" / "web" / ".env.local", "Local web environment", web)
     print("Wrote .env and apps/web/.env.local")

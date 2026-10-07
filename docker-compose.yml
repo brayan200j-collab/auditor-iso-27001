@@ -54,7 +54,7 @@ services:
 
   api:
     <<: *api-common
-    command: ["sh", "-c", "uv run alembic upgrade head && uv run uvicorn auditor.main:app --host 0.0.0.0 --port 8000"]
+    command: ["sh", "-c", "uv run alembic upgrade head && uv run uvicorn --factory auditor.main:create_app --host 0.0.0.0 --port 8000"]
     ports:
       - "127.0.0.1:8000:8000"
     healthcheck:

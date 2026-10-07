@@ -5,8 +5,8 @@ Source of truth for the continuous execution (CLAUDE.md section 0). Read this fi
 | Slice | Content | Status | Date | Commit | Evidence |
 |---|---|---|---|---|---|
 | S00 | Environment, monorepo scaffold, Makefile, compose + Supabase local, pre-commit, CI, architecture rules, design tokens, base docs | hecho | 2026-10-07 | 8c43518 | `make check` green: 38 api tests, 3 web tests, 17 import contracts |
-| S01 | Data model, migrations, RLS deny-by-default + test, seeds (users, checklist ISO-01..30) | hecho | 2026-10-07 | see `git log --grep S01` | `make check` green: 97 api tests (`tests/integration/test_schema.py`: RLS, grants, append-only, reversibility, drift); `make seed` creates 30 criteria + 5 dev users |
-| S02 | Identity: JWT, current user, permission matrix, audit_logs; login, logout, recovery, protected routes | pendiente | | | |
+| S01 | Data model, migrations, RLS deny-by-default + test, seeds (users, checklist ISO-01..30) | hecho | 2026-10-07 | 464730c | `make check` green: 97 api tests (`tests/integration/test_schema.py`: RLS, grants, append-only, reversibility, drift); `make seed` creates 30 criteria + 5 dev users |
+| S02 | Identity: JWT, current user, permission matrix, audit_logs; login, logout, recovery, protected routes | hecho | 2026-10-07 | see `git log --grep S02` | `make check` green (188 api, 15 web tests; `tests/unit/test_permissions.py` walks the full matrix; `tests/integration/test_supabase_auth.py` verifies a real ES256 token via JWKS); `pnpm --filter @auditor/web e2e` auth.spec: 5 passed |
 | S03 | Companies and users (admin); reviewer assignment | pendiente | | | |
 | S04 | Evaluations: create, list, detail, consent, state machine, progress timeline | pendiente | | | |
 | S05 | Secure PDF upload: validators, private storage, deletion, upload UI | pendiente | | | |

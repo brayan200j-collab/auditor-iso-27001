@@ -8,8 +8,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from auditor.audit.api.router import router as audit_router
 from auditor.config import Settings, load_settings
 from auditor.container import AppContainer
+from auditor.identity.api.router import router as identity_router
 from auditor.shared.api.dependencies import get_resolver
 from auditor.shared.api.errors import register_error_handlers
 from auditor.shared.api.health import build_health_router
@@ -47,6 +49,8 @@ def create_app(settings: Settings | None = None, container: AppContainer | None 
 
     register_error_handlers(app)
     app.include_router(build_health_router(container.is_ready))
+    for router in (identity_router, audit_router):
+        app.include_router(router)
 
     app.add_middleware(
         CORSMiddleware,
