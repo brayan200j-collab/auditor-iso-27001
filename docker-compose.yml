@@ -17,6 +17,7 @@ x-api-env: &api-env
   LLM_PROVIDER: ${LLM_PROVIDER:-fake}
   LLM_API_KEY: ${LLM_API_KEY:-}
   LLM_MODEL: ${LLM_MODEL:-openai/gpt-oss-120b}
+  MAX_EVALUATIONS_PER_COMPANY: ${MAX_EVALUATIONS_PER_COMPANY:-10}
   PROMPTS_DIR: /workspace/prompts
   SEEDS_DIR: /workspace/seeds
   SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-}

@@ -13,9 +13,14 @@ import httpx
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
 import auditor.persistence  # noqa: F401 - registers every ORM model (foreign keys across modules)
+from auditor.analysis.application.mark_processing_failed import MarkProcessingFailed
+from auditor.analysis.application.retry_processing import RetryProcessing
+from auditor.analysis.application.run_extraction_step import RunExtractionStep
+from auditor.analysis.application.start_analysis import StartAnalysis
 from auditor.audit.application.list_audit_logs import ListAuditLogs
 from auditor.audit.infrastructure.audit_log_reader import SqlAuditLogReader
 from auditor.audit.infrastructure.sql_audit_logger import SqlAuditLogger
+from auditor.checklist.infrastructure.repository import SqlChecklistRepository
 from auditor.companies.application.create_company import CreateCompany
 from auditor.companies.application.get_company import GetCompany
 from auditor.companies.application.list_companies import ListCompanies
@@ -23,11 +28,13 @@ from auditor.companies.application.update_company import UpdateCompany
 from auditor.companies.infrastructure.repository import SqlCompanyRepository
 from auditor.config import Settings
 from auditor.documents.application.delete_document import DeleteDocument
+from auditor.documents.application.extract_documents import ExtractRunDocuments
 from auditor.documents.application.list_documents import ListDocuments
 from auditor.documents.application.ports import FileScanner, NoopFileScanner
 from auditor.documents.application.upload_document import UploadDocument, UploadLimits
+from auditor.documents.infrastructure.pdf_extractor import PyMuPdfExtractor
 from auditor.documents.infrastructure.pdf_inspector import PyMuPdfInspector
-from auditor.documents.infrastructure.repository import SqlDocumentRepository
+from auditor.documents.infrastructure.repository import SqlChunkRepository, SqlDocumentRepository
 from auditor.evaluations.application.access import EvaluationAccess
 from auditor.evaluations.application.assign_reviewer import AssignReviewer
 from auditor.evaluations.application.create_evaluation import CreateEvaluation
@@ -52,8 +59,10 @@ from auditor.identity.application.update_user import UpdateUser
 from auditor.identity.infrastructure.supabase_admin import SupabaseAuthAdmin
 from auditor.identity.infrastructure.token_verifiers import SupabaseJwtVerifier, TestJwtVerifier
 from auditor.identity.infrastructure.user_repository import SqlUserRepository
+from auditor.shared.application.jobs import JobRecord
 from auditor.shared.application.ports import ObjectStorage
 from auditor.shared.domain.actor import Actor
+from auditor.shared.domain.vocabulary import JobKind
 from auditor.shared.infrastructure.database import (
     SessionUnitOfWork,
     SystemClock,
@@ -61,6 +70,7 @@ from auditor.shared.infrastructure.database import (
     create_session_factory,
     ping,
 )
+from auditor.shared.infrastructure.jobs import AsyncioJobRunner, SqlJobRepository
 from auditor.shared.infrastructure.storage import LocalDiskStorage, SupabaseStorage
 
 Factory = Callable[["RequestScope"], Any]
@@ -103,7 +113,9 @@ class AppContainer:
     auth_admin: AuthAdmin
     storage: ObjectStorage
     inspector: PyMuPdfInspector
+    extractor: PyMuPdfExtractor
     scanner: FileScanner
+    runner: AsyncioJobRunner
     clock: SystemClock = field(default_factory=SystemClock)
     factories: dict[type[Any], Factory] = field(default_factory=dict)
 
@@ -115,10 +127,15 @@ class AppContainer:
             use_null_pool=settings.app_env == "test",
         )
         http = httpx.AsyncClient(timeout=httpx.Timeout(30.0, connect=5.0))
-        return cls(
+        session_factory = create_session_factory(engine)
+        clock = SystemClock()
+        runner = AsyncioJobRunner(
+            session_factory, clock, stale_after_seconds=settings.job_running_timeout_seconds
+        )
+        container = cls(
             settings=settings,
             engine=engine,
-            session_factory=create_session_factory(engine),
+            session_factory=session_factory,
             token_verifier=build_token_verifier(settings),
             http=http,
             auth_admin=SupabaseAuthAdmin(
@@ -126,14 +143,36 @@ class AppContainer:
             ),
             storage=build_storage(settings, http),
             inspector=PyMuPdfInspector(settings.max_pdf_pages, settings.extraction_timeout_seconds),
+            extractor=PyMuPdfExtractor(settings.max_pdf_pages, settings.extraction_timeout_seconds),
             scanner=NoopFileScanner(),
+            runner=runner,
+            clock=clock,
             factories=build_factories(),
         )
+        container.register_jobs()
+        return container
+
+    def register_jobs(self) -> None:
+        async def extraction(job: JobRecord) -> None:
+            async with self.scope() as scope:
+                await scope.resolve(RunExtractionStep).execute(job)
+
+        async def failed(job: JobRecord, reason: str) -> None:
+            async with self.scope() as scope:
+                await scope.resolve(MarkProcessingFailed).execute(job, reason)
+
+        self.runner.register(JobKind.EXTRACTION, extraction)
+        self.runner.on_failed(failed)
+
+    async def start_background(self) -> None:
+        await self.runner.recover()
+        self.runner.start_sweeper(self.settings.job_sweep_interval_seconds)
 
     async def is_ready(self) -> bool:
         return await ping(self.engine)
 
     async def aclose(self) -> None:
+        await self.runner.stop()
         await self.http.aclose()
         await self.engine.dispose()
 
@@ -189,6 +228,18 @@ class RequestScope:
     @cached_property
     def documents(self) -> SqlDocumentRepository:
         return SqlDocumentRepository(self.session)
+
+    @cached_property
+    def chunks(self) -> SqlChunkRepository:
+        return SqlChunkRepository(self.session)
+
+    @cached_property
+    def jobs(self) -> SqlJobRepository:
+        return SqlJobRepository(self.session)
+
+    @cached_property
+    def checklists(self) -> SqlChecklistRepository:
+        return SqlChecklistRepository(self.session)
 
     @cached_property
     def evaluation_access(self) -> EvaluationAccess:
@@ -264,4 +315,39 @@ def build_factories() -> dict[type[Any], Factory]:
             s.settings.documents_bucket,
         ),
         ListDocuments: lambda s: ListDocuments(s.evaluation_access, s.lifecycle, s.documents),
+        StartAnalysis: lambda s: StartAnalysis(
+            s.evaluation_access,
+            s.lifecycle,
+            s.documents,
+            s.checklists,
+            s.jobs,
+            s.container.runner,
+            s.uow,
+            s.settings.job_max_attempts,
+        ),
+        RetryProcessing: lambda s: RetryProcessing(
+            s.evaluation_access,
+            s.lifecycle,
+            s.documents,
+            s.jobs,
+            s.container.runner,
+            s.uow,
+            s.settings.job_max_attempts,
+        ),
+        RunExtractionStep: lambda s: RunExtractionStep(
+            s.lifecycle,
+            ExtractRunDocuments(
+                s.documents,
+                s.chunks,
+                s.container.storage,
+                s.container.extractor,
+                s.container.clock,
+                s.settings.documents_bucket,
+            ),
+            s.jobs,
+            s.container.runner,
+            s.uow,
+            s.settings.job_max_attempts,
+        ),
+        MarkProcessingFailed: lambda s: MarkProcessingFailed(s.lifecycle, s.uow),
     }

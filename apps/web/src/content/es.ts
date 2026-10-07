@@ -405,3 +405,21 @@ export const documentsCopy = {
   locked: "Los documentos ya no se pueden modificar en este estado de la evaluación.",
   consentFirst: "Acepta el consentimiento para poder cargar documentos.",
 } as const;
+
+export const processingCopy = {
+  start: "Iniciar análisis",
+  starting: "Iniciando…",
+  startHint:
+    "Cuando hayas cargado todos tus documentos, inicia el análisis. Ya no podrás agregar ni eliminar documentos.",
+  live: {
+    EXTRACTING: "Extrayendo información de tus documentos…",
+    ANALYZING: "Analizando los documentos frente a los 30 criterios del checklist…",
+    PENDING_REVIEW:
+      "El análisis terminó. Una persona revisará los resultados antes de mostrártelos.",
+    FAILED: "El procesamiento no pudo completarse.",
+  },
+  updated: (time: string) => `Última actualización: ${time}`,
+  retry: "Reintentar procesamiento",
+  retrying: "Reintentando…",
+  retryHint: "El procesamiento continuará desde el último paso completado.",
+} as const;

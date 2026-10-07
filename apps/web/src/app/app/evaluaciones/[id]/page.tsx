@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 
 import { EvaluationStatusBadge } from "@/components/shared/EvaluationStatusBadge";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { ProgressTimeline } from "@/components/shared/ProgressTimeline";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { consentCopy, documentsCopy, evaluations } from "@/content/es";
 import { DocumentList, listDocuments, UploadZone } from "@/features/documents";
@@ -12,6 +11,7 @@ import {
   getConsentText,
   getEvaluation,
 } from "@/features/evaluations";
+import { ProcessingAction, StatusTracker } from "@/features/processing";
 import { requireRole } from "@/lib/guards";
 
 export const metadata: Metadata = { title: evaluations.listTitle };
@@ -40,7 +40,11 @@ export default async function EvaluationPage({ params }: PageProps<"/app/evaluac
       <EvaluationNotices evaluation={evaluation} />
       <Card className="flex flex-col gap-4">
         <CardTitle>{evaluations.progressTitle}</CardTitle>
-        <ProgressTimeline steps={detail.progress} />
+        <StatusTracker
+          evaluationId={evaluation.id}
+          initialStatus={evaluation.status}
+          initialSteps={detail.progress}
+        />
       </Card>
       {consent ? (
         <Card className="flex flex-col gap-4">
@@ -62,6 +66,9 @@ export default async function EvaluationPage({ params }: PageProps<"/app/evaluac
           documents={documents}
           canDelete={DELETABLE.has(evaluation.status)}
         />
+        {detail.available_actions.includes("START_ANALYSIS") && documents.length > 0 ? (
+          <ProcessingAction evaluationId={evaluation.id} kind="start" />
+        ) : null}
       </Card>
     </>
   );

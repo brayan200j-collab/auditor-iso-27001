@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 
 import { EvaluationStatusBadge } from "@/components/shared/EvaluationStatusBadge";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { ProgressTimeline } from "@/components/shared/ProgressTimeline";
 import { Card, CardTitle } from "@/components/ui/card";
 import { evaluations } from "@/content/es";
 import { EvaluationNotices, getEvaluation } from "@/features/evaluations";
+import { ProcessingAction, StatusTracker } from "@/features/processing";
 import { requireRole } from "@/lib/guards";
 
 export const metadata: Metadata = { title: evaluations.reviewerTitle };
@@ -26,8 +26,15 @@ export default async function ReviewEvaluationPage({ params }: PageProps<"/app/r
       <EvaluationNotices evaluation={evaluation} />
       <Card className="flex flex-col gap-4">
         <CardTitle>{evaluations.progressTitle}</CardTitle>
-        <ProgressTimeline steps={detail.progress} />
+        <StatusTracker
+          evaluationId={evaluation.id}
+          initialStatus={evaluation.status}
+          initialSteps={detail.progress}
+        />
       </Card>
+      {evaluation.status === "FAILED" ? (
+        <ProcessingAction evaluationId={evaluation.id} kind="retry" />
+      ) : null}
     </>
   );
 }

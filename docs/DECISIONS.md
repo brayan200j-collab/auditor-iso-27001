@@ -163,3 +163,15 @@ Format: context · decision · alternatives · reason. Newest last.
 - **Decision:** `AUTH_RATE_LIMIT_PER_IP` and `AUTH_RATE_LIMIT_PER_EMAIL` (server-only) default to 10/min and 5/15 min; only the generated local `.env.local` relaxes them.
 - **Alternatives:** disabling the limiter in development.
 - **Reason:** production keeps strict defaults without special code paths.
+
+## D-028 · Background jobs run as in-process asyncio tasks
+- **Context:** section 4 asks for FastAPI `BackgroundTasks` behind a `JobRunner` port, with `processing_jobs` and a recovery sweep. Jobs must also start without a request (recovery, chained steps).
+- **Decision:** `AsyncioJobRunner` (same process, same semantics as BackgroundTasks) executes jobs as asyncio tasks. Jobs are claimed with compare-and-set (QUEUED→RUNNING), send heartbeats, retry transient errors with backoff up to `JOB_MAX_ATTEMPTS`, and fail permanent ones (`PermanentJobError`) immediately; a final failure moves the evaluation to FAILED with a friendly reason. `recover()` runs at startup and every `JOB_SWEEP_INTERVAL_SECONDS`: orphaned QUEUED jobs are resubmitted, stale RUNNING jobs requeued or failed as `INTERRUPTED`.
+- **Alternatives:** Celery/Redis (forbidden), FastAPI BackgroundTasks only (cannot run without a request).
+- **Reason:** no extra infrastructure; durability comes from the database. Limitation: a single API instance should run the sweeper (documented in RUNBOOK).
+
+## D-029 · Chunking strategy
+- **Context:** evidence must stay traceable to document and page.
+- **Decision:** chunks never cross pages; numbered headings are detected per line and start a new chunk (their text becomes the chunk's `section`); sentences are packed up to ~900 characters (hard cap 1200) with ~150 characters of overlap. PostgreSQL computes the `spanish` tsvector in a generated column.
+- **Alternatives:** fixed-size windows; embeddings (out of scope).
+- **Reason:** predictable, testable (property test), and good enough for keyword FTS.

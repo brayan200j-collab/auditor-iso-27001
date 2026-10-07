@@ -8,6 +8,7 @@ from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from auditor.analysis.api.router import router as analysis_router
 from auditor.audit.api.router import router as audit_router
 from auditor.companies.api.router import router as companies_router
 from auditor.config import Settings, load_settings
@@ -40,6 +41,7 @@ def create_app(settings: Settings | None = None, container: AppContainer | None 
     @asynccontextmanager
     async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
         logger.info("startup", app_env=settings.app_env, llm_provider=settings.llm_provider)
+        await container.start_background()
         yield
         await container.aclose()
 
@@ -65,6 +67,7 @@ def create_app(settings: Settings | None = None, container: AppContainer | None 
         companies_router,
         evaluations_router,
         documents_router,
+        analysis_router,
         audit_router,
     ):
         app.include_router(router)

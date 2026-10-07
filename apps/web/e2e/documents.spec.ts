@@ -50,3 +50,25 @@ test("a scanned PDF is rejected with a clear message", async ({ page }) => {
     "parece un documento escaneado",
   );
 });
+
+test("starting the analysis extracts the PDF and the timeline advances by itself", async ({
+  page,
+}) => {
+  await login(page, "SME");
+  await newEvaluationWithConsent(page);
+  await page
+    .getByLabel("Seleccionar PDF")
+    .setInputFiles(resolve(FIXTURES, "politica_seguridad_sintetica.pdf"));
+  await expect(page.getByRole("status").filter({ hasText: "PDF válido" })).toBeVisible();
+
+  await page.getByRole("button", { name: "Iniciar análisis" }).click();
+  const timeline = page.getByRole("list", { name: "Progreso" });
+  await expect(timeline.getByRole("listitem").nth(1)).toContainText("completado", {
+    timeout: 30_000,
+  });
+  await expect(timeline.getByRole("listitem").nth(2)).toContainText("en curso");
+  await expect(page.getByText("Analizando", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Eliminar politica_seguridad_sintetica.pdf" }),
+  ).toHaveCount(0);
+});

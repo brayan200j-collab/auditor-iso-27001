@@ -96,6 +96,8 @@ def main() -> None:
         "LLM_PROVIDER": previous.get("LLM_PROVIDER", "fake"),
         "LLM_API_KEY": previous.get("LLM_API_KEY", ""),
         "LLM_MODEL": previous.get("LLM_MODEL", "openai/gpt-oss-120b"),
+        # Local only: repeated E2E runs create many evaluations. Pilot keeps the default (10).
+        "MAX_EVALUATIONS_PER_COMPANY": "500",
     }
     for role in SEED_ROLES:
         backend[f"SEED_{role}_EMAIL"] = previous.get(f"SEED_{role}_EMAIL", SEED_EMAILS[role])

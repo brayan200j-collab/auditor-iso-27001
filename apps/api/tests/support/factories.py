@@ -74,3 +74,17 @@ async def create_evaluation(
     session.add(AnalysisRunModel(evaluation_id=evaluation.id, run_number=1))
     await session.commit()
     return evaluation.id
+
+
+async def seed_checklist(session: AsyncSession) -> None:
+    from pathlib import Path
+
+    from auditor.checklist.application.import_checklist import ImportChecklist
+    from auditor.checklist.infrastructure.repository import SqlChecklistRepository
+    from auditor.checklist.infrastructure.yaml_loader import load_checklist_definition
+    from auditor.shared.infrastructure.database import SessionUnitOfWork
+
+    seed = Path(__file__).resolve().parents[4] / "seeds" / "checklist_v1.yaml"
+    await ImportChecklist(SqlChecklistRepository(session), SessionUnitOfWork(session)).execute(
+        load_checklist_definition(seed)
+    )

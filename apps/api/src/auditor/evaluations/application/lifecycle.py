@@ -10,6 +10,7 @@ from uuid import UUID
 
 from auditor.evaluations.application.ports import AnalysisRunRepository, EvaluationRepository
 from auditor.evaluations.domain.evaluation import AnalysisRun, Evaluation, FailureReason
+from auditor.evaluations.domain.scope import AllEvaluations
 from auditor.evaluations.domain.state_machine import Party, Trigger
 from auditor.shared.application.ports import AuditLogger, Clock
 from auditor.shared.domain.audit import AuditAction, AuditEntry, AuditOutcome, AuditValue
@@ -84,3 +85,22 @@ class EvaluationLifecycle:
 
     async def current_run(self, evaluation: Evaluation) -> AnalysisRun:
         return await self._runs.current(evaluation)
+
+    async def load_for_system(self, evaluation_id: UUID) -> Evaluation | None:
+        """Unscoped load for background jobs (never reachable from an HTTP request)."""
+        return await self._evaluations.get(evaluation_id, AllEvaluations())
+
+    async def lock(self, evaluation_id: UUID) -> None:
+        await self._evaluations.lock(evaluation_id)
+
+    async def bind_checklist(self, run: AnalysisRun, checklist_version_id: UUID) -> None:
+        await self._runs.bind_checklist(run.id, checklist_version_id)
+
+    async def get_run(self, run_id: UUID) -> AnalysisRun | None:
+        return await self._runs.get(run_id)
+
+    async def mark_run_started(self, run: AnalysisRun) -> None:
+        await self._runs.mark_started(run.id)
+
+    async def mark_run_finished(self, run: AnalysisRun) -> None:
+        await self._runs.mark_finished(run.id)
