@@ -67,7 +67,9 @@ async def test_full_analysis_reaches_human_review_with_thirty_findings(
     engine: AsyncEngine,
     world: World,
 ) -> None:
-    evaluation_id, run_id = await extracted_run(app, client, session, world, pdfs.policy_pdf())
+    evaluation_id, run_id = await extracted_run(
+        app, client, session, world, pdfs.policy_pdf(), analyse=True
+    )
     await app.state.container.runner.drain()
 
     evaluation = await _evaluation(session, evaluation_id)
@@ -101,7 +103,9 @@ async def test_interrupted_analysis_resumes_without_duplicating_findings(
         max_backoff_seconds=0.01,
         semaphore=asyncio.Semaphore(1),
     )
-    evaluation_id, run_id = await extracted_run(app, client, session, world, pdfs.policy_pdf())
+    evaluation_id, run_id = await extracted_run(
+        app, client, session, world, pdfs.policy_pdf(), analyse=True
+    )
     await container.runner.drain()
 
     failed = await _evaluation(session, evaluation_id)
@@ -137,7 +141,9 @@ async def test_quota_exhaustion_fails_the_evaluation_clearly(
     app: FastAPI, client: httpx.AsyncClient, session: AsyncSession, world: World
 ) -> None:
     app.state.container.settings.max_llm_calls_per_evaluation = 3
-    evaluation_id, _ = await extracted_run(app, client, session, world, pdfs.policy_pdf())
+    evaluation_id, _ = await extracted_run(
+        app, client, session, world, pdfs.policy_pdf(), analyse=True
+    )
     await app.state.container.runner.drain()
     failed = await _evaluation(session, evaluation_id)
     assert (failed.status, failed.failure_reason) == ("FAILED", "QUOTA_EXCEEDED")

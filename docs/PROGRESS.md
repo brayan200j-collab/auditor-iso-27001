@@ -24,6 +24,9 @@ Source of truth for the continuous execution (CLAUDE.md section 0). Read this fi
 | S17 | Hardening: headers, rate limiting, security pass, accessibility, performance | pendiente | | | |
 | S18 | Full E2E, A/B isolation, production Dockerfiles, docs, blockers retry, final report | pendiente | | | |
 
+## Incidents
+- 2026-10-07: commit 1651407 (S09) was created while `make check` had 4 failing tests (S06/S08 tests still expected the pipeline to stop at ANALYZING). Fixed in the following commit; commits are now chained as `make check && git commit`.
+
 ## How to resume
 1. `make supabase-start && make env` (Supabase local + `.env`).
 2. `docker compose build api-dev` if the image is missing.

@@ -60,7 +60,7 @@ async def _drain(app: FastAPI) -> None:
     await app.state.container.runner.drain()
 
 
-async def test_start_extracts_chunks_and_moves_to_analysis(
+async def test_start_extracts_chunks_and_runs_the_analysis(
     app: FastAPI, client: httpx.AsyncClient, session: AsyncSession, world: World
 ) -> None:
     evaluation_id = await _received_evaluation(client, session, world)
@@ -73,7 +73,7 @@ async def test_start_extracts_chunks_and_moves_to_analysis(
     await _drain(app)
 
     evaluation = await _evaluation(session, evaluation_id)
-    assert evaluation.status == "ANALYZING"
+    assert evaluation.status == "PENDING_REVIEW"
     pages = (
         await session.scalars(
             select(DocumentChunkModel.page).where(DocumentChunkModel.evaluation_id == evaluation_id)
@@ -94,7 +94,7 @@ async def test_start_extracts_chunks_and_moves_to_analysis(
         ).all()
     )
     assert jobs["EXTRACTION"] == "SUCCEEDED"
-    assert jobs["ANALYSIS"] in {"QUEUED", "RUNNING"}
+    assert jobs["ANALYSIS"] == "SUCCEEDED"
 
 
 async def test_spanish_full_text_search_finds_the_asset_inventory_on_page_three(
@@ -210,7 +210,7 @@ async def test_unreadable_document_fails_and_can_be_retried(
     assert retry.status_code == 202
     assert retry.json()["status"] == "EXTRACTING"
     await _drain(app)
-    assert (await _evaluation(session, evaluation_id)).status == "ANALYZING"
+    assert (await _evaluation(session, evaluation_id)).status == "PENDING_REVIEW"
 
 
 async def test_recovery_resumes_stale_jobs_and_fails_exhausted_ones(
@@ -243,6 +243,6 @@ async def test_recovery_resumes_stale_jobs_and_fails_exhausted_ones(
     await app.state.container.runner.recover()
     await _drain(app)
 
-    assert (await _evaluation(session, resumable)).status == "ANALYZING"
+    assert (await _evaluation(session, resumable)).status == "PENDING_REVIEW"
     failed = await _evaluation(session, exhausted)
     assert (failed.status, failed.failure_reason) == ("FAILED", "INTERRUPTED")
