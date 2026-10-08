@@ -28,8 +28,10 @@ $API uv run alembic upgrade head
 step "3/6 Seed checklist v1 and development users"
 $API uv run python -m auditor.seed
 
-step "4/6 API"
-$COMPOSE up -d --force-recreate --wait api
+step "4/6 API (deterministic FakeLLMProvider: tests never call a real AI provider)"
+# Restore the API with the developer's own .env (e.g. Groq) when the run ends, even on failure.
+trap '$COMPOSE up -d --force-recreate api >/dev/null 2>&1 || true' EXIT
+LLM_PROVIDER=fake LLM_API_KEY= $COMPOSE up -d --force-recreate --wait api
 
 step "5/6 Isolation and authorization suites"
 $API uv run pytest -q -p no:cacheprovider \

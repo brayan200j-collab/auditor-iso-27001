@@ -48,7 +48,10 @@ created by `make seed` with the random passwords stored in `.env` (`SEED_*_PASSW
 never created in pilot or production. Locally the AI is the deterministic `FakeLLMProvider`; use
 only the synthetic PDFs in `apps/web/e2e/fixtures/` (regenerate with `make fixtures`).
 
-To use Groq locally: `LLM_PROVIDER=groq`, `LLM_API_KEY=<key>` in `.env`, then restart the API.
+To use Groq locally: `LLM_PROVIDER=groq`, `LLM_API_KEY=<key>` in `.env` (git-ignored), then
+`docker compose up -d --force-recreate api`. Use only synthetic PDFs. `make acceptance` always runs
+with the fake provider and restores your configuration afterwards; before running `make e2e` by
+itself, switch the API back to `LLM_PROVIDER=fake` (tests never call a real provider).
 
 ## Quality gates
 

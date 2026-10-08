@@ -94,9 +94,10 @@ improvement plan without promised deadlines (D-034).
   2–3 SME pilot, not more.
 
 ## 7. Not verified
-- **GroqProvider against the real API:** implemented from the official documentation (D-030)
-  and tested only with a mock transport; no real key was used. Model name, structured-output
-  support and current free-tier limits must be re-checked.
+- **GroqProvider against the real API:** verified on 2026-10-08 with the team's key: the account
+  lists `openai/gpt-oss-120b`, and one call with a synthetic fragment returned a finding that
+  validates against the strict schema (476 input / 264 output tokens). A full 30-criterion
+  analysis and the current free-tier limits were not measured.
 - **GeminiProvider:** the documentation site was unreachable from this environment and no key was
   used (D-039).
 - **Provider privacy terms:** Groq's data-processing and retention terms have not been reviewed.
@@ -110,7 +111,7 @@ improvement plan without promised deadlines (D-034).
 - **Trivy image scans:** configured in CI; not executed locally.
 
 ## 8. Connecting real keys (no code changes)
-1. Groq: create an API key; set `LLM_PROVIDER=groq`, `LLM_API_KEY`, `LLM_MODEL=openai/gpt-oss-120b`
+1. Groq (done locally on 2026-10-08): create an API key; set `LLM_PROVIDER=groq`, `LLM_API_KEY`, `LLM_MODEL=openai/gpt-oss-120b`
    in the API environment (locally in `.env`, then restart the API). Run one evaluation with a
    **synthetic** PDF and check `llm_calls` and the metrics screen.
 2. Supabase cloud: set `DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_PUBLIC_URL`,
