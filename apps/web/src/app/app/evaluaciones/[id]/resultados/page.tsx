@@ -4,7 +4,13 @@ import Link from "next/link";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Alert } from "@/components/ui/alert";
 import { legal, resultsCopy as copy } from "@/content/es";
-import { CoverageCard, getResults, ImprovementPlan, ResultsTable } from "@/features/results";
+import {
+  CoverageCard,
+  getResults,
+  ImprovementPlan,
+  ReportDownload,
+  ResultsTable,
+} from "@/features/results";
 import { formatDate } from "@/lib/format";
 import { requireRole } from "@/lib/guards";
 
@@ -13,7 +19,7 @@ export const metadata: Metadata = { title: copy.title };
 export default async function ResultsPage({
   params,
 }: PageProps<"/app/evaluaciones/[id]/resultados">) {
-  await requireRole("SME", "REVIEWER", "ADMIN");
+  const user = await requireRole("SME", "REVIEWER", "ADMIN");
   const { id } = await params;
   const results = await getResults(id);
 
@@ -39,6 +45,7 @@ export default async function ResultsPage({
       />
       <Alert tone="neutral">{legal.scopeDisclaimer}</Alert>
       <CoverageCard coverage={results.coverage} />
+      <ReportDownload evaluationId={id} canGenerate={user.role !== "SME"} />
       <ImprovementPlan evaluationId={id} results={results} />
       <section aria-labelledby="hallazgos" className="flex flex-col gap-3">
         <h2 id="hallazgos" className="text-foreground text-lg font-semibold">

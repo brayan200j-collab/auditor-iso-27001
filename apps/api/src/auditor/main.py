@@ -19,6 +19,7 @@ from auditor.documents.api.router import router as documents_router
 from auditor.evaluations.api.router import router as evaluations_router
 from auditor.identity.api.router import router as identity_router
 from auditor.identity.api.users_router import router as users_router
+from auditor.reports.api.router import router as reports_router
 from auditor.review.api.router import router as review_router
 from auditor.shared.api.body_limit import BodySizeLimitMiddleware
 from auditor.shared.api.dependencies import get_resolver
@@ -72,6 +73,7 @@ def create_app(settings: Settings | None = None, container: AppContainer | None 
         analysis_router,
         checklist_router,
         review_router,
+        reports_router,
         audit_router,
     ):
         app.include_router(router)

@@ -72,3 +72,6 @@ async def client(app: FastAPI) -> AsyncIterator[httpx.AsyncClient]:
     transport = httpx.ASGITransport(app=app, raise_app_exceptions=False)
     async with httpx.AsyncClient(transport=transport, base_url="http://test") as http:
         yield http
+    # Background jobs (e.g. the report queued on approval) must finish before the next test
+    # truncates the tables.
+    await app.state.container.runner.drain()

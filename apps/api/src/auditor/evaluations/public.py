@@ -9,6 +9,7 @@ from auditor.evaluations.application.ports import (
     AnalysisRunRepository,
     ConsentRepository,
     EvaluationFilters,
+    NameDirectory,
 )
 from auditor.evaluations.application.views import EvaluationSummary
 from auditor.evaluations.domain.consent import CURRENT_CONSENT
@@ -31,6 +32,7 @@ __all__ = [
     "EvaluationSummary",
     "FailureReason",
     "ListEvaluations",
+    "NameDirectory",
     "Party",
     "Trigger",
 ]

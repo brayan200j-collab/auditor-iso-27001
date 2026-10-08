@@ -122,6 +122,18 @@ class SqlJobRepository:
         model = await self._session.get(ProcessingJobModel, job_id, populate_existing=True)
         return _to_record(model) if model else None
 
+    async def latest_for(self, evaluation_id: UUID, kind: JobKind) -> JobRecord | None:
+        model = await self._session.scalar(
+            select(ProcessingJobModel)
+            .where(
+                ProcessingJobModel.evaluation_id == evaluation_id,
+                ProcessingJobModel.kind == kind,
+            )
+            .order_by(ProcessingJobModel.queued_at.desc())
+            .limit(1)
+        )
+        return _to_record(model) if model else None
+
     async def recoverable(self, stale_before: datetime) -> list[JobRecord]:
         models = await self._session.scalars(
             select(ProcessingJobModel)

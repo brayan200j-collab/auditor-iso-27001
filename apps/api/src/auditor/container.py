@@ -69,6 +69,7 @@ from auditor.evaluations.application.get_status import GetEvaluationStatus
 from auditor.evaluations.application.give_consent import GiveConsent
 from auditor.evaluations.application.lifecycle import EvaluationLifecycle
 from auditor.evaluations.application.list_evaluations import ListEvaluations
+from auditor.evaluations.domain.evaluation import Evaluation
 from auditor.evaluations.infrastructure.repositories import (
     SqlAnalysisRunRepository,
     SqlConsentRepository,
@@ -85,6 +86,13 @@ from auditor.identity.application.update_user import UpdateUser
 from auditor.identity.infrastructure.supabase_admin import SupabaseAuthAdmin
 from auditor.identity.infrastructure.token_verifiers import SupabaseJwtVerifier, TestJwtVerifier
 from auditor.identity.infrastructure.user_repository import SqlUserRepository
+from auditor.reports.application.download_report import DownloadReport
+from auditor.reports.application.generate_report import GenerateReport
+from auditor.reports.application.get_report_status import GetReportStatus
+from auditor.reports.application.request_report import RequestReport
+from auditor.reports.application.schedule_report import ScheduleReport
+from auditor.reports.infrastructure.renderer import WeasyPrintRenderer
+from auditor.reports.infrastructure.repositories import SqlReportRepository
 from auditor.review.application.approve_evaluation import ApproveEvaluation
 from auditor.review.application.get_finding import GetFinding
 from auditor.review.application.get_finding_history import GetFindingHistory
@@ -171,6 +179,7 @@ class AppContainer:
     llm_backend: LLMProvider
     llm: RetryingProvider
     prompts: FilePromptTemplates
+    renderer: WeasyPrintRenderer = field(default_factory=WeasyPrintRenderer)
     clock: SystemClock = field(default_factory=SystemClock)
     factories: dict[type[Any], Factory] = field(default_factory=dict)
 
@@ -242,7 +251,13 @@ class AppContainer:
                 await scope.resolve(MarkProcessingFailed).execute(job, reason)
 
         self.runner.register(JobKind.EXTRACTION, extraction)
+
+        async def report(job: JobRecord) -> None:
+            async with self.scope() as scope:
+                await scope.resolve(GenerateReport).execute(job)
+
         self.runner.register(JobKind.ANALYSIS, orchestrator.run)
+        self.runner.register(JobKind.REPORT, report)
         self.runner.on_failed(failed)
 
     async def start_background(self) -> None:
@@ -323,6 +338,10 @@ class RequestScope:
         return SqlFindingRepository(self.session)
 
     @cached_property
+    def reports(self) -> SqlReportRepository:
+        return SqlReportRepository(self.session)
+
+    @cached_property
     def finals(self) -> SqlFinalFindingRepository:
         return SqlFinalFindingRepository(self.session)
 
@@ -354,6 +373,11 @@ class RequestScope:
 
     async def resolve_actor(self, bearer_token: str | None) -> Actor:
         return await ResolveActor(self.container.token_verifier, self.users).execute(bearer_token)
+
+
+async def _schedule(scope: RequestScope, evaluation: Evaluation, actor: Actor) -> None:
+    """Approval queues the report; a failure here never undoes the approval (retry later)."""
+    await scope.resolve(ScheduleReport).execute(evaluation, actor.user_id)
 
 
 def build_factories() -> dict[type[Any], Factory]:
@@ -493,7 +517,40 @@ def build_factories() -> dict[type[Any], Factory]:
             s.container.clock,
         ),
         ApproveEvaluation: lambda s: ApproveEvaluation(
-            s.evaluation_access, s.lifecycle, s.findings, s.finals, s.uow
+            s.evaluation_access,
+            s.lifecycle,
+            s.findings,
+            s.finals,
+            s.uow,
+            after_approval=lambda evaluation, actor: _schedule(s, evaluation, actor),
+        ),
+        ScheduleReport: lambda s: ScheduleReport(
+            s.lifecycle, s.jobs, s.container.runner, s.uow, s.settings.job_max_attempts
+        ),
+        RequestReport: lambda s: RequestReport(s.evaluation_access, s.resolve(ScheduleReport)),
+        GetReportStatus: lambda s: GetReportStatus(s.evaluation_access, s.reports, s.jobs),
+        DownloadReport: lambda s: DownloadReport(
+            s.evaluation_access,
+            s.reports,
+            s.container.storage,
+            s.audit,
+            s.uow,
+            s.settings.reports_bucket,
+            s.settings.signed_url_ttl_seconds,
+        ),
+        GenerateReport: lambda s: GenerateReport(
+            s.lifecycle,
+            s.resolve(GetApprovedResults),
+            s.documents,
+            s.companies,
+            s.users,
+            s.reports,
+            s.container.renderer,
+            s.container.storage,
+            s.audit,
+            s.uow,
+            s.container.clock,
+            s.settings.reports_bucket,
         ),
         RejectEvaluation: lambda s: RejectEvaluation(s.evaluation_access, s.lifecycle, s.uow),
         ListChecklistVersions: lambda s: ListChecklistVersions(s.checklists),

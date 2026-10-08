@@ -496,7 +496,7 @@ async def approved_results(
     return ResultsResponse(
         evaluation_id=view.evaluation.id,
         title=view.evaluation.title,
-        approved_at=view.evaluation.updated_at,
+        approved_at=view.evaluation.approved_at or view.evaluation.updated_at,
         coverage=CoverageResponse(
             total=view.coverage.total,
             found=view.coverage.found,

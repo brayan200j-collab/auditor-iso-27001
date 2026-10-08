@@ -502,6 +502,18 @@ export const resultsCopy = {
   backToResults: "Volver a los resultados",
   reviewerNotes: "Observaciones del revisor",
   notAvailable: "Los resultados estarán disponibles cuando termine la revisión humana.",
+  report: {
+    title: "Informe PDF",
+    description:
+      "Informe de autoevaluación inicial con la cobertura documental, los hallazgos revisados y el plan inicial de mejora.",
+    download: "Descargar informe PDF",
+    downloading: "Preparando la descarga…",
+    pending: "El informe se está generando. Esta página se actualizará sola.",
+    failed: "No fue posible generar el informe. Puedes intentarlo de nuevo.",
+    none: "El informe aún no se ha generado.",
+    generate: "Generar informe",
+    version: (version: number, date: string) => `Versión ${version} · generado el ${date}`,
+  },
 } as const;
 
 export const reviewCopy = {

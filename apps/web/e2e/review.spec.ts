@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { expect, test, type Page } from "@playwright/test";
@@ -95,9 +96,18 @@ test("a reviewer edits a finding, approves the rest and approves the evaluation"
   await page.getByRole("link", { name: "Ver resultados aprobados" }).click();
   await expect(page.getByText("Cobertura documental preliminar")).toBeVisible();
   await expect(page.getByText(/de 30 criterios con evidencia documental/)).toBeVisible();
-  await expect(page.getByText("Plan inicial de mejora")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Plan inicial de mejora" })).toBeVisible();
   await expect(page.locator("main")).not.toContainText("%");
   await expect(page.locator("main")).not.toContainText("Nivel de confianza");
+
+  // The report was generated on approval; it downloads through a short-lived signed URL.
+  const downloadButton = page.getByRole("button", { name: "Descargar informe PDF" });
+  await expect(downloadButton).toBeVisible({ timeout: 60_000 });
+  const [download] = await Promise.all([page.waitForEvent("download"), downloadButton.click()]);
+  expect(download.suggestedFilename()).toBe("informe-autoevaluacion-inicial.pdf");
+  const pdf = await download.path();
+  expect(readFileSync(pdf).subarray(0, 5).toString()).toBe("%PDF-");
+  await expect(page.getByRole("heading", { name: "Plan inicial de mejora" })).toBeVisible();
   await page
     .getByRole("link", { name: /^Ver detalle de ISO-/ })
     .first()

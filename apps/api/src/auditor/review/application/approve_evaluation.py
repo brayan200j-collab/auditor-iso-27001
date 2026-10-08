@@ -28,7 +28,7 @@ async def _nothing(_evaluation: Evaluation, _actor: Actor) -> None:
 class ApproveEvaluation:
     """PENDING_REVIEW → APPROVED once every finding of the run has been reviewed.
 
-    Approval is final (the evaluation becomes immutable) and triggers the report generation.
+    Approval is final (the evaluation becomes immutable); once committed, the report is queued.
     """
 
     def __init__(
@@ -68,6 +68,6 @@ class ApproveEvaluation:
             actor_role=actor.role,
             details={"findings": len(findings)},
         )
-        await self._after_approval(approved, actor)
         await self._uow.commit()
+        await self._after_approval(approved, actor)
         return approved

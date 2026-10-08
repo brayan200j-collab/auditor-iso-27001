@@ -205,3 +205,9 @@ Format: context · decision · alternatives · reason. Newest last.
 - **Decision:** `GET /evaluations/{id}/findings` returns final findings only when the evaluation is APPROVED (409 `CONFLICT` before that, no data). Discarded findings are not shown; coverage reports found/partial/no-evidence counts out of the checklist total plus "no incluidos tras la revisión humana". No confidence or AI-only fields reach the company. Gaps (partial and no evidence) use the shared ordering (priority → risk → effort); the plan groups them in three phases by priority: critical/high "Abordar primero", medium "A continuación", low "Más adelante". No time frames are promised.
 - **Alternatives:** time-boxed phases (30/60/90 days); showing discarded criteria.
 - **Reason:** honest, actionable order without inventing deadlines; same use case feeds the PDF report.
+
+## D-035 · PDF report generation and download
+- **Context:** section 15: report only after approval, private storage, signed URL, audit.
+- **Decision:** after the approval commits, `ScheduleReport` queues a REPORT job (`ApproveEvaluation.after_approval`); `GenerateReport` builds the content from `GetApprovedResults` (reviewed findings only), renders Jinja2 (autoescape) → WeasyPrint with a URL fetcher that refuses every external resource, stores it at a system path in the private `reports` bucket and records `REPORT_GENERATED`. It is idempotent per analysis run; reviewers/admins can request it again (e.g. after a failure) with `POST /evaluations/{id}/report`, which returns 409 before approval. `GET /reports/{id}/download` checks scope, records `REPORT_DOWNLOADED` and returns a signed URL valid for `SIGNED_URL_TTL_SECONDS`; storage paths never reach the browser.
+- **Alternatives:** synchronous generation inside the approval request; streaming the PDF through the API.
+- **Reason:** approval stays fast and never fails because of rendering; downloads stay auditable without proxying files.

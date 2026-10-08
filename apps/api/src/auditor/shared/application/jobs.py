@@ -65,6 +65,10 @@ class JobRepository(Protocol):
 
     async def get(self, job_id: UUID) -> JobRecord | None: ...
 
+    async def latest_for(self, evaluation_id: UUID, kind: JobKind) -> JobRecord | None:
+        """Most recently queued job of a kind for an evaluation."""
+        ...
+
     async def recoverable(self, stale_before: datetime) -> list[JobRecord]:
         """QUEUED jobs and RUNNING jobs whose heartbeat is older than `stale_before`."""
         ...
