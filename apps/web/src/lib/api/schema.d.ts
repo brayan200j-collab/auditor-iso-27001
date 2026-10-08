@@ -299,6 +299,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/evaluations/{evaluation_id}/documents/upload-ticket": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ticket temporal para cargar un PDF directamente a la API */
+        post: operations["upload_ticket_api_v1_evaluations__evaluation_id__documents_upload_ticket_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/evaluations/{evaluation_id}/start": {
         parameters: {
             query?: never;
@@ -1597,6 +1614,13 @@ export interface components {
          * @enum {string}
          */
         Trigger: "DOCUMENT_UPLOADED" | "LAST_DOCUMENT_DELETED" | "START_ANALYSIS" | "EXTRACTION_COMPLETED" | "ANALYSIS_COMPLETED" | "PROCESSING_FAILED" | "RETRY_EXTRACTION" | "RETRY_ANALYSIS" | "APPROVE" | "REJECT" | "NEW_DOCUMENT_AFTER_REJECTION";
+        /** UploadTicketResponse */
+        UploadTicketResponse: {
+            /** Ticket */
+            ticket: string;
+            /** Expires In */
+            expires_in: number;
+        };
         /** UserCreateRequest */
         UserCreateRequest: {
             /** Email */
@@ -3383,7 +3407,10 @@ export interface operations {
     upload_document_api_v1_evaluations__evaluation_id__documents_post: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Ticket de carga temporal (alternativa al JWT) */
+                "X-Upload-Ticket"?: string | null;
+            };
             path: {
                 evaluation_id: string;
             };
@@ -3494,6 +3521,98 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Solicitud con formato no válido */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No autenticado */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Sin permiso */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflicto con el estado actual */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Archivo demasiado grande */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Datos no válidos */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Límite de uso alcanzado */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    upload_ticket_api_v1_evaluations__evaluation_id__documents_upload_ticket_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                evaluation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadTicketResponse"];
+                };
             };
             /** @description Solicitud con formato no válido */
             400: {

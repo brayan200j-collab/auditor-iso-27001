@@ -97,9 +97,10 @@ def create_app(settings: Settings | None = None, container: AppContainer | None 
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.allowed_origins,
+        allow_origin_regex=settings.allowed_origin_regex,
         allow_credentials=True,
         allow_methods=["GET", "POST", "PATCH", "PUT", "DELETE"],
-        allow_headers=["authorization", "content-type", "x-request-id"],
+        allow_headers=["authorization", "content-type", "x-request-id", "x-upload-ticket"],
         expose_headers=["x-request-id"],
         max_age=600,
     )

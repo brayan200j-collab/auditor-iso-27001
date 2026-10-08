@@ -96,12 +96,17 @@ async def _handle_validation_error(_request: Request, exc: Exception) -> JSONRes
 def _allowed_methods(request: Request) -> str | None:
     """Methods documented for the requested path (Starlette reports only the first route's)."""
     path = request.url.path
-    methods: set[str] = set()
+    matches: list[tuple[int, set[str]]] = []
     for template, operations in request.app.openapi().get("paths", {}).items():
         pattern = "^" + re.sub(r"\{[^/]+\}", "[^/]+", template) + "$"
         if re.match(pattern, path):
-            methods.update(method.upper() for method in operations)
-    return ", ".join(sorted(methods)) if methods else None
+            matches.append((template.count("{"), {method.upper() for method in operations}))
+    if not matches:
+        return None
+    # The most specific templates win: "/documents/upload-ticket" is not "/documents/{id}".
+    fewest = min(params for params, _ in matches)
+    methods = set().union(*(found for params, found in matches if params == fewest))
+    return ", ".join(sorted(methods))
 
 
 async def _handle_http_error(request: Request, exc: Exception) -> JSONResponse:

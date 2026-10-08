@@ -13,7 +13,13 @@ import { preCheck } from "./validation";
 const refresh = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh }) }));
 
-const UPLOAD_URL = `${window.location.origin}/api/backend/api/v1/evaluations/:id/documents`;
+const TICKET_URL = `${window.location.origin}/api/backend/api/v1/evaluations/:id/documents/upload-ticket`;
+// PDFs go straight to the API (hosting limits function bodies), authorized by the ticket.
+const UPLOAD_URL = "http://api.test/api/v1/evaluations/:id/documents";
+
+function ticketHandler() {
+  return http.post(TICKET_URL, () => HttpResponse.json({ ticket: "ticket-123", expires_in: 300 }));
+}
 
 function pdfFile(name = "politica.pdf", bytes = 2048): File {
   return new File([new Uint8Array(bytes)], name, { type: "application/pdf" });
@@ -33,10 +39,13 @@ describe("preCheck", () => {
 });
 
 describe("UploadZone", () => {
-  it("uploads through the BFF and confirms the validation results", async () => {
+  it("uploads directly to the API with a ticket and confirms the validation results", async () => {
     let contentType: string | null = null;
+    let ticket: string | null = null;
     server.use(
+      ticketHandler(),
       http.post(UPLOAD_URL, ({ request }) => {
+        ticket = request.headers.get("x-upload-ticket");
         // jsdom's FormData cannot be re-parsed by Node's fetch here; the header proves multipart.
         contentType = request.headers.get("content-type");
         return HttpResponse.json(
@@ -61,11 +70,13 @@ describe("UploadZone", () => {
     expect(screen.getByText("5 páginas")).toBeInTheDocument();
     expect(screen.getByText(documentsCopy.textDetected)).toBeInTheDocument();
     expect(contentType).toMatch(/^multipart\/form-data; boundary=/);
+    expect(ticket).toBe("ticket-123");
     expect(refresh).toHaveBeenCalled();
   });
 
   it("shows the API's Spanish message when the server rejects the file", async () => {
     server.use(
+      ticketHandler(),
       http.post(UPLOAD_URL, () =>
         HttpResponse.json(
           {
@@ -80,6 +91,24 @@ describe("UploadZone", () => {
     renderWithQuery(<UploadZone evaluationId="e1" />);
     await userEvent.upload(screen.getByLabelText(documentsCopy.choose), pdfFile("escaneado.pdf"));
     expect(await screen.findByRole("alert")).toHaveTextContent("parece un documento escaneado");
+  });
+
+  it("explains when no upload ticket can be obtained", async () => {
+    server.use(
+      http.post(TICKET_URL, () =>
+        HttpResponse.json(
+          {
+            code: "FORBIDDEN",
+            message: "No tienes permiso para realizar esta acción.",
+            request_id: "r",
+          },
+          { status: 403 },
+        ),
+      ),
+    );
+    renderWithQuery(<UploadZone evaluationId="e1" />);
+    await userEvent.upload(screen.getByLabelText(documentsCopy.choose), pdfFile());
+    expect(await screen.findByRole("alert")).toHaveTextContent("No tienes permiso");
   });
 
   it("never calls the API for files that fail the client pre-check", async () => {

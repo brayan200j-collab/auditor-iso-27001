@@ -56,6 +56,7 @@ from auditor.companies.infrastructure.repository import SqlCompanyRepository
 from auditor.config import Settings
 from auditor.documents.application.delete_document import DeleteDocument
 from auditor.documents.application.extract_documents import ExtractRunDocuments
+from auditor.documents.application.issue_upload_ticket import IssueUploadTicket
 from auditor.documents.application.list_documents import ListDocuments
 from auditor.documents.application.ports import FileScanner, NoopFileScanner
 from auditor.documents.application.upload_document import UploadDocument, UploadLimits
@@ -86,6 +87,7 @@ from auditor.identity.application.list_users import ListUsers
 from auditor.identity.application.ports import AuthAdmin, TokenVerifier
 from auditor.identity.application.record_session_event import RecordSessionEvent
 from auditor.identity.application.resolve_actor import ResolveActor
+from auditor.identity.application.resolve_ticket_actor import ResolveTicketActor
 from auditor.identity.application.update_user import UpdateUser
 from auditor.identity.infrastructure.supabase_admin import SupabaseAuthAdmin
 from auditor.identity.infrastructure.token_verifiers import SupabaseJwtVerifier, TestJwtVerifier
@@ -202,6 +204,7 @@ class AppContainer:
     renderer: WeasyPrintRenderer = field(default_factory=WeasyPrintRenderer)
     clock: SystemClock = field(default_factory=SystemClock)
     retention_task: asyncio.Task[None] | None = None
+    upload_ticket_secret: bytes = field(default_factory=lambda: secrets.token_bytes(32))
     factories: dict[type[Any], Factory] = field(default_factory=dict)
 
     @classmethod
@@ -243,6 +246,10 @@ class AppContainer:
             clock=clock,
             factories=build_factories(),
         )
+        if settings.upload_ticket_secret is not None:
+            container.upload_ticket_secret = (
+                settings.upload_ticket_secret.get_secret_value().encode()
+            )
         container.register_jobs()
         return container
 
@@ -570,6 +577,12 @@ def build_factories() -> dict[type[Any], Factory]:
             s.finals,
             s.uow,
             after_approval=lambda evaluation, actor: _schedule(s, evaluation, actor),
+        ),
+        IssueUploadTicket: lambda s: IssueUploadTicket(
+            s.evaluation_access, s.container.upload_ticket_secret, s.container.clock
+        ),
+        ResolveTicketActor: lambda s: ResolveTicketActor(
+            s.users, s.container.upload_ticket_secret, s.container.clock
         ),
         PurgeExpiredDocuments: lambda s: PurgeExpiredDocuments(
             SqlRetentionStore(s.session),

@@ -38,9 +38,9 @@ class RateLimiter:
 
 
 def client_key(request: Request) -> str:
-    authorization = request.headers.get("authorization")
-    if authorization:
-        return "s:" + hashlib.sha256(authorization.encode()).hexdigest()[:32]
+    credential = request.headers.get("authorization") or request.headers.get("x-upload-ticket")
+    if credential:
+        return "s:" + hashlib.sha256(credential.encode()).hexdigest()[:32]
     return "ip:" + (request.client.host if request.client else "unknown")
 
 

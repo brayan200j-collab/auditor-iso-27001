@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildCsp, createNonce } from "./csp";
+import { buildCsp, createNonce, originOf } from "./csp";
 
 describe("buildCsp", () => {
   it("allows only nonce scripts and same-origin connections in production", () => {
@@ -19,6 +19,14 @@ describe("buildCsp", () => {
     expect(csp).toContain("'unsafe-eval'");
     expect(csp).toContain("connect-src 'self' ws:");
     expect(csp).not.toContain("upgrade-insecure-requests");
+  });
+});
+
+describe("API origin", () => {
+  it("allows connections to the API origin only, for direct uploads", () => {
+    const csp = buildCsp("n", false, originOf("https://api.example.com/some/path"));
+    expect(csp).toContain("connect-src 'self' https://api.example.com;");
+    expect(buildCsp("n", false, originOf("not a url"))).toContain("connect-src 'self';");
   });
 });
 

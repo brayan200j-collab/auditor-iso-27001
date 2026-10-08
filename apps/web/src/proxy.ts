@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-import { buildCsp, createNonce } from "@/lib/csp";
+import { buildCsp, createNonce, originOf } from "@/lib/csp";
 
 const PROTECTED_PREFIX = "/app";
 
@@ -11,7 +11,11 @@ const PROTECTED_PREFIX = "/app";
  */
 export async function proxy(request: NextRequest) {
   const nonce = createNonce();
-  const csp = buildCsp(nonce, process.env.NODE_ENV === "development");
+  const csp = buildCsp(
+    nonce,
+    process.env.NODE_ENV === "development",
+    originOf(process.env.NEXT_PUBLIC_API_URL),
+  );
   // Next.js reads the nonce from the request's CSP header and adds it to its own scripts.
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-nonce", nonce);

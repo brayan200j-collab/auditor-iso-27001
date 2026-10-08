@@ -55,6 +55,10 @@ class Settings(BaseSettings):
     reports_bucket: str = "reports"
 
     allowed_origins: Annotated[list[str], NoDecode] = Field(default_factory=list)
+    # Extra origins as a regular expression, e.g. the preview domains of the web host.
+    allowed_origin_regex: str | None = None
+    # Signs upload tickets; when unset a random per-process key is used (single API instance).
+    upload_ticket_secret: SecretStr | None = None
 
     llm_provider: LLMProviderName
     llm_api_key: SecretStr | None = None

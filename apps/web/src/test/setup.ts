@@ -4,6 +4,8 @@ import { afterAll, afterEach, beforeAll } from "vitest";
 
 import { server } from "./msw";
 
+process.env.NEXT_PUBLIC_API_URL ??= "http://api.test";
+
 beforeAll(() => server.listen({ onUnhandledFrame: "error" }));
 afterEach(() => {
   cleanup();
