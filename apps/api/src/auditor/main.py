@@ -17,6 +17,7 @@ from auditor.container import AppContainer
 from auditor.documents.api.router import UPLOAD_PATH_PATTERN
 from auditor.documents.api.router import router as documents_router
 from auditor.evaluations.api.router import router as evaluations_router
+from auditor.feedback.api.router import router as feedback_router
 from auditor.identity.api.router import router as identity_router
 from auditor.identity.api.users_router import router as users_router
 from auditor.reports.api.router import router as reports_router
@@ -74,6 +75,7 @@ def create_app(settings: Settings | None = None, container: AppContainer | None 
         checklist_router,
         review_router,
         reports_router,
+        feedback_router,
         audit_router,
     ):
         app.include_router(router)

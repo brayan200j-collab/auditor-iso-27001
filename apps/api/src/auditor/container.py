@@ -75,6 +75,8 @@ from auditor.evaluations.infrastructure.repositories import (
     SqlConsentRepository,
     SqlEvaluationRepository,
 )
+from auditor.feedback.application.submit_feedback import GetSurveyStatus, SubmitFeedback
+from auditor.feedback.infrastructure.repositories import SqlFeedbackRepository
 from auditor.identity.application.create_user import CreateUser
 from auditor.identity.application.get_profile import GetProfile
 from auditor.identity.application.get_user import GetUser
@@ -338,6 +340,10 @@ class RequestScope:
         return SqlFindingRepository(self.session)
 
     @cached_property
+    def feedback(self) -> SqlFeedbackRepository:
+        return SqlFeedbackRepository(self.session)
+
+    @cached_property
     def reports(self) -> SqlReportRepository:
         return SqlReportRepository(self.session)
 
@@ -524,6 +530,8 @@ def build_factories() -> dict[type[Any], Factory]:
             s.uow,
             after_approval=lambda evaluation, actor: _schedule(s, evaluation, actor),
         ),
+        SubmitFeedback: lambda s: SubmitFeedback(s.evaluation_access, s.feedback, s.audit, s.uow),
+        GetSurveyStatus: lambda s: GetSurveyStatus(s.evaluation_access, s.feedback),
         ScheduleReport: lambda s: ScheduleReport(
             s.lifecycle, s.jobs, s.container.runner, s.uow, s.settings.job_max_attempts
         ),

@@ -574,6 +574,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/feedback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Responder la encuesta de validación */
+        post: operations["submit_feedback_api_v1_feedback_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/evaluations/{evaluation_id}/feedback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Estado de la encuesta de la evaluación */
+        get: operations["survey_status_api_v1_evaluations__evaluation_id__feedback_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/audit-logs": {
         parameters: {
             query?: never;
@@ -1098,6 +1132,37 @@ export interface components {
          * @enum {string}
          */
         FailureReason: "EXTRACTION_ERROR" | "ANALYSIS_ERROR" | "INTERRUPTED" | "QUOTA_EXCEEDED";
+        /** FeedbackRequest */
+        FeedbackRequest: {
+            /**
+             * Evaluation Id
+             * Format: uuid
+             */
+            evaluation_id: string;
+            /** Usefulness */
+            usefulness: number;
+            /** Ease Of Use */
+            ease_of_use: number;
+            /** Trust In Results */
+            trust_in_results: number;
+            /** Actionable Recommendations */
+            actionable_recommendations: boolean;
+            /**
+             * Manual Time Hours
+             * @description Tiempo estimado sin el sistema, en horas
+             */
+            manual_time_hours: number | string;
+            /**
+             * System Time Hours
+             * @description Tiempo usando el sistema, en horas
+             */
+            system_time_hours: number | string;
+            /** Willingness To Use */
+            willingness_to_use: number;
+            willingness_to_pay: components["schemas"]["PayWillingness"];
+            /** Comments */
+            comments?: string | null;
+        };
         /** FinalFindingResponse */
         FinalFindingResponse: {
             /**
@@ -1172,6 +1237,11 @@ export interface components {
             /** Page Size */
             page_size: number;
         };
+        /**
+         * PayWillingness
+         * @enum {string}
+         */
+        PayWillingness: "YES" | "MAYBE" | "NO";
         /** PlanPhaseResponse */
         PlanPhaseResponse: {
             /**
@@ -1407,6 +1477,13 @@ export interface components {
          * @enum {string}
          */
         StepState: "DONE" | "CURRENT" | "FAILED" | "PENDING";
+        /** SurveyStatusResponse */
+        SurveyStatusResponse: {
+            /** Available */
+            available: boolean;
+            /** Submitted At */
+            submitted_at: string | null;
+        };
         /**
          * Trigger
          * @enum {string}
@@ -4925,6 +5002,178 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DownloadResponse"];
+                };
+            };
+            /** @description Solicitud con formato no válido */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No autenticado */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Sin permiso */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflicto con el estado actual */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Datos no válidos */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Límite de uso alcanzado */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    submit_feedback_api_v1_feedback_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FeedbackRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SurveyStatusResponse"];
+                };
+            };
+            /** @description Solicitud con formato no válido */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No autenticado */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Sin permiso */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflicto con el estado actual */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Datos no válidos */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Límite de uso alcanzado */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    survey_status_api_v1_evaluations__evaluation_id__feedback_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                evaluation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SurveyStatusResponse"];
                 };
             };
             /** @description Solicitud con formato no válido */

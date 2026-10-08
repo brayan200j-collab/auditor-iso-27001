@@ -108,6 +108,22 @@ test("a reviewer edits a finding, approves the rest and approves the evaluation"
   const pdf = await download.path();
   expect(readFileSync(pdf).subarray(0, 5).toString()).toBe("%PDF-");
   await expect(page.getByRole("heading", { name: "Plan inicial de mejora" })).toBeVisible();
+
+  // Validation survey: one answer per approved evaluation.
+  await page.getByRole("link", { name: "Responder encuesta" }).click();
+  const choose = (question: RegExp, option: string) =>
+    page.getByRole("group", { name: question }).getByText(option, { exact: true }).click();
+  await choose(/útiles/, "5");
+  await choose(/fácil/, "4");
+  await choose(/confianza/, "4");
+  await choose(/accionables/, "Sí");
+  await page.getByLabel(/sin la aplicación/).fill("16");
+  await page.getByLabel(/dedicaste/).fill("1,5");
+  await choose(/usarla de nuevo/, "5");
+  await choose(/Pagarías/, "Tal vez");
+  await page.getByRole("button", { name: "Enviar respuestas" }).click();
+  await expect(page.getByText("Gracias por responder la encuesta.")).toBeVisible();
+
   await page
     .getByRole("link", { name: /^Ver detalle de ISO-/ })
     .first()

@@ -3,7 +3,10 @@ import Link from "next/link";
 
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Alert } from "@/components/ui/alert";
-import { legal, resultsCopy as copy } from "@/content/es";
+import { buttonVariants } from "@/components/ui/button";
+import { Card, CardDescription, CardTitle } from "@/components/ui/card";
+import { legal, resultsCopy as copy, surveyCopy } from "@/content/es";
+import { getSurveyStatus } from "@/features/feedback";
 import {
   CoverageCard,
   getResults,
@@ -22,6 +25,7 @@ export default async function ResultsPage({
   const user = await requireRole("SME", "REVIEWER", "ADMIN");
   const { id } = await params;
   const results = await getResults(id);
+  const survey = user.role === "SME" && results ? await getSurveyStatus(id) : null;
 
   if (!results) {
     return (
@@ -46,6 +50,26 @@ export default async function ResultsPage({
       <Alert tone="neutral">{legal.scopeDisclaimer}</Alert>
       <CoverageCard coverage={results.coverage} />
       <ReportDownload evaluationId={id} canGenerate={user.role !== "SME"} />
+      {survey ? (
+        <Card className="flex flex-col gap-3">
+          <CardTitle>{surveyCopy.title}</CardTitle>
+          {survey.submitted_at ? (
+            <CardDescription>{surveyCopy.thanks}</CardDescription>
+          ) : (
+            <>
+              <CardDescription>{surveyCopy.invite}</CardDescription>
+              <div>
+                <Link
+                  href={`/app/evaluaciones/${id}/encuesta`}
+                  className={buttonVariants({ variant: "outline" })}
+                >
+                  {surveyCopy.open}
+                </Link>
+              </div>
+            </>
+          )}
+        </Card>
+      ) : null}
       <ImprovementPlan evaluationId={id} results={results} />
       <section aria-labelledby="hallazgos" className="flex flex-col gap-3">
         <h2 id="hallazgos" className="text-foreground text-lg font-semibold">

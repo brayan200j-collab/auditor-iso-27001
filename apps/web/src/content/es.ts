@@ -516,6 +516,37 @@ export const resultsCopy = {
   },
 } as const;
 
+export const surveyCopy = {
+  title: "Encuesta de validación",
+  description:
+    "Tus respuestas nos ayudan a validar si la herramienta es útil para PYMES. Toma unos 2 minutos.",
+  open: "Responder encuesta",
+  thanks: "Gracias por responder la encuesta.",
+  invite: "¿Nos cuentas qué te pareció? Responde una encuesta corta sobre esta evaluación.",
+  scaleHint: "1 = muy bajo · 5 = muy alto",
+  questions: {
+    usefulness: "¿Qué tan útiles te resultaron los resultados?",
+    ease_of_use: "¿Qué tan fácil fue usar la aplicación?",
+    trust_in_results: "¿Cuánta confianza te generan los resultados?",
+    actionable_recommendations: "¿Las recomendaciones son accionables para tu empresa?",
+    manual_time_hours: "¿Cuántas horas crees que te habría tomado esta revisión sin la aplicación?",
+    system_time_hours: "¿Cuántas horas dedicaste usando la aplicación?",
+    willingness_to_use: "¿Qué tan dispuesto estarías a usarla de nuevo?",
+    willingness_to_pay: "¿Pagarías por un servicio como este?",
+    comments: "Comentarios (opcional)",
+  },
+  hoursHint: "En horas; puedes usar decimales, por ejemplo 1,5.",
+  yes: "Sí",
+  no: "No",
+  pay: { YES: "Sí", MAYBE: "Tal vez", NO: "No" },
+  submit: "Enviar respuestas",
+  sent: "¡Gracias! Registramos tus respuestas.",
+  invalid: "Revisa las respuestas marcadas.",
+  required: "Elige una opción.",
+  hoursInvalid: "Escribe un número entre 0 y 1000.",
+  back: "Volver a los resultados",
+} as const;
+
 export const reviewCopy = {
   summaryTitle: "Resultado del análisis",
   evaluated: (total: number) => `${total} criterios evaluados`,

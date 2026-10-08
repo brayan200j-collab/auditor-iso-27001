@@ -211,3 +211,9 @@ Format: context · decision · alternatives · reason. Newest last.
 - **Decision:** after the approval commits, `ScheduleReport` queues a REPORT job (`ApproveEvaluation.after_approval`); `GenerateReport` builds the content from `GetApprovedResults` (reviewed findings only), renders Jinja2 (autoescape) → WeasyPrint with a URL fetcher that refuses every external resource, stores it at a system path in the private `reports` bucket and records `REPORT_GENERATED`. It is idempotent per analysis run; reviewers/admins can request it again (e.g. after a failure) with `POST /evaluations/{id}/report`, which returns 409 before approval. `GET /reports/{id}/download` checks scope, records `REPORT_DOWNLOADED` and returns a signed URL valid for `SIGNED_URL_TTL_SECONDS`; storage paths never reach the browser.
 - **Alternatives:** synchronous generation inside the approval request; streaming the PDF through the API.
 - **Reason:** approval stays fast and never fails because of rendering; downloads stay auditable without proxying files.
+
+## D-036 · Validation survey
+- **Context:** section 15: one survey per approved evaluation to measure pilot value.
+- **Decision:** `POST /feedback` (SME of the owning company only) accepts four 1–5 scales (usefulness, ease of use, trust, willingness to use), actionable recommendations (yes/no), estimated manual hours and hours using the system (0–1000, one decimal), willingness to pay (yes/maybe/no) and optional comments (≤ 2000). It returns 409 before approval and when an answer already exists (unique per evaluation); each answer is audited as `FEEDBACK_SUBMITTED`. The form accepts comma decimals and the server action validates again with the same schema.
+- **Alternatives:** free-text time estimates; allowing edits after submission.
+- **Reason:** comparable numbers for the pilot metrics (S14) and a single, unambiguous answer per evaluation.
