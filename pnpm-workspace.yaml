@@ -1,0 +1,13 @@
+packages:
+  - apps/web
+
+allowBuilds:
+  supabase: true
+  sharp: false
+  unrs-resolver: false
+  esbuild: true
+
+# Narrow audit exceptions. Each entry is justified in docs/DECISIONS.md (D-013) and reviewed weekly.
+auditConfig:
+  ignoreGhsas:
+    - GHSA-vfj7-8cjw-p6xm

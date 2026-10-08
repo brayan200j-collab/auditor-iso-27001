@@ -1,0 +1,12 @@
+title = "Auditor Virtual gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Test-only fixtures that are not secrets"
+paths = [
+  '''apps/api/tests/support/settings\.py''',
+  '''pnpm-lock\.yaml''',
+  '''apps/api/uv\.lock''',
+]

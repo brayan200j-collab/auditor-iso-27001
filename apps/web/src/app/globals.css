@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens — Auditor Virtual.
+ * Sober, professional palette. Every text/background pair used by components meets WCAG 2.1 AA.
+ */
+:root {
+  --background: #f6f8fb;
+  --surface: #ffffff;
+  --surface-muted: #eef2f7;
+  --foreground: #0f1b2d;
+  --muted-foreground: #4a5568;
+  --border: #d5dce6;
+  --ring: #1d5fa8;
+
+  --primary: #1f4e79;
+  --primary-hover: #183d5f;
+  --primary-foreground: #ffffff;
+  --secondary: #e6edf5;
+  --secondary-foreground: #1f4e79;
+
+  --success: #1e6b3a;
+  --success-soft: #e5f3ea;
+  --warning: #8a4b00;
+  --warning-soft: #fdf1df;
+  --danger: #a3241c;
+  --danger-soft: #fbe7e5;
+  --info: #1d5fa8;
+  --info-soft: #e5eef9;
+  --neutral: #4a5568;
+  --neutral-soft: #edf0f4;
+
+  --radius: 0.5rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-neutral: var(--neutral);
+  --color-neutral-soft: var(--neutral-soft);
+  --radius-md: var(--radius);
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

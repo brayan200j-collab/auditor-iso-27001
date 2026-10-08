@@ -1,0 +1,27 @@
+# Install with: uvx pre-commit install
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-yaml
+      - id: check-toml
+      - id: end-of-file-fixer
+        exclude: ^apps/web/src/lib/api/schema\.d\.ts$
+      - id: trailing-whitespace
+        exclude: ^apps/web/src/lib/api/schema\.d\.ts$
+      - id: check-added-large-files
+        args: ["--maxkb=600"]
+      - id: detect-private-key
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1
+    hooks:
+      - id: gitleaks
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.0
+    hooks:
+      - id: ruff-check
+        args: ["--config", "apps/api/pyproject.toml"]
+        files: ^apps/api/
+      - id: ruff-format
+        args: ["--config", "apps/api/pyproject.toml"]
+        files: ^apps/api/

@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Informe de autoevaluación inicial · {{ evaluation.title }}</title>
+<style>
+  @page {
+    size: A4;
+    margin: 22mm 18mm 20mm 18mm;
+    @bottom-left { content: "Auditor Virtual · Resultado preliminar sujeto a revisión"; font-family: "DejaVu Sans", sans-serif; font-size: 8pt; color: #64748b; }
+    @bottom-right { content: "Página " counter(page) " de " counter(pages); font-family: "DejaVu Sans", sans-serif; font-size: 8pt; color: #64748b; }
+  }
+  @page :first { @bottom-left { content: none; } @bottom-right { content: none; } }
+  body { font-family: "DejaVu Sans", sans-serif; font-size: 9.5pt; color: #0f172a; line-height: 1.45; }
+  h1 { font-size: 22pt; margin: 0 0 6mm; color: #0b3b66; }
+  h2 { font-size: 13pt; color: #0b3b66; border-bottom: 1px solid #cbd5e1; padding-bottom: 1.5mm; margin: 9mm 0 3mm; }
+  h3 { font-size: 10.5pt; margin: 0 0 1.5mm; }
+  .cover { page-break-after: always; padding-top: 40mm; }
+  .brand { font-size: 11pt; color: #475569; letter-spacing: 0.04em; text-transform: uppercase; }
+  .meta { margin-top: 12mm; border-collapse: collapse; }
+  .meta td { padding: 1.5mm 6mm 1.5mm 0; vertical-align: top; }
+  .meta td:first-child { color: #475569; }
+  .notice { border: 1px solid #cbd5e1; background: #f8fafc; padding: 3mm 4mm; margin: 4mm 0; }
+  table.grid { width: 100%; border-collapse: collapse; margin: 2mm 0; }
+  table.grid th, table.grid td { border: 1px solid #e2e8f0; padding: 1.5mm 2mm; text-align: left; vertical-align: top; }
+  table.grid th { background: #f1f5f9; font-weight: bold; }
+  table.grid tr { page-break-inside: avoid; }
+  .coverage li { margin: 1mm 0; font-size: 11pt; }
+  .finding { border: 1px solid #e2e8f0; padding: 3mm 4mm; margin: 0 0 4mm; page-break-inside: avoid; }
+  .badge { display: inline-block; padding: 0.4mm 2mm; border-radius: 2mm; font-size: 8pt; font-weight: bold; }
+  .FOUND { background: #dcfce7; color: #166534; }
+  .PARTIAL { background: #fef3c7; color: #92400e; }
+  .NO_DOCUMENTARY_EVIDENCE { background: #fee2e2; color: #991b1b; }
+  .muted { color: #64748b; }
+  blockquote { margin: 1.5mm 0; padding-left: 3mm; border-left: 2px solid #94a3b8; font-style: italic; }
+  .small { font-size: 8pt; }
+</style>
+</head>
+<body>
+
+<section class="cover">
+  <div class="brand">Auditor Virtual</div>
+  <p class="muted">Autoevaluación inicial de seguridad de la información.</p>
+  <h1>Informe de autoevaluación inicial</h1>
+  <p>Resultado preliminar sujeto a revisión, validado por una persona antes de su entrega.</p>
+  <table class="meta">
+    <tr><td>Empresa</td><td>{{ c.company_name }}</td></tr>
+    <tr><td>Evaluación</td><td>{{ evaluation.title }}</td></tr>
+    <tr><td>Fecha de aprobación</td><td>{{ approved_at | date }}</td></tr>
+    <tr><td>Fecha del informe</td><td>{{ c.generated_at | date }}</td></tr>
+    {% if c.reviewer_name %}<tr><td>Revisión humana</td><td>{{ c.reviewer_name }}</td></tr>{% endif %}
+  </table>
+  <div class="notice">Este resultado corresponde a una autoevaluación inicial y no constituye una certificación ISO/IEC 27001 ni reemplaza una auditoría realizada por un organismo acreditado.</div>
+</section>
+
+<h2>Alcance</h2>
+<p>Este informe contrasta la documentación aportada por la empresa con un checklist propio de {{ results.coverage.total }} criterios alineado con ISO/IEC 27001:2022, utilizando CIS Controls v8.1 y NIST CSF 2.0 como referencias complementarias. La inteligencia artificial propuso una clasificación por criterio a partir de fragmentos de los documentos; una persona revisó, ajustó o descartó cada propuesta antes de este informe. Solo se evalúa la evidencia documental: un criterio sin evidencia no significa que el control no exista en la práctica.</p>
+
+<h3>Documentos analizados</h3>
+{% if c.documents %}
+<table class="grid">
+  <tr><th>Documento</th><th>Páginas</th></tr>
+  {% for doc in c.documents %}<tr><td>{{ doc.name }}</td><td>{{ doc.pages }}</td></tr>{% endfor %}
+</table>
+{% else %}
+<p class="muted">Los documentos originales ya no están disponibles según la política de retención.</p>
+{% endif %}
+
+<h2>Resumen ejecutivo</h2>
+{% set cov = results.coverage %}
+{% set urgent = results.gaps | selectattr("final.values.priority", "in", ["CRITICAL", "HIGH"]) | list %}
+<p>Se revisaron {{ cov.total }} criterios. Se encontró evidencia documental en {{ cov.found }}, evidencia parcial en {{ cov.partial }} y no se encontró evidencia documental suficiente en {{ cov.no_evidence }}{% if cov.discarded %}; {{ cov.discarded }} no se incluyen tras la revisión humana{% endif %}.
+Se identificaron {{ results.gaps | length }} brechas, de las cuales {{ urgent | length }} tienen prioridad crítica o alta.</p>
+
+<h2>Cobertura documental preliminar</h2>
+<ul class="coverage">
+  <li>{{ cov.found }} de {{ cov.total }} criterios con evidencia documental</li>
+  <li>{{ cov.partial }} de {{ cov.total }} con evidencia parcial</li>
+  <li>{{ cov.no_evidence }} de {{ cov.total }} sin evidencia documental</li>
+  {% if cov.discarded %}<li>{{ cov.discarded }} de {{ cov.total }} no incluidos tras la revisión humana</li>{% endif %}
+</ul>
+
+<h2>Plan inicial de mejora</h2>
+<p class="muted">Brechas ordenadas por prioridad, luego por nivel de riesgo y luego por esfuerzo estimado.</p>
+{% if results.plan %}
+{% for phase, items in results.plan.items() %}
+<h3>{{ phases[phase] }}</h3>
+<table class="grid">
+  <tr><th>Criterio</th><th>Recomendación</th><th>Prioridad</th><th>Riesgo</th><th>Esfuerzo</th></tr>
+  {% for item in items %}
+  {% set v = item.final.values %}
+  <tr>
+    <td>{{ item.criterion.code }} · {{ item.criterion.name }}</td>
+    <td>{{ v.recommendation }}</td>
+    <td>{{ priority[v.priority] }}</td>
+    <td>{{ risk[v.risk_level] }}</td>
+    <td>{{ effort[v.effort] }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endfor %}
+{% else %}
+<p>No se identificaron brechas en los criterios revisados.</p>
+{% endif %}
+
+<h2>Hallazgos por criterio</h2>
+{% for item in results.items %}
+{% set v = item.final.values %}
+<div class="finding">
+  <h3>{{ item.criterion.code }} · {{ item.criterion.name }} <span class="badge {{ v.status }}">{{ status[v.status] }}</span></h3>
+  <p class="small muted">{{ status_text[v.status] }}</p>
+  <p><strong>Prioridad:</strong> {{ priority[v.priority] }} · <strong>Riesgo:</strong> {{ risk[v.risk_level] }} · <strong>Esfuerzo:</strong> {{ effort[v.effort] }}</p>
+  {% if v.gap %}<p><strong>Brecha:</strong> {{ v.gap }}</p>{% endif %}
+  {% if v.recommendation %}<p><strong>Recomendación:</strong> {{ v.recommendation }}</p>{% endif %}
+  {% if item.final.evidence %}
+  <p><strong>Evidencia:</strong></p>
+  {% for e in item.final.evidence %}
+  <p class="small muted">{{ results.document_names.get(e.document_id, "Documento") }} · Página {{ e.page }}</p>
+  <blockquote>{{ e.quote }}</blockquote>
+  {% endfor %}
+  {% endif %}
+  {% if item.final.reviewer_comment %}<p><strong>Observaciones del revisor:</strong> {{ item.final.reviewer_comment }}</p>{% endif %}
+  <p class="small muted">Referencias:
+    {% if item.criterion.iso_reference %}ISO/IEC 27001:2022 {{ item.criterion.iso_reference }}{% endif %}
+    {% if item.criterion.cis_reference %} · CIS Controls v8.1 {{ item.criterion.cis_reference }}{% endif %}
+    {% if item.criterion.nist_reference %} · NIST CSF 2.0 {{ item.criterion.nist_reference }}{% endif %}
+    {% if item.criterion.reference_status != "confirmed" %} (referencia por confirmar){% endif %}
+  </p>
+</div>
+{% endfor %}
+
+<h2>Descargo de alcance y privacidad</h2>
+<div class="notice">Este resultado corresponde a una autoevaluación inicial y no constituye una certificación ISO/IEC 27001 ni reemplaza una auditoría realizada por un organismo acreditado.</div>
+<p class="small">El MVP utiliza un proveedor de inteligencia artificial con nivel gratuito, sujeto a límites de solicitudes y consumo. Los documentos se procesan mediante un proveedor externo de inferencia bajo condiciones de tratamiento y privacidad que deben revisarse antes del piloto. El sistema minimiza la información enviada y no incorpora documentos empresariales a los conjuntos de prueba.</p>
+
+</body>
+</html>
