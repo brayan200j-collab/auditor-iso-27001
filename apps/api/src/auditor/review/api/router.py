@@ -302,6 +302,9 @@ class ResultsResponse(ApiModel):
     findings: list[ResultFindingResponse]
     gap_ids: list[UUID] = Field(description="Brechas ordenadas por prioridad, riesgo y esfuerzo")
     plan: list[PlanPhaseResponse]
+    documents_retained_until: datetime | None = Field(
+        description="Fecha a partir de la cual se eliminan los PDF originales y sus fragmentos"
+    )
 
 
 # ------------------------------------------------------------------ requests
@@ -510,4 +513,5 @@ async def approved_results(
             PlanPhaseResponse(phase=int(phase), finding_ids=[i.final.ai_finding_id for i in group])
             for phase, group in view.plan.items()
         ],
+        documents_retained_until=view.documents_retained_until,
     )

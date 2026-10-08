@@ -48,6 +48,11 @@ export default async function ResultsPage({
         }
       />
       <Alert tone="neutral">{legal.scopeDisclaimer}</Alert>
+      {results.documents_retained_until ? (
+        <p className="text-muted-foreground text-sm">
+          {copy.retention(formatDate(results.documents_retained_until))}
+        </p>
+      ) : null}
       <CoverageCard coverage={results.coverage} />
       <ReportDownload evaluationId={id} canGenerate={user.role !== "SME"} />
       {survey ? (

@@ -46,6 +46,7 @@ const results: Results = {
     { phase: 1, finding_ids: ["id-ISO-07"] },
     { phase: 3, finding_ids: ["id-ISO-02"] },
   ],
+  documents_retained_until: "2027-01-05T10:00:00Z",
 };
 
 describe("CoverageCard", () => {

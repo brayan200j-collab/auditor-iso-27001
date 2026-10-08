@@ -20,6 +20,7 @@ class Permission(StrEnum):
     MANAGE_COMPANIES = "MANAGE_COMPANIES"
     MANAGE_USERS = "MANAGE_USERS"
     MANAGE_CHECKLIST = "MANAGE_CHECKLIST"
+    MANAGE_RETENTION = "MANAGE_RETENTION"
     ASSIGN_REVIEWER = "ASSIGN_REVIEWER"
     VIEW_EVALUATIONS = "VIEW_EVALUATIONS"
     CREATE_EVALUATION = "CREATE_EVALUATION"
@@ -61,6 +62,7 @@ PERMISSION_MATRIX: MappingProxyType[Role, MappingProxyType[Permission, Scope]] =
                 Permission.RETRY_PROCESSING: _ALL,
                 Permission.VIEW_APPROVED_RESULTS: _ALL,
                 Permission.DOWNLOAD_REPORT: _ALL,
+                Permission.MANAGE_RETENTION: _ALL,
                 Permission.VIEW_AUDIT_LOGS: _ALL,
                 Permission.VIEW_METRICS: _ALL,
                 Permission.VIEW_ANONYMIZED_METRICS: _ALL,

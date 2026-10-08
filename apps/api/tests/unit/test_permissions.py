@@ -24,6 +24,7 @@ EXPECTED: dict[Permission, dict[Role, Scope]] = {
     Permission.MANAGE_COMPANIES: {A: ALL},
     Permission.MANAGE_USERS: {A: ALL},
     Permission.MANAGE_CHECKLIST: {A: ALL},
+    Permission.MANAGE_RETENTION: {A: ALL},
     Permission.ASSIGN_REVIEWER: {A: ALL},
     Permission.VIEW_EVALUATIONS: {A: ALL, R: ASSIGNED, S: OWN},
     Permission.CREATE_EVALUATION: {S: OWN},

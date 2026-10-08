@@ -78,6 +78,7 @@ class Settings(BaseSettings):
     extraction_timeout_seconds: float = Field(default=60.0, gt=0)
 
     retention_days: int = Field(default=90, ge=1)
+    retention_sweep_interval_seconds: int = Field(default=21600, ge=60)
     signed_url_ttl_seconds: int = Field(default=120, ge=10, le=3600)
 
     job_max_attempts: int = Field(default=3, ge=1)

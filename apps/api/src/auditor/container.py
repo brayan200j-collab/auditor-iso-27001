@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import secrets
 from collections.abc import AsyncIterator, Callable
 from contextlib import asynccontextmanager
@@ -98,6 +99,8 @@ from auditor.reports.application.request_report import RequestReport
 from auditor.reports.application.schedule_report import ScheduleReport
 from auditor.reports.infrastructure.renderer import WeasyPrintRenderer
 from auditor.reports.infrastructure.repositories import SqlReportRepository
+from auditor.retention.application.purge_expired import PurgeExpiredDocuments
+from auditor.retention.infrastructure.sql_retention_store import SqlRetentionStore
 from auditor.review.application.approve_evaluation import ApproveEvaluation
 from auditor.review.application.get_finding import GetFinding
 from auditor.review.application.get_finding_history import GetFindingHistory
@@ -122,7 +125,10 @@ from auditor.shared.infrastructure.database import (
     ping,
 )
 from auditor.shared.infrastructure.jobs import AsyncioJobRunner, SqlJobRepository
+from auditor.shared.infrastructure.logging import get_logger
 from auditor.shared.infrastructure.storage import LocalDiskStorage, SupabaseStorage
+
+logger = get_logger(__name__)
 
 Factory = Callable[["RequestScope"], Any]
 
@@ -186,6 +192,7 @@ class AppContainer:
     prompts: FilePromptTemplates
     renderer: WeasyPrintRenderer = field(default_factory=WeasyPrintRenderer)
     clock: SystemClock = field(default_factory=SystemClock)
+    retention_task: asyncio.Task[None] | None = None
     factories: dict[type[Any], Factory] = field(default_factory=dict)
 
     @classmethod
@@ -268,11 +275,28 @@ class AppContainer:
     async def start_background(self) -> None:
         await self.runner.recover()
         self.runner.start_sweeper(self.settings.job_sweep_interval_seconds)
+        self.retention_task = asyncio.get_running_loop().create_task(self._retention_loop())
+
+    async def _retention_loop(self) -> None:
+        """Purges expired documents at startup and then every retention sweep interval."""
+        while True:
+            try:
+                async with self.scope() as scope:
+                    summary = await scope.resolve(PurgeExpiredDocuments).execute()
+                if summary.documents:
+                    logger.info("retention_purged", documents=summary.documents)
+            except Exception:
+                logger.exception("retention_sweep_failed")
+            await asyncio.sleep(self.settings.retention_sweep_interval_seconds)
 
     async def is_ready(self) -> bool:
         return await ping(self.engine)
 
     async def aclose(self) -> None:
+        if self.retention_task is not None:
+            self.retention_task.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await self.retention_task
         await self.runner.stop()
         await self.http.aclose()
         await self.engine.dispose()
@@ -510,7 +534,12 @@ def build_factories() -> dict[type[Any], Factory]:
             s.evaluation_access, s.findings, s.human_reviews
         ),
         GetApprovedResults: lambda s: GetApprovedResults(
-            s.evaluation_access, s.lifecycle, s.finals, s.checklists, s.documents
+            s.evaluation_access,
+            s.lifecycle,
+            s.finals,
+            s.checklists,
+            s.documents,
+            s.settings.retention_days,
         ),
         GetFinding: lambda s: GetFinding(
             s.findings, s.resolve(GetReview), s.resolve(GetFindingHistory)
@@ -532,6 +561,15 @@ def build_factories() -> dict[type[Any], Factory]:
             s.finals,
             s.uow,
             after_approval=lambda evaluation, actor: _schedule(s, evaluation, actor),
+        ),
+        PurgeExpiredDocuments: lambda s: PurgeExpiredDocuments(
+            SqlRetentionStore(s.session),
+            s.container.storage,
+            s.audit,
+            s.uow,
+            s.container.clock,
+            s.settings.documents_bucket,
+            s.settings.retention_days,
         ),
         GetDashboard: lambda s: GetDashboard(SqlMetricsReader(s.session)),
         GetPilotMetrics: lambda s: GetPilotMetrics(SqlMetricsReader(s.session)),

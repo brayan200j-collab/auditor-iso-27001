@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from uuid import UUID
 
 from auditor.checklist.public import ChecklistItem, ChecklistRepository
@@ -44,6 +45,7 @@ class ResultsView:
     gaps: list[ResultItem]
     plan: dict[PlanPhase, list[ResultItem]]
     document_names: dict[UUID, str]
+    documents_retained_until: datetime | None
 
 
 class GetApprovedResults:
@@ -56,7 +58,9 @@ class GetApprovedResults:
         finals: FinalFindingRepository,
         checklists: ChecklistRepository,
         documents: DocumentRepository,
+        retention_days: int,
     ) -> None:
+        self._retention = timedelta(days=retention_days)
         self._access = access
         self._lifecycle = lifecycle
         self._finals = finals
@@ -97,4 +101,7 @@ class GetApprovedResults:
                 phase: [item(f) for f in group] for phase, group in improvement_plan(finals).items()
             },
             document_names={d.id: d.original_name for d in documents},
+            documents_retained_until=(
+                evaluation.approved_at + self._retention if evaluation.approved_at else None
+            ),
         )

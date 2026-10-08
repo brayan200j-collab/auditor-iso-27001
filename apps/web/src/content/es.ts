@@ -502,6 +502,8 @@ export const resultsCopy = {
   backToResults: "Volver a los resultados",
   reviewerNotes: "Observaciones del revisor",
   notAvailable: "Los resultados estarán disponibles cuando termine la revisión humana.",
+  retention: (date: string) =>
+    `Por política de retención, los PDF originales y sus fragmentos de texto se eliminarán automáticamente el ${date}. Los resultados revisados y el informe se conservan.`,
   report: {
     title: "Informe PDF",
     description:
