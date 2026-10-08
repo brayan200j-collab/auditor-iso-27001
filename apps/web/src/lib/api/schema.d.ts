@@ -608,6 +608,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Resumen del panel */
+        get: operations["dashboard_api_v1_dashboard_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/metrics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Métricas del piloto */
+        get: operations["metrics_api_v1_metrics_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/audit-logs": {
         parameters: {
             query?: never;
@@ -942,6 +976,19 @@ export interface components {
             /** Reference Status */
             reference_status: string;
         };
+        /** DashboardResponse */
+        DashboardResponse: {
+            /** Active Evaluations */
+            active_evaluations: number;
+            /** Pending Review */
+            pending_review: number;
+            /** Approved */
+            approved: number;
+            /** Documents Processed */
+            documents_processed: number;
+            /** High Priority Findings */
+            high_priority_findings: number;
+        };
         /** DecisionResponse */
         DecisionResponse: {
             /**
@@ -1228,6 +1275,13 @@ export interface components {
          * @enum {string}
          */
         Level: "LOW" | "MEDIUM" | "HIGH";
+        /** MetricsResponse */
+        MetricsResponse: {
+            /** Anonymized */
+            anonymized: boolean;
+            technical: components["schemas"]["TechnicalMetricsResponse"];
+            value: components["schemas"]["ValueMetricsResponse"];
+        };
         /** PageMeta */
         PageMeta: {
             /** Total */
@@ -1484,6 +1538,31 @@ export interface components {
             /** Submitted At */
             submitted_at: string | null;
         };
+        /** TechnicalMetricsResponse */
+        TechnicalMetricsResponse: {
+            /** Documents Attempted */
+            documents_attempted: number;
+            /** Documents Processed Ok */
+            documents_processed_ok: number;
+            /** Processed Ok Ratio */
+            processed_ok_ratio: number | null;
+            /** Extraction Errors */
+            extraction_errors: number;
+            /** Processing Failures */
+            processing_failures: number;
+            /** Average Analysis Seconds */
+            average_analysis_seconds: number | null;
+            /** Llm Calls */
+            llm_calls: number;
+            /** Approximate Tokens */
+            approximate_tokens: number;
+            /** Findings Reviewed */
+            findings_reviewed: number;
+            /** Findings Modified */
+            findings_modified: number;
+            /** Authorization Denials */
+            authorization_denials: number;
+        };
         /**
          * Trigger
          * @enum {string}
@@ -1535,6 +1614,31 @@ export interface components {
             active?: boolean | null;
             /** Company Id */
             company_id?: string | null;
+        };
+        /** ValueMetricsResponse */
+        ValueMetricsResponse: {
+            /** Responses */
+            responses: number;
+            /** Average Manual Hours */
+            average_manual_hours: number | null;
+            /** Average System Hours */
+            average_system_hours: number | null;
+            /** Average Usefulness */
+            average_usefulness: number | null;
+            /** Average Ease Of Use */
+            average_ease_of_use: number | null;
+            /** Average Trust */
+            average_trust: number | null;
+            /** Actionable Yes */
+            actionable_yes: number;
+            /** Average Willingness To Use */
+            average_willingness_to_use: number | null;
+            /** Pay Yes */
+            pay_yes: number;
+            /** Pay Maybe */
+            pay_maybe: number;
+            /** Pay No */
+            pay_no: number;
         };
         /**
          * VersionStatus
@@ -5174,6 +5278,172 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SurveyStatusResponse"];
+                };
+            };
+            /** @description Solicitud con formato no válido */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No autenticado */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Sin permiso */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflicto con el estado actual */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Datos no válidos */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Límite de uso alcanzado */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    dashboard_api_v1_dashboard_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DashboardResponse"];
+                };
+            };
+            /** @description Solicitud con formato no válido */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No autenticado */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Sin permiso */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflicto con el estado actual */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Datos no válidos */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Límite de uso alcanzado */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    metrics_api_v1_metrics_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MetricsResponse"];
                 };
             };
             /** @description Solicitud con formato no válido */

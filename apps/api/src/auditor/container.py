@@ -88,6 +88,9 @@ from auditor.identity.application.update_user import UpdateUser
 from auditor.identity.infrastructure.supabase_admin import SupabaseAuthAdmin
 from auditor.identity.infrastructure.token_verifiers import SupabaseJwtVerifier, TestJwtVerifier
 from auditor.identity.infrastructure.user_repository import SqlUserRepository
+from auditor.metrics.application.get_dashboard import GetDashboard
+from auditor.metrics.application.get_pilot_metrics import GetPilotMetrics
+from auditor.metrics.infrastructure.sql_metrics_reader import SqlMetricsReader
 from auditor.reports.application.download_report import DownloadReport
 from auditor.reports.application.generate_report import GenerateReport
 from auditor.reports.application.get_report_status import GetReportStatus
@@ -530,6 +533,8 @@ def build_factories() -> dict[type[Any], Factory]:
             s.uow,
             after_approval=lambda evaluation, actor: _schedule(s, evaluation, actor),
         ),
+        GetDashboard: lambda s: GetDashboard(SqlMetricsReader(s.session)),
+        GetPilotMetrics: lambda s: GetPilotMetrics(SqlMetricsReader(s.session)),
         SubmitFeedback: lambda s: SubmitFeedback(s.evaluation_access, s.feedback, s.audit, s.uow),
         GetSurveyStatus: lambda s: GetSurveyStatus(s.evaluation_access, s.feedback),
         ScheduleReport: lambda s: ScheduleReport(

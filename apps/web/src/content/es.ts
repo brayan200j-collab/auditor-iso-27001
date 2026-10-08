@@ -516,6 +516,128 @@ export const resultsCopy = {
   },
 } as const;
 
+export const dashboardCopy = {
+  greeting: (name: string) => `Hola, ${name}.`,
+  cards: {
+    active_evaluations: "Evaluaciones activas",
+    pending_review: "Pendientes de revisión",
+    approved: "Aprobadas",
+    documents_processed: "Documentos procesados",
+    high_priority_findings: "Hallazgos de alta prioridad",
+  },
+  hints: {
+    active_evaluations: "En borrador, en proceso o en revisión.",
+    pending_review: "Esperando la revisión humana.",
+    approved: "Con resultados disponibles.",
+    documents_processed: "PDF con texto extraído correctamente.",
+    high_priority_findings: "Brechas de prioridad crítica o alta en evaluaciones aprobadas.",
+  },
+  empty: {
+    SME: "Aún no tienes evaluaciones. Crea la primera para cargar tu documentación.",
+    REVIEWER: "Aún no tienes evaluaciones asignadas.",
+    ADMIN: "Aún no hay evaluaciones en la plataforma.",
+  },
+  start: "Nueva evaluación",
+} as const;
+
+export const metricsCopy = {
+  title: "Métricas del piloto",
+  description: "Indicadores agregados del piloto. No identifican empresas ni personas.",
+  anonymized: "Vista anonimizada: solo se muestran cifras agregadas.",
+  noData: "Sin datos aún",
+  technicalTitle: "Métricas técnicas",
+  valueTitle: "Métricas de valor (encuesta)",
+  technical: {
+    processed: "PDF procesados correctamente",
+    processedValue: (ok: number, total: number, ratio: number) =>
+      `${ok} de ${total} (${Math.round(ratio * 100)} %)`,
+    extractionErrors: "PDF rechazados en la validación",
+    processingFailures: "Errores de procesamiento",
+    averageAnalysis: "Tiempo promedio de análisis",
+    llmCalls: "Llamadas a la IA",
+    tokens: "Tokens aproximados",
+    modified: "Hallazgos modificados por el revisor",
+    modifiedValue: (modified: number, reviewed: number) => `${modified} de ${reviewed}`,
+    denials: "Intentos de acceso no autorizado",
+  },
+  value: {
+    responses: "Encuestas respondidas",
+    manualTime: "Tiempo manual estimado (promedio)",
+    systemTime: "Tiempo usando el sistema (promedio)",
+    usefulness: "Utilidad percibida (1 a 5)",
+    ease: "Facilidad de uso (1 a 5)",
+    trust: "Confianza en los resultados (1 a 5)",
+    actionable: "Recomendaciones accionables",
+    actionableValue: (yes: number, total: number) => `${yes} de ${total} respondieron que sí`,
+    willingness: "Disposición a usarla de nuevo (1 a 5)",
+    pay: "Disposición a pagar",
+    payValue: (yes: number, maybe: number, no: number) =>
+      `Sí: ${yes} · Tal vez: ${maybe} · No: ${no}`,
+  },
+  hours: (value: number) => `${value.toLocaleString("es-CO")} h`,
+  seconds: (value: number) =>
+    value >= 60 ? `${Math.floor(value / 60)} min ${value % 60} s` : `${value} s`,
+  score: (value: number) => value.toLocaleString("es-CO", { minimumFractionDigits: 1 }),
+} as const;
+
+export const auditCopy = {
+  title: "Registro de auditoría",
+  description:
+    "Acciones relevantes registradas por el sistema. Nunca incluye contenido de documentos.",
+  columns: {
+    when: "Fecha",
+    action: "Acción",
+    outcome: "Resultado",
+    role: "Rol",
+    resource: "Recurso",
+  },
+  filterAction: "Acción",
+  filterOutcome: "Resultado",
+  all: "Todos",
+  apply: "Filtrar",
+  empty: "No hay registros con estos filtros.",
+  outcomes: { SUCCESS: "Correcto", DENIED: "Denegado", FAILURE: "Error" },
+  actions: {
+    LOGIN: "Inicio de sesión",
+    LOGOUT: "Cierre de sesión",
+    ACCESS_DENIED: "Acceso no autorizado",
+    COMPANY_CREATED: "Empresa creada",
+    COMPANY_UPDATED: "Empresa actualizada",
+    USER_CREATED: "Usuario creado",
+    USER_UPDATED: "Usuario actualizado",
+    REVIEWER_ASSIGNED: "Revisor asignado",
+    EVALUATION_CREATED: "Evaluación creada",
+    CONSENT_GIVEN: "Consentimiento otorgado",
+    DOCUMENT_UPLOADED: "Documento cargado",
+    DOCUMENT_REJECTED: "Documento rechazado",
+    DOCUMENT_DELETED: "Documento eliminado",
+    PROCESSING_STARTED: "Procesamiento iniciado",
+    PROCESSING_FINISHED: "Procesamiento finalizado",
+    PROCESSING_FAILED: "Error de procesamiento",
+    PROCESSING_RETRIED: "Procesamiento reintentado",
+    FINDINGS_GENERATED: "Hallazgos generados",
+    FINDING_REVIEWED: "Hallazgo revisado",
+    EVALUATION_APPROVED: "Evaluación aprobada",
+    EVALUATION_REJECTED: "Evaluación rechazada",
+    REPORT_GENERATED: "Informe generado",
+    REPORT_DOWNLOADED: "Informe descargado",
+    CHECKLIST_VERSION_CREATED: "Versión de checklist creada",
+    CHECKLIST_VERSION_PUBLISHED: "Versión de checklist publicada",
+    FEEDBACK_SUBMITTED: "Encuesta respondida",
+    RETENTION_PURGED: "Purga por retención",
+    QUOTA_EXCEEDED: "Cuota superada",
+  } as Record<string, string>,
+  resources: {
+    evaluation: "Evaluación",
+    document: "Documento",
+    report: "Informe",
+    company: "Empresa",
+    user: "Usuario",
+    ai_finding: "Hallazgo",
+    checklist_version: "Versión de checklist",
+  } as Record<string, string>,
+} as const;
+
 export const surveyCopy = {
   title: "Encuesta de validación",
   description:

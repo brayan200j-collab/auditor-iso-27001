@@ -11,13 +11,13 @@ export function credentials(role: SeedRole): { email: string; password: string }
   return { email, password };
 }
 
-export async function login(page: Page, role: SeedRole): Promise<void> {
+export async function login(page: Page, role: SeedRole, landing = /\/app$/): Promise<void> {
   const { email, password } = credentials(role);
   await page.goto("/login");
   await page.getByLabel("Correo electrónico").fill(email);
   await page.getByLabel("Contraseña").fill(password);
   await page.getByRole("button", { name: "Ingresar" }).click();
-  await expect(page).toHaveURL(/\/app$/);
+  await expect(page).toHaveURL(landing);
 }
 
 export async function logout(page: Page): Promise<void> {
