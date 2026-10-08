@@ -7,6 +7,9 @@ import { LoginForm } from "@/features/auth";
 
 export const metadata: Metadata = { title: auth.login.title };
 
+// The sign-in action waits for the API, which may need up to a minute to wake up on a free plan.
+export const maxDuration = 60;
+
 export default function LoginPage() {
   return (
     <PublicShell>

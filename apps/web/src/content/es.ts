@@ -123,6 +123,7 @@ export const auth = {
     password: "Contraseña",
     submit: "Ingresar",
     submitting: "Ingresando…",
+    slow: "Estamos iniciando el servicio; la primera vez puede tardar hasta un minuto. No cierres esta página.",
     invalidCredentials: "Correo o contraseña incorrectos.",
     forgot: "¿Olvidaste tu contraseña?",
   },

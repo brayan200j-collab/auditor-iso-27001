@@ -41,6 +41,23 @@ describe("LoginForm", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent(auth.login.invalidCredentials);
   });
 
+  it("explains the wait when the server takes a while to start", async () => {
+    let finish: (value: unknown) => void = () => undefined;
+    signInAction.mockReturnValue(new Promise((resolve) => (finish = resolve)));
+    render(<LoginForm />);
+    await userEvent.type(screen.getByLabelText(auth.login.email), "persona@example.test");
+    await userEvent.type(screen.getByLabelText(auth.login.password), "una-clave");
+    await userEvent.click(screen.getByRole("button", { name: auth.login.submit }));
+
+    expect(screen.getByRole("button", { name: auth.login.submitting })).toBeDisabled();
+    expect(screen.queryByText(auth.login.slow)).not.toBeInTheDocument();
+    expect(await screen.findByText(auth.login.slow, {}, { timeout: 7_000 })).toBeInTheDocument();
+
+    finish({ ok: false, message: auth.login.invalidCredentials });
+    expect(await screen.findByRole("alert")).toHaveTextContent(auth.login.invalidCredentials);
+    expect(screen.queryByText(auth.login.slow)).not.toBeInTheDocument();
+  }, 15_000);
+
   it("never shows demo credentials", () => {
     const { container } = render(<LoginForm />);
     const text = container.textContent ?? "";

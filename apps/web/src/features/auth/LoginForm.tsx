@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 
 import { Alert } from "@/components/ui/alert";
@@ -14,17 +14,28 @@ import { auth } from "@/content/es";
 import { signInAction } from "./actions";
 import { loginSchema, type LoginInput } from "./schemas";
 
+const SLOW_AFTER_MS = 5_000;
+
 export function LoginForm() {
   const [serverError, setServerError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const [slow, setSlow] = useState(false);
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<LoginInput>({ resolver: zodResolver(loginSchema) });
 
+  // After a few seconds, explain the wait: a sleeping server can take up to a minute to start.
+  useEffect(() => {
+    if (!pending) return;
+    const timer = setTimeout(() => setSlow(true), SLOW_AFTER_MS);
+    return () => clearTimeout(timer);
+  }, [pending]);
+
   const onSubmit = handleSubmit((values) => {
     setServerError(null);
+    setSlow(false);
     startTransition(async () => {
       const result = await signInAction(values);
       if (result && !result.ok) setServerError(result.message);
@@ -57,6 +68,9 @@ export function LoginForm() {
       <Button type="submit" disabled={pending}>
         {pending ? auth.login.submitting : auth.login.submit}
       </Button>
+      <p role="status" aria-live="polite" className="text-muted-foreground text-sm">
+        {pending && slow ? auth.login.slow : ""}
+      </p>
       <Link href="/recuperar" className="text-primary text-sm underline-offset-4 hover:underline">
         {auth.login.forgot}
       </Link>
