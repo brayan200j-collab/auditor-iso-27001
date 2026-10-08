@@ -10,10 +10,11 @@ import { env } from "@/lib/env";
  */
 
 const FORWARDED_REQUEST_HEADERS = ["accept", "content-type", "content-length", "x-request-id"];
+// Never content-length/content-encoding: fetch() already decompressed the upstream body (the API
+// host serves brotli), so the upstream length would truncate what the browser reads.
 const FORWARDED_RESPONSE_HEADERS = [
   "content-type",
   "content-disposition",
-  "content-length",
   "x-request-id",
   "retry-after",
 ];

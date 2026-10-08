@@ -95,4 +95,17 @@ describe("BFF proxy", () => {
     });
     expect(response.status).toBe(403);
   });
+
+  it("never forwards the compressed length of a decompressed upstream body", async () => {
+    const body = JSON.stringify({ ticket: "x".repeat(300), expires_in: 300 });
+    fetchMock.mockResolvedValueOnce(
+      new Response(body, {
+        status: 200,
+        headers: { "content-type": "application/json", "content-length": "114" },
+      }),
+    );
+    const response = await call(GET, ["api", "v1", "me"]);
+    expect(response.headers.get("content-length")).toBeNull();
+    expect(await response.json()).toEqual(JSON.parse(body));
+  });
 });
