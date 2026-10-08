@@ -76,4 +76,23 @@ describe("BFF proxy", () => {
     );
     expect(forged.status).toBe(403);
   });
+
+  it("accepts the domain the platform forwards, even behind an internal host", async () => {
+    const response = await call(POST, ["api", "v1", "auth", "login-event"], {
+      method: "POST",
+      headers: {
+        origin: "https://auditor-iso-27001-nv3h-abc123-team.vercel.app",
+        "x-forwarded-host": "auditor-iso-27001-nv3h-abc123-team.vercel.app",
+      },
+    });
+    expect(response.status).toBe(200);
+  });
+
+  it("rejects malformed origins", async () => {
+    const response = await call(POST, ["api", "v1", "auth", "login-event"], {
+      method: "POST",
+      headers: { origin: "null" },
+    });
+    expect(response.status).toBe(403);
+  });
 });

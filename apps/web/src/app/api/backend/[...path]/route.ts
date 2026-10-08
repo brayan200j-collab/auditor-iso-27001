@@ -28,17 +28,29 @@ function jsonError(status: number, code: string, message: string): Response {
 
 /**
  * CSRF guard for state-changing calls: the browser's Origin must be this site. The configured
- * site URL and the host the request arrived on are both accepted, because hosting platforms serve
- * the same deployment under several domains; another site's Origin never matches either.
+ * site URL and the domain the browser actually used (Host / X-Forwarded-Host, set by the hosting
+ * platform) are both accepted, because one deployment is served under several domains; another
+ * site's Origin never matches either.
  */
 function isSameOrigin(request: NextRequest): boolean {
   const origin = request.headers.get("origin");
-  if (origin) {
-    return (
-      origin === new URL(env().NEXT_PUBLIC_SITE_URL).origin || origin === request.nextUrl.origin
-    );
+  if (!origin) return request.headers.get("sec-fetch-site") === "same-origin";
+  let originHost: string;
+  try {
+    originHost = new URL(origin).host;
+  } catch {
+    return false;
   }
-  return request.headers.get("sec-fetch-site") === "same-origin";
+  const allowed = new Set([
+    new URL(env().NEXT_PUBLIC_SITE_URL).host,
+    request.nextUrl.host,
+    request.headers.get("x-forwarded-host")?.split(",")[0]?.trim(),
+    request.headers.get("host"),
+  ]);
+  if (allowed.has(originHost)) return true;
+  // Diagnostic only: origins and hosts are not sensitive and help explain rejected requests.
+  console.warn("bff_origin_rejected", { origin, allowed: [...allowed].filter(Boolean) });
+  return false;
 }
 
 async function forward(request: NextRequest, context: Context): Promise<Response> {
