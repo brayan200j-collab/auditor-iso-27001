@@ -26,9 +26,18 @@ function jsonError(status: number, code: string, message: string): Response {
   return Response.json({ code, message, request_id: null }, { status });
 }
 
+/**
+ * CSRF guard for state-changing calls: the browser's Origin must be this site. The configured
+ * site URL and the host the request arrived on are both accepted, because hosting platforms serve
+ * the same deployment under several domains; another site's Origin never matches either.
+ */
 function isSameOrigin(request: NextRequest): boolean {
   const origin = request.headers.get("origin");
-  if (origin) return origin === new URL(env().NEXT_PUBLIC_SITE_URL).origin;
+  if (origin) {
+    return (
+      origin === new URL(env().NEXT_PUBLIC_SITE_URL).origin || origin === request.nextUrl.origin
+    );
+  }
   return request.headers.get("sec-fetch-site") === "same-origin";
 }
 

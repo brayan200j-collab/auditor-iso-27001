@@ -15,8 +15,9 @@ function call(
   handler: typeof GET,
   path: string[],
   init?: { method?: string; headers?: Record<string, string> },
+  site = "http://localhost:3000",
 ) {
-  const request = new NextRequest(`http://localhost:3000/api/backend/${path.join("/")}`, init);
+  const request = new NextRequest(`${site}/api/backend/${path.join("/")}`, init);
   return handler(request, { params: Promise.resolve({ path }) });
 }
 
@@ -60,5 +61,19 @@ describe("BFF proxy", () => {
       headers: { origin: "http://localhost:3000" },
     });
     expect(response.status).toBe(200);
+  });
+
+  it("accepts the other domains the same deployment is served on", async () => {
+    const alias = "https://auditor-iso-27001-nv3h-git-main.vercel.app";
+    const upload = ["api", "v1", "evaluations", "e1", "documents"];
+    const same = await call(POST, upload, { method: "POST", headers: { origin: alias } }, alias);
+    expect(same.status).toBe(200);
+    const forged = await call(
+      POST,
+      upload,
+      { method: "POST", headers: { origin: "https://evil.example" } },
+      alias,
+    );
+    expect(forged.status).toBe(403);
   });
 });
