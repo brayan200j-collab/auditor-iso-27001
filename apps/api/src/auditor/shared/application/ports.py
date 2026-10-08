@@ -36,5 +36,8 @@ class ObjectStorage(Protocol):
     async def delete(self, bucket: str, path: str) -> None: ...
 
     async def create_signed_url(
-        self, bucket: str, path: str, ttl_seconds: int, download_name: str
-    ) -> str: ...
+        self, bucket: str, path: str, ttl_seconds: int, download_name: str | None
+    ) -> str:
+        """Short-lived URL; with `download_name` the browser saves the file, otherwise it opens
+        inline (e.g. a PDF in the browser's viewer)."""
+        ...

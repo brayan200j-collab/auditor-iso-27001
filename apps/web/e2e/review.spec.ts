@@ -52,6 +52,16 @@ test("a reviewer edits a finding, approves the rest and approves the evaluation"
   const queueUrl = page.url();
   await expectNoA11yViolations(page);
 
+  // The reviewer can open the original PDF to contrast the AI analysis (short-lived, audited link).
+  // Headless Chromium downloads PDFs instead of showing them, so the test checks the signed request.
+  const signedPdf = (request: { url: () => string }) =>
+    request.url().includes("/storage/v1/object/sign/documents/");
+  await expect(page.getByRole("heading", { name: "Documentos de la evaluación" })).toBeVisible();
+  await Promise.all([
+    page.context().waitForEvent("request", signedPdf),
+    page.getByRole("button", { name: "Ver PDF" }).click(),
+  ]);
+
   // Edit the first finding in the queue: the reviewer changes its priority and comments.
   await page
     .getByRole("link", { name: /^Revisar ISO-/ })
@@ -62,6 +72,10 @@ test("a reviewer edits a finding, approves the rest and approves the evaluation"
   ).toBeVisible();
   await expect(page.getByRole("heading", { name: "Evidencia", exact: true })).toBeVisible();
   await expectNoA11yViolations(page);
+  const atPage = page.getByRole("button", { name: /^Ver en el PDF · página \d+$/ });
+  if ((await atPage.count()) > 0) {
+    await Promise.all([page.context().waitForEvent("request", signedPdf), atPage.first().click()]);
+  }
   await page.getByRole("button", { name: "Editar y aprobar" }).first().click();
   await page.getByLabel("Prioridad").selectOption({ label: "Alta" });
   await page.getByLabel("Comentario").fill("Prioridad ajustada por el revisor.");

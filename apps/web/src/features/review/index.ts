@@ -3,5 +3,7 @@ export { getFinding, getReview, type FindingDetail, type Review, type ReviewItem
 export { DecisionPanel } from "./DecisionPanel";
 export { EvidenceList } from "./EvidenceList";
 export { FindingActions } from "./FindingActions";
+export { OpenDocumentButton } from "./OpenDocumentButton";
+export { ReviewDocuments } from "./ReviewDocuments";
 export { ReviewQueueTable } from "./ReviewQueueTable";
 export { ReviewSummaryCard } from "./ReviewSummaryCard";

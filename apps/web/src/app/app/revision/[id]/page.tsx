@@ -5,9 +5,16 @@ import { EvaluationStatusBadge } from "@/components/shared/EvaluationStatusBadge
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { evaluations, resultsCopy, reviewCopy } from "@/content/es";
+import { listDocuments } from "@/features/documents";
 import { EvaluationNotices, getEvaluation } from "@/features/evaluations";
 import { ProcessingAction, StatusTracker } from "@/features/processing";
-import { DecisionPanel, getReview, ReviewQueueTable, ReviewSummaryCard } from "@/features/review";
+import {
+  DecisionPanel,
+  getReview,
+  ReviewDocuments,
+  ReviewQueueTable,
+  ReviewSummaryCard,
+} from "@/features/review";
 import { requireRole } from "@/lib/guards";
 
 export const metadata: Metadata = { title: evaluations.reviewerTitle };
@@ -19,7 +26,10 @@ export default async function ReviewEvaluationPage({ params }: PageProps<"/app/r
   const { id } = await params;
   const detail = await getEvaluation(id);
   const { evaluation } = detail;
-  const review = WITH_FINDINGS.has(evaluation.status) ? await getReview(evaluation.id) : null;
+  const [review, documents] = await Promise.all([
+    WITH_FINDINGS.has(evaluation.status) ? getReview(evaluation.id) : Promise.resolve(null),
+    listDocuments(evaluation.id),
+  ]);
 
   return (
     <>
@@ -39,6 +49,9 @@ export default async function ReviewEvaluationPage({ params }: PageProps<"/app/r
       </Card>
       {evaluation.status === "FAILED" ? (
         <ProcessingAction evaluationId={evaluation.id} kind="retry" />
+      ) : null}
+      {documents.length > 0 ? (
+        <ReviewDocuments evaluationId={evaluation.id} documents={documents} />
       ) : null}
       {review ? (
         <>

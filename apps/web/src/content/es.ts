@@ -740,5 +740,15 @@ export const reviewCopy = {
     rejected: "Evaluación rechazada.",
   },
   backToQueue: "Volver a la cola de revisión",
+  documents: {
+    title: "Documentos de la evaluación",
+    hint: "Abre el PDF original para contrastar el análisis de la IA. Cada consulta queda registrada.",
+    open: "Ver PDF",
+    openLabel: (name: string) => `Ver PDF ${name}`,
+    atPage: (page: number) => `Ver en el PDF · página ${page}`,
+    opening: "Abriendo…",
+    empty: "Esta evaluación no tiene documentos.",
+    pages: (count: number) => `${count} páginas`,
+  },
   locked: "La evaluación ya no está en revisión; los hallazgos no se pueden modificar.",
 } as const;

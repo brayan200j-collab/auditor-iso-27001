@@ -74,7 +74,7 @@ export default async function FindingReviewPage({
             <h3 className="text-foreground mb-2 text-sm font-semibold">
               {reviewCopy.evidenceTitle}
             </h3>
-            <EvidenceList evidence={ai.evidence} />
+            <EvidenceList evidence={ai.evidence} evaluationId={detail.evaluation_id} />
           </div>
           <p className="text-muted-foreground text-xs">
             {reviewCopy.modelInfo(

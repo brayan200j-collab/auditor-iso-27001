@@ -75,7 +75,7 @@ class SupabaseStorage:
             raise ProcessingError(detail=f"storage delete failed: {response.status_code}")
 
     async def create_signed_url(
-        self, bucket: str, path: str, ttl_seconds: int, download_name: str
+        self, bucket: str, path: str, ttl_seconds: int, download_name: str | None
     ) -> str:
         response = await self._request(
             "POST",
@@ -85,6 +85,8 @@ class SupabaseStorage:
         if not response.is_success:
             raise ProcessingError(detail=f"storage signing failed: {response.status_code}")
         signed = str(response.json()["signedURL"])
+        if download_name is None:
+            return f"{self._public}{signed}"
         separator = "&" if "?" in signed else "?"
         return f"{self._public}{signed}{separator}{urlencode({'download': download_name})}"
 
@@ -117,12 +119,15 @@ class LocalDiskStorage:
         await asyncio.to_thread(self._file(bucket, path).unlink, missing_ok=True)
 
     async def create_signed_url(
-        self, bucket: str, path: str, ttl_seconds: int, download_name: str
+        self, bucket: str, path: str, ttl_seconds: int, download_name: str | None
     ) -> str:
         expires = int(time.time()) + ttl_seconds
         message = f"{bucket}/{_check_path(path)}:{expires}".encode()
         signature = hmac.new(self._key, message, hashlib.sha256).hexdigest()
-        query = urlencode({"expires": expires, "signature": signature, "download": download_name})
+        params: dict[str, str | int] = {"expires": expires, "signature": signature}
+        if download_name is not None:
+            params["download"] = download_name
+        query = urlencode(params)
         return f"{self._public}/local-storage/{bucket}/{quote(path)}?{query}"
 
     def exists(self, bucket: str, path: str) -> bool:

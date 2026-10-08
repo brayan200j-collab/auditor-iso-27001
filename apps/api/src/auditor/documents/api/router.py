@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, File, Header, Security, UploadFile, stat
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from auditor.documents.application.delete_document import DeleteDocument
+from auditor.documents.application.get_document_link import GetDocumentLink
 from auditor.documents.application.issue_upload_ticket import IssueUploadTicket
 from auditor.documents.application.list_documents import ListDocuments
 from auditor.documents.application.upload_document import IncomingFile, UploadDocument
@@ -49,6 +50,11 @@ async def upload_actor(
 
 
 UploadActor = Annotated[Actor, Depends(upload_actor)]
+
+
+class DocumentLinkResponse(ApiModel):
+    url: str
+    expires_in: int
 
 
 class UploadTicketResponse(ApiModel):
@@ -145,3 +151,19 @@ async def upload_ticket(
 ) -> UploadTicketResponse:
     ticket = await issue.execute(actor, evaluation_id)
     return UploadTicketResponse(ticket=ticket.value, expires_in=ticket.expires_in)
+
+
+@router.get(
+    "/{document_id:uuid}/link",
+    response_model=DocumentLinkResponse,
+    dependencies=[Depends(rate_limit("download"))],
+    summary="Enlace temporal para ver el PDF original (auditado)",
+)
+async def document_link(
+    actor: CurrentActor,
+    evaluation_id: UUID,
+    document_id: UUID,
+    get: Annotated[GetDocumentLink, Depends(use_case(GetDocumentLink))],
+) -> DocumentLinkResponse:
+    link = await get.execute(actor, evaluation_id, document_id)
+    return DocumentLinkResponse(url=link.url, expires_in=link.expires_in)

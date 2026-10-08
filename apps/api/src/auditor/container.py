@@ -56,6 +56,7 @@ from auditor.companies.infrastructure.repository import SqlCompanyRepository
 from auditor.config import Settings
 from auditor.documents.application.delete_document import DeleteDocument
 from auditor.documents.application.extract_documents import ExtractRunDocuments
+from auditor.documents.application.get_document_link import GetDocumentLink
 from auditor.documents.application.issue_upload_ticket import IssueUploadTicket
 from auditor.documents.application.list_documents import ListDocuments
 from auditor.documents.application.ports import FileScanner, NoopFileScanner
@@ -577,6 +578,15 @@ def build_factories() -> dict[type[Any], Factory]:
             s.finals,
             s.uow,
             after_approval=lambda evaluation, actor: _schedule(s, evaluation, actor),
+        ),
+        GetDocumentLink: lambda s: GetDocumentLink(
+            s.evaluation_access,
+            s.documents,
+            s.container.storage,
+            s.audit,
+            s.uow,
+            s.settings.documents_bucket,
+            s.settings.signed_url_ttl_seconds,
         ),
         IssueUploadTicket: lambda s: IssueUploadTicket(
             s.evaluation_access, s.container.upload_ticket_secret, s.container.clock

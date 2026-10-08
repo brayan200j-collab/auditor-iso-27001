@@ -3,14 +3,24 @@ import { FileText, TriangleAlert } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { reviewCopy } from "@/content/es";
 
+import { OpenDocumentButton } from "./OpenDocumentButton";
+
 type Evidence = {
+  document_id?: string;
   document_name: string | null;
   page: number;
   quote: string;
   citation_verified: boolean;
 };
 
-export function EvidenceList({ evidence }: { evidence: Evidence[] }) {
+/** With `evaluationId`, each citation can open the original PDF at its page (reviewers). */
+export function EvidenceList({
+  evidence,
+  evaluationId,
+}: {
+  evidence: Evidence[];
+  evaluationId?: string;
+}) {
   if (evidence.length === 0) {
     return <p className="text-muted-foreground text-sm">{reviewCopy.noCitations}</p>;
   }
@@ -35,6 +45,16 @@ export function EvidenceList({ evidence }: { evidence: Evidence[] }) {
           {item.citation_verified ? null : (
             <p className="text-muted-foreground mt-1 text-xs">{reviewCopy.unverifiedHelp}</p>
           )}
+          {evaluationId && item.document_id ? (
+            <div className="mt-2">
+              <OpenDocumentButton
+                evaluationId={evaluationId}
+                documentId={item.document_id}
+                page={item.page}
+                label={reviewCopy.documents.atPage(item.page)}
+              />
+            </div>
+          ) : null}
         </li>
       ))}
     </ul>
