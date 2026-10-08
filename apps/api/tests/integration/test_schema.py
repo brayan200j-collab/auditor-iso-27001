@@ -88,6 +88,23 @@ async def test_client_roles_have_no_privileges(engine: AsyncEngine, role: str, t
         await transaction.rollback()
 
 
+@pytest.mark.parametrize("role", ["anon", "authenticated"])
+async def test_migration_bookkeeping_is_not_exposed(engine: AsyncEngine, role: str) -> None:
+    """alembic_version exists before 0001 runs; 0004 locks it down like every other table."""
+    async with engine.connect() as connection:
+        transaction = await connection.begin()
+        secured = await connection.scalar(
+            text(
+                "SELECT relrowsecurity FROM pg_class WHERE oid = 'public.alembic_version'::regclass"
+            )
+        )
+        assert secured is True
+        await connection.execute(text(f"SET LOCAL ROLE {role}"))
+        with pytest.raises(ProgrammingError, match="permission denied"):
+            await connection.execute(text("SELECT version_num FROM alembic_version"))
+        await transaction.rollback()
+
+
 async def test_rls_denies_rows_even_if_select_is_granted_by_mistake(engine: AsyncEngine) -> None:
     async with engine.connect() as connection:
         transaction = await connection.begin()
