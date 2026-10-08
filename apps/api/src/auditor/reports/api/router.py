@@ -11,6 +11,7 @@ from auditor.reports.application.get_report_status import GetReportStatus, Repor
 from auditor.reports.application.request_report import RequestReport
 from auditor.reports.domain.report import ReportState
 from auditor.shared.api.dependencies import CurrentActor, use_case
+from auditor.shared.api.rate_limit import rate_limit
 from auditor.shared.api.schemas import ERROR_RESPONSES, ApiModel
 
 router = APIRouter(prefix="/api/v1", tags=["reports"], responses=ERROR_RESPONSES)
@@ -70,6 +71,7 @@ async def request_report(
 @router.get(
     "/reports/{report_id}/download",
     response_model=DownloadResponse,
+    dependencies=[Depends(rate_limit("download"))],
     summary="URL firmada de corta duración para descargar el informe",
 )
 async def download_report(

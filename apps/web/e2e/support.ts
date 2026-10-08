@@ -1,3 +1,4 @@
+import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page } from "@playwright/test";
 
 export type SeedRole = "ADMIN" | "REVIEWER" | "SME" | "SME_B" | "MENTOR";
@@ -23,4 +24,12 @@ export async function login(page: Page, role: SeedRole, landing = /\/app$/): Pro
 export async function logout(page: Page): Promise<void> {
   await page.getByRole("button", { name: "Cerrar sesión" }).click();
   await expect(page).toHaveURL(/\/login$/);
+}
+
+/** Fails with the list of WCAG 2.1 AA violations found on the current page (axe-core). */
+export async function expectNoA11yViolations(page: Page): Promise<void> {
+  const results = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+    .analyze();
+  expect(results.violations.map((v) => `${page.url()} · ${v.id}`)).toEqual([]);
 }

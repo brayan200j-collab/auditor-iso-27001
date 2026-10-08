@@ -30,6 +30,7 @@ from auditor.shared.api.errors import register_error_handlers
 from auditor.shared.api.health import build_health_router
 from auditor.shared.api.middleware import RequestIdMiddleware, SecurityHeadersMiddleware
 from auditor.shared.api.openapi import install_openapi
+from auditor.shared.api.rate_limit import RateLimiter, rate_limit
 from auditor.shared.api.strict_query import reject_unknown_query_parameters
 from auditor.shared.infrastructure.logging import configure_logging, get_logger
 
@@ -63,6 +64,14 @@ def create_app(settings: Settings | None = None, container: AppContainer | None 
         dependencies=[Depends(reject_unknown_query_parameters)],
     )
     app.state.container = container
+    app.state.rate_limiter = RateLimiter(
+        {
+            "default": settings.rate_limit_default,
+            "upload": settings.rate_limit_upload,
+            "start": settings.rate_limit_start,
+            "download": settings.rate_limit_download,
+        }
+    )
     app.dependency_overrides[get_resolver] = container.request_resolver
 
     register_error_handlers(app)
@@ -82,7 +91,7 @@ def create_app(settings: Settings | None = None, container: AppContainer | None 
         retention_router,
         audit_router,
     ):
-        app.include_router(router)
+        app.include_router(router, dependencies=[Depends(rate_limit("default"))])
     install_openapi(app)
 
     app.add_middleware(

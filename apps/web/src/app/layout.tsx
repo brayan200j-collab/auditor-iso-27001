@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 
 import { brand, common } from "@/content/es";
 
@@ -10,7 +11,9 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  // Reading the request makes every page dynamic, so each response gets its own CSP nonce.
+  await headers();
   return (
     <html lang="es" className="h-full antialiased">
       <body className="flex min-h-full flex-col">

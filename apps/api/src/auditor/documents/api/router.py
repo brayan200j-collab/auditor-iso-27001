@@ -11,6 +11,7 @@ from auditor.documents.application.list_documents import ListDocuments
 from auditor.documents.application.upload_document import IncomingFile, UploadDocument
 from auditor.documents.domain.document import Document, DocumentStatus
 from auditor.shared.api.dependencies import CurrentActor, use_case
+from auditor.shared.api.rate_limit import rate_limit
 from auditor.shared.api.schemas import ERROR_RESPONSES, ApiModel
 
 UPLOAD_PATH_PATTERN = r"^/api/v1/evaluations/[^/]+/documents$"
@@ -50,6 +51,7 @@ class DocumentResponse(ApiModel):
     "",
     response_model=DocumentResponse,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(rate_limit("upload"))],
     summary="Cargar un PDF (máximo 20 MB y 30 páginas, con texto seleccionable)",
 )
 async def upload_document(

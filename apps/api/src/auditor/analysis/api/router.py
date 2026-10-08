@@ -9,6 +9,7 @@ from auditor.analysis.application.retry_processing import RetryProcessing
 from auditor.analysis.application.start_analysis import StartAnalysis
 from auditor.evaluations.public import Evaluation, EvaluationStatus
 from auditor.shared.api.dependencies import CurrentActor, use_case
+from auditor.shared.api.rate_limit import rate_limit
 from auditor.shared.api.schemas import ERROR_RESPONSES, ApiModel
 
 router = APIRouter(prefix="/api/v1/evaluations", tags=["analysis"], responses=ERROR_RESPONSES)
@@ -27,6 +28,7 @@ class ProcessingResponse(ApiModel):
     "/{evaluation_id}/start",
     response_model=ProcessingResponse,
     status_code=status.HTTP_202_ACCEPTED,
+    dependencies=[Depends(rate_limit("start"))],
     summary="Iniciar el análisis de los documentos cargados",
 )
 async def start_analysis(
@@ -41,6 +43,7 @@ async def start_analysis(
     "/{evaluation_id}/retry",
     response_model=ProcessingResponse,
     status_code=status.HTTP_202_ACCEPTED,
+    dependencies=[Depends(rate_limit("start"))],
     summary="Reintentar el procesamiento desde el último paso exitoso",
 )
 async def retry_processing(

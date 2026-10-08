@@ -29,6 +29,12 @@ def make_settings(tmp_storage: Path | None = None, **overrides: Any) -> Settings
         "storage_provider": "local",
         "test_jwt_secret": TEST_JWT_SECRET,
         "local_storage_dir": tmp_storage or Path("/tmp/auditor-test-storage"),  # noqa: S108
+        # Suites such as the contract fuzzer send many requests per session; dedicated tests
+        # (tests/integration/test_rate_limits.py) override these with tight limits.
+        "rate_limit_default": "100000/minute",
+        "rate_limit_upload": "100000/minute",
+        "rate_limit_start": "100000/minute",
+        "rate_limit_download": "100000/minute",
     }
     values.update(overrides)
     return Settings(**values)

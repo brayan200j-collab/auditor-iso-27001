@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 
 import { expect, test, type Page } from "@playwright/test";
 
-import { login, logout } from "./support";
+import { expectNoA11yViolations, login, logout } from "./support";
 
 const FIXTURES = resolve(__dirname, "fixtures");
 
@@ -50,6 +50,7 @@ test("a reviewer edits a finding, approves the rest and approves the evaluation"
   await expect(page.getByRole("button", { name: "Aprobar evaluación" })).toBeDisabled();
   await expect(page.locator("main")).not.toContainText("%");
   const queueUrl = page.url();
+  await expectNoA11yViolations(page);
 
   // Edit the first finding in the queue: the reviewer changes its priority and comments.
   await page
@@ -60,6 +61,7 @@ test("a reviewer edits a finding, approves the rest and approves the evaluation"
     page.getByText("Nivel de confianza estimado", { exact: false }).first(),
   ).toBeVisible();
   await expect(page.getByRole("heading", { name: "Evidencia", exact: true })).toBeVisible();
+  await expectNoA11yViolations(page);
   await page.getByRole("button", { name: "Editar y aprobar" }).first().click();
   await page.getByLabel("Prioridad").selectOption({ label: "Alta" });
   await page.getByLabel("Comentario").fill("Prioridad ajustada por el revisor.");
@@ -99,6 +101,7 @@ test("a reviewer edits a finding, approves the rest and approves the evaluation"
   await expect(page.getByRole("heading", { name: "Plan inicial de mejora" })).toBeVisible();
   await expect(page.locator("main")).not.toContainText("%");
   await expect(page.locator("main")).not.toContainText("Nivel de confianza");
+  await expectNoA11yViolations(page);
 
   // The report was generated on approval; it downloads through a short-lived signed URL.
   const downloadButton = page.getByRole("button", { name: "Descargar informe PDF" });
@@ -111,6 +114,8 @@ test("a reviewer edits a finding, approves the rest and approves the evaluation"
 
   // Validation survey: one answer per approved evaluation.
   await page.getByRole("link", { name: "Responder encuesta" }).click();
+  await expect(page.getByRole("button", { name: "Enviar respuestas" })).toBeVisible();
+  await expectNoA11yViolations(page);
   const choose = (question: RegExp, option: string) =>
     page.getByRole("group", { name: question }).getByText(option, { exact: true }).click();
   await choose(/útiles/, "5");
@@ -129,5 +134,6 @@ test("a reviewer edits a finding, approves the rest and approves the evaluation"
     .first()
     .click();
   await expect(page.getByRole("link", { name: "Volver a los resultados" })).toBeVisible();
+  await expectNoA11yViolations(page);
   await expect(page.getByText(/no constituye una certificación/)).toBeVisible();
 });
