@@ -34,6 +34,7 @@ from auditor.analysis.application.run_extraction_step import RunExtractionStep
 from auditor.analysis.application.start_analysis import StartAnalysis
 from auditor.analysis.infrastructure.evidence_search import DocumentEvidenceSearch
 from auditor.analysis.infrastructure.fake_provider import FakeLLMProvider
+from auditor.analysis.infrastructure.gemini_provider import GeminiProvider
 from auditor.analysis.infrastructure.groq_provider import GroqProvider
 from auditor.analysis.infrastructure.progress import FindingProgressReader
 from auditor.analysis.infrastructure.prompt_templates import FilePromptTemplates
@@ -168,6 +169,14 @@ def build_llm(settings: Settings, http: httpx.AsyncClient) -> LLMProvider:
             http,
             timeout_seconds=settings.llm_timeout_seconds,
             reasoning_effort=settings.llm_reasoning_effort or None,
+        )
+    if settings.llm_provider == "gemini" and settings.llm_api_key is not None:
+        # Development with synthetic documents only: config refuses it in pilot/production.
+        return GeminiProvider(
+            settings.llm_api_key.get_secret_value(),
+            settings.llm_model,
+            http,
+            timeout_seconds=settings.llm_timeout_seconds,
         )
     if settings.llm_provider == "fake":
         return FakeLLMProvider()
