@@ -10,7 +10,10 @@ test("an SME creates an evaluation and gives consent; an admin assigns a reviewe
   const title = `Autoevaluación E2E ${randomUUID().slice(0, 6)}`;
 
   await login(page, "SME");
-  await page.getByRole("link", { name: "Nueva evaluación" }).click();
+  await page
+    .getByRole("navigation", { name: "Navegación principal" })
+    .getByRole("link", { name: "Nueva evaluación" })
+    .click();
   await page.getByLabel("Nombre de la evaluación").fill(title);
   await page.getByRole("button", { name: "Crear evaluación" }).click();
 

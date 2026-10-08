@@ -37,7 +37,8 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev --no-editable
 
 FROM base AS runtime
-RUN groupadd --system app && useradd --system --gid app --home /app app
+# A home directory gives Fontconfig (WeasyPrint) a writable cache for the non-root user.
+RUN groupadd --system app && useradd --system --gid app --create-home --home-dir /home/app app
 WORKDIR /app
 COPY --from=builder /opt/venv /opt/venv
 COPY apps/api/alembic.ini ./alembic.ini

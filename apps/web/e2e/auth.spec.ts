@@ -20,7 +20,11 @@ test("an SME signs in, sees its company and signs out", async ({ page, context }
   await login(page, "SME");
   await expect(page.getByText("PYME", { exact: false }).first()).toBeVisible();
   await expect(page.getByText("Empresa de prueba A S.A.S.")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Nueva evaluación" })).toBeVisible();
+  await expect(
+    page
+      .getByRole("navigation", { name: "Navegación principal" })
+      .getByRole("link", { name: "Nueva evaluación" }),
+  ).toBeVisible();
 
   const cookies = await context.cookies();
   const authCookies = cookies.filter((cookie) => cookie.name.startsWith("sb-"));

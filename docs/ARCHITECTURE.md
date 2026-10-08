@@ -42,6 +42,8 @@ Every module has `domain/`, `application/`, `infrastructure/`, `api/` and option
 - A module never imports another module's layers directly — only its `public.py`.
 - `shared` does not depend on feature modules.
 - Composition happens only in `auditor/container.py` and `auditor/main.py`.
+- Cross-module aggregates (`metrics` dashboards, `retention` purge) are read models with plain SQL
+  over the tables, so they never import another module's internals (D-037, D-038).
 
 **Dependency injection:** routers declare `Depends(use_case(X))`. The composition root overrides the
 `get_resolver` placeholder with a request-scoped resolver that owns one `AsyncSession` per request

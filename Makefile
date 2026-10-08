@@ -101,4 +101,4 @@ acceptance: ## Clean stack + seed + full E2E + isolation suite
 
 docker-build: ## Build production images
 	docker build -f apps/api/Dockerfile --target runtime -t auditor-api:latest .
-	docker build -f apps/web/Dockerfile -t auditor-web:latest .
+	docker build -f apps/web/Dockerfile -t auditor-web:latest 		--build-arg NEXT_PUBLIC_SUPABASE_URL="$${NEXT_PUBLIC_SUPABASE_URL:-http://127.0.0.1:54321}" 		--build-arg NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="$${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:-sb_publishable_build_placeholder}" 		--build-arg NEXT_PUBLIC_API_URL="$${NEXT_PUBLIC_API_URL:-http://127.0.0.1:8000}" 		--build-arg NEXT_PUBLIC_SITE_URL="$${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}" .

@@ -86,7 +86,6 @@ class Settings(BaseSettings):
     job_sweep_interval_seconds: int = Field(default=60, ge=5)
 
     rate_limit_default: str = "300/minute"
-    rate_limit_auth: str = "10/minute"
     rate_limit_upload: str = "20/hour"
     rate_limit_start: str = "20/hour"
     rate_limit_download: str = "60/hour"
