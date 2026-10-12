@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Plus } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -23,8 +24,18 @@ export default async function DashboardPage() {
 
   return (
     <>
-      <PageHeader title={nav.home} description={brand.tagline} />
-      <p className="text-foreground">{dashboardCopy.greeting(profile.full_name)}</p>
+      <PageHeader
+        title={dashboardCopy.greeting(profile.full_name)}
+        description={brand.tagline}
+        actions={
+          profile.role === "SME" ? (
+            <Link href="/app/evaluaciones/nueva" className={buttonVariants()}>
+              <Plus className="size-4" aria-hidden="true" />
+              {dashboardCopy.start}
+            </Link>
+          ) : undefined
+        }
+      />
       {counts ? <DashboardCards counts={counts} /> : null}
       {empty ? (
         <EmptyState

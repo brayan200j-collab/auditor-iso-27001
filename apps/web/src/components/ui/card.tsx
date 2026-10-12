@@ -5,7 +5,10 @@ import { cn } from "@/lib/utils";
 export function Card({ className, ...props }: ComponentProps<"section">) {
   return (
     <section
-      className={cn("border-border bg-surface rounded-md border p-6 shadow-sm", className)}
+      className={cn(
+        "border-border/70 bg-surface shadow-card rounded-3xl border p-6 sm:p-7",
+        className,
+      )}
       {...props}
     />
   );
@@ -13,7 +16,10 @@ export function Card({ className, ...props }: ComponentProps<"section">) {
 
 export function CardTitle({ className, children, ...props }: ComponentProps<"h2">) {
   return (
-    <h2 className={cn("text-foreground text-lg font-semibold", className)} {...props}>
+    <h2
+      className={cn("text-foreground text-lg font-semibold tracking-tight", className)}
+      {...props}
+    >
       {children}
     </h2>
   );

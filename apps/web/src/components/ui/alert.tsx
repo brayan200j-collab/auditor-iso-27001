@@ -3,7 +3,7 @@ import type { ComponentProps } from "react";
 
 import { cn } from "@/lib/utils";
 
-const alertVariants = cva("rounded-md border px-4 py-3 text-sm", {
+const alertVariants = cva("rounded-2xl border px-4 py-3.5 text-sm leading-relaxed", {
   variants: {
     tone: {
       info: "border-info/30 bg-info-soft text-info",

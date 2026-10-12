@@ -41,7 +41,7 @@ export default async function EvaluationPage({ params }: PageProps<"/app/evaluac
       />
       <EvaluationNotices evaluation={evaluation} />
       {evaluation.status === "APPROVED" ? (
-        <Card className="flex flex-col gap-3">
+        <Card className="bg-pastel-mint flex flex-col gap-3 border-0">
           <div className="flex flex-col gap-1">
             <CardTitle>{resultsCopy.readyTitle}</CardTitle>
             <CardDescription>{resultsCopy.readyDescription}</CardDescription>

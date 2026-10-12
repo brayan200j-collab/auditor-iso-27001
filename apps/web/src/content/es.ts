@@ -168,6 +168,8 @@ export const nav = {
   auditLogs: "Registro de auditoría",
   metrics: "Métricas",
   signedInAs: (name: string, role: string) => `${name} · ${role}`,
+  footer:
+    "Autoevaluación inicial de seguridad de la información · Resultado preliminar sujeto a revisión.",
 } as const;
 
 export const publicPages = {
@@ -203,6 +205,160 @@ export const publicPages = {
   ],
   academic:
     "Proyecto académico de la Electiva Emprendimiento en TIC, Universidad Santiago de Cali, para PYMES del Valle del Cauca.",
+} as const;
+
+export const landing = {
+  nav: {
+    label: "Secciones",
+    what: "Qué es",
+    how: "Cómo funciona",
+    benefits: "Ventajas",
+    results: "Resultados",
+    trust: "Seguridad",
+  },
+  eyebrow: "Autoevaluación inicial · ISO/IEC 27001:2022",
+  headlineStart: "Obtén una primera lectura clara de tus",
+  headlineAccent: "brechas de seguridad",
+  headlineEnd: "a partir de tus documentos.",
+  lead: "Sube tus políticas y procedimientos en PDF. La inteligencia artificial busca evidencia en 30 criterios, una persona valida cada hallazgo y tú recibes un informe con prioridades y un plan inicial de mejora.",
+  primaryCta: "Iniciar sesión",
+  secondaryCta: "Ver cómo funciona",
+  inviteNote: "El acceso es por invitación durante el piloto con PYMES del Valle del Cauca.",
+  mockup: {
+    label: "Vista ilustrativa con datos de ejemplo",
+    title: "Autoevaluación · Ejemplo",
+    reviewed: "Revisado por una persona",
+    coverageTitle: "Cobertura documental preliminar",
+    coverage: [
+      { value: "14", label: "con evidencia documental" },
+      { value: "9", label: "con evidencia parcial" },
+      { value: "7", label: "sin evidencia documental" },
+    ],
+    of: "de 30 criterios",
+    rows: [
+      { code: "ISO-07", name: "Gestión de activos", page: "Página 3" },
+      { code: "ISO-16", name: "Copias de respaldo", page: "Página 5" },
+      { code: "ISO-23", name: "Gestión de incidentes", page: "Sin cita" },
+    ],
+  },
+  what: {
+    eyebrow: "Qué es",
+    title: "Una autoevaluación inicial, guiada por IA y validada por personas",
+    pillars: [
+      {
+        title: "La IA lee tus documentos",
+        text: "Busca evidencia de cada criterio en tus PDF y cita el documento y la página exactos de donde la obtuvo.",
+      },
+      {
+        title: "Una persona valida todo",
+        text: "Un revisor aprueba, ajusta o descarta cada hallazgo. Nunca verás un resultado de la IA sin revisar.",
+      },
+      {
+        title: "Tú recibes un plan claro",
+        text: "Cobertura documental preliminar, brechas priorizadas y un plan inicial de mejora en lenguaje claro.",
+      },
+    ],
+  },
+  how: {
+    eyebrow: "Cómo funciona",
+    title: "De tus documentos a un plan de acción en cinco pasos",
+    steps: [
+      {
+        title: "Crea tu evaluación",
+        text: "Inicia sesión, ponle nombre a tu autoevaluación y acepta el consentimiento de tratamiento de datos.",
+      },
+      {
+        title: "Sube tus PDF",
+        text: "Políticas, procedimientos o manuales con texto seleccionable: hasta 30 páginas y 20 MB por archivo.",
+      },
+      {
+        title: "La IA analiza 30 criterios",
+        text: "Para cada criterio se buscan los fragmentos más relevantes y la IA propone un estado con evidencia trazable.",
+      },
+      {
+        title: "Revisión humana",
+        text: "Un revisor contrasta el análisis con el documento original, ajusta lo necesario y aprueba la evaluación.",
+      },
+      {
+        title: "Recibe tus resultados",
+        text: "Consulta la cobertura, las brechas y el plan inicial de mejora, descarga el informe en PDF y cuéntanos tu experiencia.",
+      },
+    ],
+  },
+  benefits: {
+    eyebrow: "Ventajas",
+    title: "Por qué usar Auditor Virtual",
+    items: [
+      {
+        title: "Ahorra tiempo de revisión",
+        text: "La IA hace la primera lectura de tus documentos frente a 30 criterios; tu equipo se concentra en decidir qué mejorar.",
+      },
+      {
+        title: "Evidencia trazable",
+        text: "Cada hallazgo indica el documento y la página de donde sale. Las citas que no se pueden verificar se marcan y nunca se presentan como evidencia.",
+      },
+      {
+        title: "Criterio humano en cada resultado",
+        text: "La IA propone; una persona revisa, edita o descarta. Así los resultados son útiles y responsables.",
+      },
+      {
+        title: "Prioridades claras",
+        text: "Las brechas se ordenan por prioridad, nivel de riesgo y esfuerzo estimado para que sepas por dónde empezar.",
+      },
+      {
+        title: "Referencias reconocidas",
+        text: "Checklist propio alineado con ISO/IEC 27001:2022, con CIS Controls v8.1 y NIST CSF 2.0 como referencias complementarias.",
+      },
+      {
+        title: "Pensado para PYMES",
+        text: "Lenguaje claro, sin jerga innecesaria y con un plan inicial que se puede llevar a la práctica.",
+      },
+    ],
+  },
+  results: {
+    eyebrow: "Resultados",
+    title: "Lo que obtienes al terminar",
+    items: [
+      {
+        title: "Cobertura documental preliminar",
+        text: "Cuántos de los 30 criterios tienen evidencia documental, evidencia parcial o no tienen evidencia, siempre en conteos.",
+      },
+      {
+        title: "Brechas priorizadas",
+        text: "Lo que falta documentar, ordenado por prioridad, nivel de riesgo y esfuerzo, con la recomendación para cada caso.",
+      },
+      {
+        title: "Plan inicial de mejora",
+        text: "Las acciones agrupadas en tres fases: abordar primero, a continuación y más adelante.",
+      },
+      {
+        title: "Informe en PDF",
+        text: "Un documento para compartir con tu equipo directivo, con evidencia, observaciones del revisor y alcance.",
+      },
+    ],
+    phases: ["Abordar primero", "A continuación", "Más adelante"],
+  },
+  trust: {
+    eyebrow: "Seguridad y privacidad",
+    title: "Tus documentos, protegidos en cada paso",
+    items: [
+      "A la IA solo se envían los fragmentos relevantes de cada criterio, nunca el documento completo ni el nombre de tu empresa.",
+      "Los PDF se guardan en almacenamiento privado y solo se consultan con enlaces temporales, después de verificar permisos.",
+      "Cada empresa ve únicamente su información y cada acción relevante queda en un registro de auditoría.",
+      "Los PDF originales y sus fragmentos se eliminan automáticamente 90 días después de aprobada la evaluación.",
+    ],
+  },
+  limits: {
+    title: "Lo que esta herramienta no hace",
+  },
+  finalCta: {
+    title: "¿Tu empresa participa en el piloto?",
+    text: "Inicia sesión con la cuenta que recibiste por invitación y comienza tu primera autoevaluación.",
+  },
+  footer: {
+    product: "Producto",
+    legal: "Legal",
+  },
 } as const;
 
 export const privacyPage = {

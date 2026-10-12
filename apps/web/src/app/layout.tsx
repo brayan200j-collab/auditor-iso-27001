@@ -1,9 +1,18 @@
 import type { Metadata } from "next";
+import { Poppins } from "next/font/google";
 import { headers } from "next/headers";
 
 import { brand, common } from "@/content/es";
 
 import "./globals.css";
+
+// Self-hosted at build time by Next.js: no requests to Google from the browser (CSP font-src 'self').
+const poppins = Poppins({
+  subsets: ["latin", "latin-ext"],
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-poppins",
+});
 
 export const metadata: Metadata = {
   title: { default: brand.name, template: `%s · ${brand.name}` },
@@ -15,7 +24,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   // Reading the request makes every page dynamic, so each response gets its own CSP nonce.
   await headers();
   return (
-    <html lang="es" className="h-full antialiased">
+    <html lang="es" className={`${poppins.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
         <a
           href="#contenido"
