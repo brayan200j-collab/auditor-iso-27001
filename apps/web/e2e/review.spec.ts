@@ -110,8 +110,10 @@ test("a reviewer edits a finding, approves the rest and approves the evaluation"
   await page.goto("/app/evaluaciones");
   await page.getByRole("row").filter({ hasText: title }).getByRole("link").click();
   await page.getByRole("link", { name: "Ver resultados aprobados" }).click();
-  await expect(page.getByText("Cobertura documental preliminar")).toBeVisible();
-  await expect(page.getByText(/de 30 criterios con evidencia documental/)).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Cobertura documental preliminar" }),
+  ).toBeVisible();
+  await expect(page.getByText(/^\d+ de 30 criterios con evidencia documental$/)).toBeVisible();
   await expect(page.getByRole("heading", { name: "Plan inicial de mejora" })).toBeVisible();
   await expect(page.locator("main")).not.toContainText("%");
   await expect(page.locator("main")).not.toContainText("Nivel de confianza");

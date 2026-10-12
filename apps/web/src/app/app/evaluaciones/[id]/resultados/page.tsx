@@ -7,6 +7,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { legal, resultsCopy as copy, surveyCopy } from "@/content/es";
 import { getSurveyStatus } from "@/features/feedback";
+import { HowToReadResults } from "@/features/guide";
 import {
   CoverageCard,
   getResults,
@@ -54,6 +55,7 @@ export default async function ResultsPage({
         </p>
       ) : null}
       <CoverageCard coverage={results.coverage} />
+      <HowToReadResults />
       <ReportDownload evaluationId={id} canGenerate={user.role !== "SME"} />
       {survey ? (
         <Card className="flex flex-col gap-3">

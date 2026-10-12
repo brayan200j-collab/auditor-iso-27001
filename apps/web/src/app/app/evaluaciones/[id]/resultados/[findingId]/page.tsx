@@ -16,6 +16,7 @@ import {
   riskLabels,
 } from "@/content/es";
 import { ReferenceList } from "@/features/admin-checklist";
+import { CriterionHelp } from "@/features/guide";
 import { getResults } from "@/features/results";
 import { EvidenceList } from "@/features/review";
 import { requireRole } from "@/lib/guards";
@@ -79,6 +80,7 @@ export default async function ResultFindingPage({
           </div>
         ) : null}
       </Card>
+      <CriterionHelp code={criterion.code} />
       <Card className="flex flex-col gap-3">
         <CardTitle>{reviewCopy.evidenceTitle}</CardTitle>
         <EvidenceList

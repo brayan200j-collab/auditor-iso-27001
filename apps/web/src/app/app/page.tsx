@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { Alert } from "@/components/ui/alert";
 import { buttonVariants } from "@/components/ui/button";
 import { brand, dashboardCopy, legal, nav } from "@/content/es";
+import { FirstStepsCard } from "@/features/guide";
 import { DashboardCards, getDashboard } from "@/features/metrics";
 import { requireProfile } from "@/lib/profile";
 
@@ -36,6 +37,7 @@ export default async function DashboardPage() {
           ) : undefined
         }
       />
+      {profile.role === "SME" ? <FirstStepsCard href="/app/guia" /> : null}
       {counts ? <DashboardCards counts={counts} /> : null}
       {empty ? (
         <EmptyState

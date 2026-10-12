@@ -71,7 +71,7 @@ export function Wordmark({ inverted = false }: { inverted?: boolean }) {
   return (
     <span
       className={cn(
-        "text-lg leading-none tracking-tight",
+        "text-lg leading-none tracking-tight whitespace-nowrap",
         inverted ? "text-white" : "text-foreground",
       )}
     >

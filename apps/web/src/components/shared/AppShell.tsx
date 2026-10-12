@@ -25,7 +25,7 @@ function initials(name: string): string {
 export function AppShell({ userName, role, companyName, items, actions, children }: AppShellProps) {
   return (
     <div className="flex min-h-full flex-1 flex-col">
-      <header className="border-border/70 bg-surface/90 sticky top-0 z-30 border-b backdrop-blur">
+      <header className="border-border/70 bg-surface/90 sticky top-0 z-30 border-b backdrop-blur print:hidden">
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 px-4 pt-3 sm:px-6">
           <BrandMark href="/app" />
           <div className="flex items-center gap-3">
@@ -58,7 +58,7 @@ export function AppShell({ userName, role, companyName, items, actions, children
       >
         {children}
       </main>
-      <footer className="text-muted-foreground mx-auto w-full max-w-6xl px-4 pb-8 text-xs sm:px-6">
+      <footer className="text-muted-foreground mx-auto w-full max-w-6xl px-4 pb-8 text-xs sm:px-6 print:hidden">
         <div className="prism-line mb-4 w-16 opacity-80" aria-hidden="true" />
         Auditor Virtual · {nav.footer}
       </footer>

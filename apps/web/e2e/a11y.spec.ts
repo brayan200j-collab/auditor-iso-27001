@@ -16,13 +16,13 @@ async function expectAccessible(page: Page, path: string): Promise<void> {
 }
 
 test("public pages meet WCAG 2.1 AA", async ({ page }) => {
-  for (const path of ["/", "/login", "/recuperar", "/privacidad"]) {
+  for (const path of ["/", "/login", "/recuperar", "/privacidad", "/guia"]) {
     await expectAccessible(page, path);
   }
 });
 
 const PAGES: Record<Exclude<SeedRole, "SME_B">, string[]> = {
-  SME: ["/app", "/app/evaluaciones", "/app/evaluaciones/nueva"],
+  SME: ["/app", "/app/evaluaciones", "/app/evaluaciones/nueva", "/app/guia"],
   REVIEWER: ["/app", "/app/revision"],
   ADMIN: [
     "/app",

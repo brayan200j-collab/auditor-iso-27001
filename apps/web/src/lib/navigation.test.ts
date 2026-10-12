@@ -20,4 +20,10 @@ describe("navigationFor", () => {
     expect(links).toContain("/app/evaluaciones/nueva");
     expect(links).not.toContain("/app/revision");
   });
+
+  it("offers the user guide to every role that works with evaluations", () => {
+    for (const role of ["SME", "REVIEWER", "ADMIN"] as const) {
+      expect(navigationFor(role).map((item) => item.href)).toContain("/app/guia");
+    }
+  });
 });

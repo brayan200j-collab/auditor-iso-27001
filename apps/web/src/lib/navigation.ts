@@ -12,11 +12,13 @@ export function navigationFor(role: Role): NavItem[] {
         { href: "/app", label: nav.home },
         { href: "/app/evaluaciones", label: nav.myEvaluations },
         { href: "/app/evaluaciones/nueva", label: nav.newEvaluation },
+        { href: "/app/guia", label: nav.guide },
       ];
     case "REVIEWER":
       return [
         { href: "/app", label: nav.home },
         { href: "/app/revision", label: nav.assigned },
+        { href: "/app/guia", label: nav.guide },
       ];
     case "ADMIN":
       return [
@@ -28,6 +30,7 @@ export function navigationFor(role: Role): NavItem[] {
         { href: "/app/admin/checklist", label: nav.checklist },
         { href: "/app/admin/auditoria", label: nav.auditLogs },
         { href: "/app/metricas", label: nav.metrics },
+        { href: "/app/guia", label: nav.guide },
       ];
     case "MENTOR":
       return [{ href: "/app/metricas", label: nav.metrics }];

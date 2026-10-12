@@ -167,6 +167,7 @@ export const nav = {
   checklist: "Checklist",
   auditLogs: "Registro de auditoría",
   metrics: "Métricas",
+  guide: "Guía de uso",
   signedInAs: (name: string, role: string) => `${name} · ${role}`,
   footer:
     "Autoevaluación inicial de seguridad de la información · Resultado preliminar sujeto a revisión.",
@@ -215,6 +216,7 @@ export const landing = {
     benefits: "Ventajas",
     results: "Resultados",
     trust: "Seguridad",
+    guide: "Guía de uso",
   },
   eyebrow: "Autoevaluación inicial · ISO/IEC 27001:2022",
   headlineStart: "Obtén una primera lectura clara de tus",
@@ -908,3 +910,5 @@ export const reviewCopy = {
   },
   locked: "La evaluación ya no está en revisión; los hallazgos no se pueden modificar.",
 } as const;
+
+export * from "./guide";

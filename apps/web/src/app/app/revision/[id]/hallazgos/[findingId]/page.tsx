@@ -7,6 +7,7 @@ import { Alert } from "@/components/ui/alert";
 import { Card, CardTitle } from "@/components/ui/card";
 import { effortLabels, priorityLabels, reviewCopy, riskLabels } from "@/content/es";
 import { ReferenceList } from "@/features/admin-checklist";
+import { CriterionHelp } from "@/features/guide";
 import { ConfidenceValue, EvidenceList, FindingActions, getFinding } from "@/features/review";
 import { formatDateTime } from "@/lib/format";
 import { requireRole } from "@/lib/guards";
@@ -107,6 +108,8 @@ export default async function FindingReviewPage({
           </Card>
         </div>
       </div>
+
+      <CriterionHelp code={criterion.code} />
 
       <Card className="flex flex-col gap-4">
         <CardTitle>{reviewCopy.actions.choose}</CardTitle>

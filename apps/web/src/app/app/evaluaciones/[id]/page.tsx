@@ -13,6 +13,7 @@ import {
   getConsentText,
   getEvaluation,
 } from "@/features/evaluations";
+import { UploadHelp } from "@/features/guide";
 import { ProcessingAction, StatusTracker } from "@/features/processing";
 import { requireRole } from "@/lib/guards";
 
@@ -78,6 +79,7 @@ export default async function EvaluationPage({ params }: PageProps<"/app/evaluac
           <CardTitle>{documentsCopy.title}</CardTitle>
           <CardDescription>{documentsCopy.description}</CardDescription>
         </div>
+        {canUpload ? <UploadHelp guideHref="/app/guia#documentos" /> : null}
         {canUpload ? <UploadZone evaluationId={evaluation.id} /> : null}
         <DocumentList
           evaluationId={evaluation.id}

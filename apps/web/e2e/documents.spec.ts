@@ -17,6 +17,9 @@ async function newEvaluationWithConsent(page: Page): Promise<string> {
   await page.getByRole("button", { name: "Aceptar y continuar" }).click();
   // Once consent is stored the page re-renders without the consent card and offers the upload.
   await expect(page.getByRole("button", { name: "Seleccionar PDF" })).toBeVisible();
+  // People without security background are told which documents help.
+  await expect(page.getByText("¿Qué documentos debo subir?")).toBeVisible();
+  await expect(page.getByText("Procedimiento de copias de respaldo")).toBeVisible();
   return title;
 }
 
